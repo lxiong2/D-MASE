@@ -110,14 +110,13 @@ buses1 = [1; 2; 5];
 %z1 = [0.0000; 0.0869; 0.3532; 0.0663; 0.2402]; Gross error of
 %20*0.01 at P1-5 + add P4-5 to make the system observable
 z1 = [0.0000; 0.0869; 0.3532 - 20*0.01; 0.0663; 0.2402; 0.0445];
-R1 = [0.01 0.01 0.01 0.01 0.01 0.01].^2;
-type1 = {'th'; 'pf'; 'pf'; 'pf'; 'p'; 'pf'}; 
+R1 = [0.01 0.01 0.01 0.01 0.01].^2;
+type1 = {'th'; 'pf'; 'pf'; 'pf'; 'p'}; 
 indices1 = [1 0 0;
             1 2 1;
             1 5 1;
             2 5 1;
-            1 0 0;
-            5 4 1];
+            1 0 0];
         
 % Area 2
 buses2 = [3; 4; 7; 8];
@@ -223,7 +222,36 @@ indicesc4 = [10 11 1;
 %     -0.0426149573330085]
 
 % PowerWorld DC R = 0, C = 0, X = actual
-z = [0;1.47880570400000;0.711194241600000;0.409039746600000;2.19000000000000;0.623398012700000;-0.226179389200000;-0.241497606500000;0.289850803800000;0;-0.264683847100000;0.0630476047700000;0.0754514511100000;0.170336918600000;0.0144514504200000;-0.0610000000000000;-0.277376141600000;0.0619523989500000;0.0992116402800000;-0.0760000000000000;-0.623398012700000;0.166313222300000;0.289850803800000;-0.942000000000000;-0.226179389200000;0.0497883636600000;-0.135000000000000;-0.264683847100000;-0.0280476046300000;-0.149000000000000;-0.277376141600000]
+z = [0;
+    1.478805704;
+    0.711194242;
+    0.409039747;
+    2.19;
+    -0.226179389;
+    -0.241497607;
+    0.289850804;
+    0;
+    -0.264683847;
+    0.063047605;
+    0.075451451;
+    0.170336919;
+    0.01445145;
+    -0.061;
+    -0.277376142;
+    0.061952399;
+    0.09921164;
+    -0.076;
+    -0.623398013;
+    0.166313222;
+    0.289850804;
+    -0.942;
+    -0.226179389;
+    0.049788364;
+    -0.135;
+    -0.264683847;
+    -0.028047605;
+    -0.149;
+    -0.277376142];
 
 % PowerWorld DC X = 1
 % z = [0;
@@ -263,26 +291,26 @@ type = [type1; type2; type3; type4; typec1; typec2; typec3; typec4];
 indices = [indices1; indices2; indices3; indices4; indicesc1; indicesc2; indicesc3; indicesc4];
 
 % Decentralized case: include boundary measurements for each area
-allbuses1 = [1; 2; 4; 5; 6]; %indices of x1
-allz1 = [z(1:6); z(20)]; 
-allR1 = diag([R1 Rc1]);
-alltype1 = [type1; typec1];
-allindices1 = [indices1; indicesc1];
-
-allbuses2 = [2; 3; 4; 5; 7; 8; 9];
-allz2 = [z(7:10); z(21:25)];
-allR2 = diag([R2 Rc2]);
-alltype2 = [type2; typec2];
-allindices2 = [indices2; indicesc2];
-
-allbuses3 = [6; 11; 12; 13; 14];
-allz3 = [z(11:16); z(26:28)];
-allR3 = diag([R3 Rc3]);
-alltype3 = [type3; typec3];
-allindices3 = [indices3; indicesc3];
-
-allbuses4 = [9; 10; 11; 13; 14];
-allz4 = [z(17:19); z(29:31)];
-allR4 = diag([R4 Rc4]);
-alltype4 = [type4; typec4];
-allindices4 = [indices4; indicesc4];
+% allbuses1 = [1; 2; 4; 5; 6]; %indices of x1
+% allz1 = [z(1:6); z(20)]; 
+% allR1 = diag([R1 Rc1]);
+% alltype1 = [type1; typec1];
+% allindices1 = [indices1; indicesc1];
+% 
+% allbuses2 = [2; 3; 4; 5; 7; 8; 9];
+% allz2 = [z(7:10); z(21:25)];
+% allR2 = diag([R2 Rc2]);
+% alltype2 = [type2; typec2];
+% allindices2 = [indices2; indicesc2];
+% 
+% allbuses3 = [6; 11; 12; 13; 14];
+% allz3 = [z(11:16); z(26:28)];
+% allR3 = diag([R3 Rc3]);
+% alltype3 = [type3; typec3];
+% allindices3 = [indices3; indicesc3];
+% 
+% allbuses4 = [9; 10; 11; 13; 14];
+% allz4 = [z(17:19); z(29:31)];
+% allR4 = diag([R4 Rc4]);
+% alltype4 = [type4; typec4];
+% allindices4 = [indices4; indicesc4];

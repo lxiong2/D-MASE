@@ -20,7 +20,8 @@ deltax(:,1) = ones(size(x,1),1);
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-Ybus = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
+YBus_14DC
+%Ybus2 = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);
 B = imag(Ybus);
 
