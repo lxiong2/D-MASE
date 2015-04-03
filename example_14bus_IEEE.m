@@ -110,7 +110,7 @@ buses1 = [1; 2; 5];
 %z1 = [0.0000; 0.0869; 0.3532; 0.0663; 0.2402]; Gross error of
 %20*0.01 at P1-5 + add P4-5 to make the system observable
 z1 = [0.0000; 0.0869; 0.3532 - 20*0.01; 0.0663; 0.2402; 0.0445];
-R1 = [0.01 0.01 0.01 0.01 0.01].^2;
+R1 = 0.01^2*ones(1,size(z1,1));
 type1 = {'th'; 'pf'; 'pf'; 'pf'; 'p'}; 
 indices1 = [1 0 0;
             1 2 1;
@@ -121,7 +121,7 @@ indices1 = [1 0 0;
 % Area 2
 buses2 = [3; 4; 7; 8];
 z2 = [0.0000; -0.0243; 0.0356; -0.0002];
-R2 = [0.01 0.01 0.01 0.01].^2;
+R2 = 0.01^2*ones(1,size(z2,1));
 type2 = {'th'; 'pf'; 'pf'; 'pf'};
 indices2 = [3 0 0;
             3 4 1;
@@ -131,7 +131,7 @@ indices2 = [3 0 0;
 % Area 3
 buses3 = [6; 11; 12; 13];
 z3 = [0.0000; 0.0099; 0.0148; 0.0164; 0.0016; -0.0133];
-R3 = [0.01 0.01 0.01 0.01 0.01 0.01].^2;
+R3 = 0.01^2*ones(1,size(z3,1));
 type3 = {'th'; 'pf'; 'pf'; 'pf'; 'pf'; 'p'};
 indices3 = [6 0 0;
             6 11 1;
@@ -143,7 +143,7 @@ indices3 = [6 0 0;
 % Area 4
 buses4 = [9; 10; 14];
 z4 = [0.0000; 0.0028; 0.0192];
-R4 = [0.01 0.01 0.01].^2;
+R4 = 0.01^2*ones(1,size(z4,1));
 type4 = {'th'; 'pf'; 'pf'};
 indices4 = [9 0 0;
             9 10 1;
@@ -151,12 +151,12 @@ indices4 = [9 0 0;
 
 % Boundary measurements    
 zc1 = [-0.0801];
-Rc1 = 0.01^2;
+Rc1 = 0.01^2*ones(1,size(zc1,1));
 typec1 = {'p'};
 indicesc1 = [5 0 0];
 
 zc2 = [-0.0445; 0.0630; 0.0274; -0.1594; 0.0000];
-Rc2 = [0.01 0.01 0.01 0.01 0.01].^2;
+Rc2 = 0.01^2*ones(1,size(zc2,1));
 typec2 = {'pf'; 'pf'; 'pf'; 'p'; 'th'};
 indicesc2 = [4 5 1;
              4 9 1;
@@ -166,20 +166,20 @@ indicesc2 = [4 5 1;
          
 %zc3 = [0.0154; -0.2026; 0.0000]; Gross error of -20*0.01 introduced to P13
 zc3 = [0.0154; -0.2026 + 20*0.01; 0.0000];
-Rc3 = [0.01 0.01 0.01].^2;
+Rc3 = 0.01^2*ones(1,size(zc3,1));
 typec3 = {'pf'; 'p'; 'th'};
 indicesc3 = [13 14 1;
              13 0 0;
              6 0 0];
          
 zc4 = [-0.0054; -0.0346; 0.0000];
-Rc4 = [0.01 0.01 0.01].^2;
+Rc4 = 0.01^2*ones(1,size(zc4,1));
 typec4 = {'pf'; 'p'; 'th'};
 indicesc4 = [10 11 1;
              14 0 0;
              9 0 0];
 
-% Centralized case with all measurements aggregated         
+%% Centralized case with all measurements aggregated         
 %z = [z1; z2; z3; z4; zc1; zc2; zc3; zc4]
 % z = [% z1
 %     0;
@@ -221,39 +221,243 @@ indicesc4 = [10 11 1;
 %     -0.0345967097649149;
 %     -0.0426149573330085]
 
-% PowerWorld DC R = 0, C = 0, X = actual
-z = [0;
-    1.478805704;
-    0.711194242;
-    0.409039747;
-    2.19;
-    -0.226179389;
-    -0.241497607;
-    0.289850804;
-    0;
-    -0.264683847;
-    0.063047605;
-    0.075451451;
-    0.170336919;
-    0.01445145;
-    -0.061;
-    -0.277376142;
-    0.061952399;
-    0.09921164;
-    -0.076;
-    -0.623398013;
-    0.166313222;
-    0.289850804;
-    -0.942;
-    -0.226179389;
-    0.049788364;
-    -0.135;
-    -0.264683847;
-    -0.028047605;
-    -0.149;
-    -0.277376142];
+%% PowerWorld DC R = 0, C = 0, X = actual; took out measurement P5-4
+z = [% Area 1
+     0;
+     1.478805704;
+     0.711194242;
+     0.409039747;
+     2.19;
+     % Area 2
+     -0.226179389;
+     -0.241497607;
+     0.289850804;
+     0;
+     % Area 3
+     -0.264683847;
+     0.063047605;
+     0.075451451;
+     0.170336919;
+     0.01445145;
+     -0.061;
+     % Area 4
+     -0.277376142;
+     0.061952399;
+     0.09921164;
+     % Boundary 1
+     -0.076;
+     % Boundary 2
+     -0.623398013;
+     0.166313222;
+     0.289850804;
+     -0.942;
+     -0.226179389;
+     % Boundary 3
+     0.049788364;
+     -0.135;
+     -0.264683847;
+     % Boundary 4
+     -0.028047605;
+     -0.149;
+     -0.277376142];
 
-% PowerWorld DC X = 1
+type = {% Area 1
+        'th'; 'pf'; 'pf'; 'pf'; 'p';
+        % Area 2
+        'th'; 'pf'; 'pf'; 'pf';
+        % Area 3
+        'th'; 'pf'; 'pf'; 'pf'; 'pf'; 'p';
+        % Area 4
+        'th'; 'pf'; 'pf';
+        % Boundary 1
+        'p';
+        % Boundary 2
+        'pf'; 'pf'; 'pf'; 'p'; 'th';
+        % Boundary 3
+        'pf'; 'p'; 'th';
+        % Boundary 4
+        'pf'; 'p'; 'th'};
+
+indices = [% Area 1
+            1 0 0;
+            1 2 1;
+            1 5 1;
+            2 5 1;
+            1 0 0;
+            % Area 2
+            3 0 0;
+            3 4 1;
+            4 7 1;
+            7 8 1;
+            % Area 3
+            6 0 0;
+            6 11 1;
+            6 12 1;
+            6 13 1;
+            12 13 1;
+            12 0 0;
+            % Area 4
+            9 0 0;
+            9 10 1;
+            9 14 1;
+            % Boundary 1
+            5 0 0;
+            % Boundary 2
+            4 5 1;
+            4 9 1;
+            7 9 1;
+            3 0 0;
+            3 0 0;
+            % Boundary 3
+            13 14 1;
+            13 0 0;
+            6 0 0;
+            % Boundary 4
+            10 11 1;
+            14 0 0;
+            9 0 0];
+
+R = diag(0.01^2*ones(1,size(z,1)));
+
+% Decentralized case: include boundary measurements for each area
+allbuses1 = [1; 2; 4; 5; 6]; %indices of x1
+allz1 = [z(1:5); z(19)]; 
+allR1 = diag(0.01^2*ones(1,size(allz1,1)));
+alltype1 = [type(1:5); type(19)]; 
+allindices1 = [indices(1:5,:); indices(19,:)]; 
+
+allbuses2 = [2; 3; 4; 5; 7; 8; 9];
+allz2 = [z(6:9); z(20:24)];
+allR2 = diag(0.01^2*ones(1,size(allz2,1)));
+alltype2 = [type(6:9); type(20:24)];
+allindices2 = [indices(6:9,:); indices(20:24,:)];
+
+allbuses3 = [6; 11; 12; 13; 14];
+allz3 = [z(10:15); z(25:27)];
+allR3 = diag(0.01^2*ones(1,size(allz3,1)));
+alltype3 = [type(10:15); type(25:27)];
+allindices3 = [indices(10:15,:); indices(25:27,:)];
+
+allbuses4 = [9; 10; 11; 13; 14];
+allz4 = [z(16:18); z(28:30)];
+allR4 = diag(0.01^2*ones(1,size(allz4,1)));
+alltype4 = [type(16:18); type(28:30)];
+allindices4 = [indices(16:18,:); indices(28:30,:)];
+
+%% PowerWorld DC R = 0, C = 0, X = actual; took out measurement P5-4 AND angle measurements
+% Central solution converges just fine; however, decentralized solution 
+% is not even close to central; possibly not observable? 
+% Not sure why it isn't similar even at 100 iterations
+
+% z = [% Area 1
+%      1.478805704;
+%      0.711194242;
+%      0.409039747;
+%      2.19;
+%      % Area 2
+%      -0.241497607;
+%      0.289850804;
+%      0;
+%      % Area 3
+%      0.063047605;
+%      0.075451451;
+%      0.170336919;
+%      0.01445145;
+%      -0.061;
+%      % Area 4
+%      0.061952399;
+%      0.09921164;
+%      % Boundary 1
+%      -0.076;
+%      % Boundary 2
+%      -0.623398013;
+%      0.166313222;
+%      0.289850804;
+%      -0.942;
+%      % Boundary 3
+%      0.049788364;
+%      -0.135;
+%      % Boundary 4
+%      -0.028047605;
+%      -0.149];
+%         
+% type = {% Area 1
+%         'pf'; 'pf'; 'pf'; 'p';
+%         % Area 2
+%         'pf'; 'pf'; 'pf';
+%         % Area 3
+%         'pf'; 'pf'; 'pf'; 'pf'; 'p';
+%         % Area 4
+%         'pf'; 'pf';
+%         % Boundary 1
+%         'p';
+%         % Boundary 2
+%         'pf'; 'pf'; 'pf'; 'p';
+%         % Boundary 3
+%         'pf'; 'p';
+%         % Boundary 4
+%         'pf'; 'p'};
+% 
+% indices = [% Area 1
+%             1 2 1;
+%             1 5 1;
+%             2 5 1;
+%             1 0 0;
+%             % Area 2
+%             3 4 1;
+%             4 7 1;
+%             7 8 1;
+%             % Area 3
+%             6 11 1;
+%             6 12 1;
+%             6 13 1;
+%             12 13 1;
+%             12 0 0;
+%             % Area 4
+%             9 10 1;
+%             9 14 1;
+%             % Boundary 1
+%             5 0 0;
+%             % Boundary 2
+%             4 5 1;
+%             4 9 1;
+%             7 9 1;
+%             3 0 0;
+%             % Boundary 3
+%             13 14 1;
+%             13 0 0;
+%             % Boundary 4
+%             10 11 1;
+%             14 0 0];
+%         
+% R = diag(0.01^2*ones(1,size(z,1)));
+% 
+% % Decentralized case: include boundary measurements for each area
+% allbuses1 = [1; 2; 4; 5; 6]; %indices of x1
+% allz1 = [z(1:4); z(15)]; 
+% allR1 = diag(0.01^2*ones(1,size(allz1,1)));
+% alltype1 = [type(1:4); type(15)]; 
+% allindices1 = [indices(1:4,:); indices(15,:)]; 
+% 
+% allbuses2 = [2; 3; 4; 5; 7; 8; 9];
+% allz2 = [z(5:7); z(16:19)];
+% allR2 = diag(0.01^2*ones(1,size(allz2,1)));
+% alltype2 = [type(5:7); type(16:19)];
+% allindices2 = [indices(5:7,:); indices(16:19,:)];
+% 
+% allbuses3 = [6; 11; 12; 13; 14];
+% allz3 = [z(8:12); z(20:21)];
+% allR3 = diag(0.01^2*ones(1,size(allz3,1)));
+% alltype3 = [type(8:12); type(20:21)];
+% allindices3 = [indices(8:12,:); indices(20:21,:)];
+% 
+% allbuses4 = [9; 10; 11; 13; 14];
+% allz4 = [z(13:14); z(22:23)];
+% allR4 = diag(0.01^2*ones(1,size(allz4,1)));
+% alltype4 = [type(13:14); type(22:23)];
+% allindices4 = [indices(13:14,:); indices(22:23,:)];
+             
+%% PowerWorld DC X = 1
 % z = [0;
 %     1.08824709100000;
 %     1.10175285400000;
@@ -286,9 +490,9 @@ z = [0;
 %     -0.149000000000000;
 %     -1.84522789900000]
 
-R = diag([R1 R2 R3 R4 Rc1 Rc2 Rc3 Rc4]);
-type = [type1; type2; type3; type4; typec1; typec2; typec3; typec4];
-indices = [indices1; indices2; indices3; indices4; indicesc1; indicesc2; indicesc3; indicesc4];
+%R = diag([R1 R2 R3 R4 Rc1 Rc2 Rc3 Rc4]);
+%type = [type1; type2; type3; type4; typec1; typec2; typec3; typec4];
+%indices = [indices1; indices2; indices3; indices4; indicesc1; indicesc2; indicesc3; indicesc4];
 
 % Decentralized case: include boundary measurements for each area
 % allbuses1 = [1; 2; 4; 5; 6]; %indices of x1

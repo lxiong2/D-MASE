@@ -21,7 +21,7 @@ B = imag(Ybus);
 numPart = 2;
 iter = 1;
 maxiter = 100;
-rho = 1; % step size
+rho = 10; % step size
 
 % Initialize each partition's state vectors
 % x1_k = [th1 th2 th4' th5 th6']
