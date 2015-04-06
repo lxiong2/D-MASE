@@ -25,14 +25,14 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     f = [0; x(4:5,k)];
 
     % Form the measurement function h(x^k)
-    h(:,k) = createhvector(e,f,G,B,type,indices,numbus,buses);
+    h(:,k) = createhvector_rect(e,f,G,B,type,indices,numbus,buses);
     r(:,k) = z-h(:,k);
     J(k) = (z-h(:,k)).'*(R\(z-h(:,k)));
     
     % Form measurement Jacobian H
     % FIX: Test and debug iMeas.m
     % WARNING: Assumed gsi = 0 in realPowerFlowMeas.m
-    temp = createHmatrix(theta,V,G,B,type,indices,numbus,buses,lines);
+    temp = createHmatrix_rect(e,f,G,B,type,indices,numbus,buses,lines);
     H(:,:,k) = [temp(:,1:slackIndex-1) temp(:,slackIndex+1:(2*numbus))];
   
     % Calculate gain matrix G(x^k) = H.'*R^(-1)*H
