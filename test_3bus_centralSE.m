@@ -6,15 +6,11 @@ maxiter = 10;
 
 example_3bus_Abur
 
-% x = [th2 th3; V1; V2; V3]
+% x = [e1; e2; e3; f2; f3]
 
 %% AC flat start
-x(:,1) = [zeros(numbus-1,1); ones(numbus,1)];
+x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];
 deltax(:,1) = ones(size(x,1),1);
-
-%% DC flat start
-% x(:,1) = zeros(numbus-1,1);
-% deltax(:,1) = ones(2,1);
 
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
@@ -25,11 +21,11 @@ B = imag(Ybus);
 
 while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     %% AC version
-    theta = [0; x(1:2,k)];
-    V = x(3:5,k);
+    e = x(1:3,k);
+    f = [0; x(4:5,k)];
 
     % Form the measurement function h(x^k)
-    h(:,k) = createhvector(theta,V,G,B,type,indices,numbus,buses,lines);
+    h(:,k) = createhvector(e,f,G,B,type,indices,numbus,buses);
     r(:,k) = z-h(:,k);
     J(k) = (z-h(:,k)).'*(R\(z-h(:,k)));
     
