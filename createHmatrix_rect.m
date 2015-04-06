@@ -36,14 +36,14 @@ for a = 1:size(type,1)
     elseif strcmp(type(a),'pf') == 1
         numPFmeas = numPFmeas + 1;
         indPFmeas = indices(a,:);
-        [dPijde, dPijdf] = realPowerFlowMeas(e,f,numbus,buses,lines,indPFmeas);
+        [dPijde, dPijdf] = realPowerFlowMeas_rect(e,f,G,B,numbus,buses,lines,indPFmeas);
         H(a,:) = [dPijde dPijdf];
     % Reactive power flow measurements [dQijdth dQijdV]   
     elseif strcmp(type(a),'qf') == 1
         numQFmeas = numQFmeas + 1;
         indQFmeas = indices(a,:);
-        [dQijdth, dQijdV] = reactivePowerFlowMeas(e,f,numbus,buses,lines,indQFmeas);
-        H(a,:) = [dQijdth dQijdV];
+        [dQijde, dQijdf] = reactivePowerFlowMeas_rect(e,f,G,B,numbus,buses,lines,indQFmeas);
+        H(a,:) = [dQijde dQijdf];
     % Voltage magnitude measurements    
     elseif strcmp(type(a),'v') == 1
         numVmeas = numVmeas + 1;
