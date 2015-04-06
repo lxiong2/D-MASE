@@ -36,9 +36,7 @@ z = [0.4864415159668960;
      0.0020941787076120;
      0.0000000000000000;
      1.0000000000000000;
-     0.9948061840940000;
-     0.0839887199942846;
-     0.0071149251204361]
+     0.9948061840940000]
 
 % After running SE on perfect AC measurements
 %z = [0.484110867410053;0.420765689413069;-0.402714233939197;0.00990113466041009;0.00418283886383009;-0.00511898351369013;0.997499689048022;0.997308195081827]
@@ -57,11 +55,11 @@ z = [0.4864415159668960;
 %      1.000000000000;
 %      1.000000000000]
 
-Rdiag = [0.008 0.008 0.010 0.008 0.008 0.010 0.004 0.004 0.008 0.008].^2;
+Rdiag = [0.008 0.008 0.010 0.008 0.008 0.010 0.004 0.004].^2;
 R = diag(Rdiag);
 
 % measurement types
-type = {'pf'; 'pf'; 'p'; 'qf'; 'qf'; 'q'; 'v'; 'v'; 'pf'; 'qf'};
+type = {'pf'; 'pf'; 'p'; 'qf'; 'qf'; 'q'; 'v'; 'v'};
 indices = [1 2 1;
            1 3 1;
            2 0 0;
@@ -69,9 +67,7 @@ indices = [1 2 1;
            1 3 1;
            2 0 0;
            1 0 0;
-           2 0 0;
-           2 3 1;
-           2 3 1];
+           2 0 0];
        
 %% Decentralized case
 allbuses1 = [1; 2; 3]; %x = [th1; th2'; th3; V1; V2'; V3] for AC
@@ -90,16 +86,14 @@ allindices1 = [indices(1:2,:);
 
 allbuses2 = [1; 2; 3]; %x = [th1'; th2; th3'; V1'; V2; V3'] for AC
 % AC
-allz2 = [z(1); z(3); z(4); z(6); z(8); z(9); z(10)];
-allR2 = diag([Rdiag(1) Rdiag(3) Rdiag(4) Rdiag(6) Rdiag(8) Rdiag(9) Rdiag(10)]);
-alltype2 = [type(1); type(3); type(4); type(6); type(8); type(9); type(10)];
+allz2 = [z(1); z(3); z(4); z(6); z(8)];
+allR2 = diag([Rdiag(1) Rdiag(3) Rdiag(4) Rdiag(6) Rdiag(8)]);
+alltype2 = [type(1); type(3); type(4); type(6); type(8)];
 allindices2 = [indices(1,:);
                indices(3,:);
                indices(4,:);
                indices(6,:);
-               indices(8,:);
-               indices(9,:);
-               indices(10,:)];
+               indices(8,:)];
 % DC
 % allz2 = [z(1); z(3)];
 % allR2 = diag([Rdiag(1) Rdiag(3)]);
