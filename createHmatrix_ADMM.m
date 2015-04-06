@@ -25,7 +25,8 @@ for a = 1:size(type,1)
     if strcmp(type(a),'p') == 1
         numPmeas = numPmeas + 1;
         indPmeas = indices(a,:);
-        [dPdth, dPdV] = realPowerInjMeas_ADMM(theta,V,G,B,numbus,buses,allbuses_a,adjbuses,indPmeas);
+        [dPdth, dPdV] = realPowerInjMeas(theta,V,G,B,numbus,buses,indPmeas);
+        %[dPdth, dPdV] = realPowerInjMeas_ADMM(theta,V,G,B,numbus,buses,allbuses_a,adjbuses,indPmeas);
         H(a,:) = [dPdth dPdV];
     % Reactive power injection measurements [dQdth dQdV]   
     elseif strcmp(type(a),'q') == 1

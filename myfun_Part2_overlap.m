@@ -12,7 +12,7 @@ function [f2, Gain2, g2, H2, h2] = myfun_Part2_overlap(buses, numbus, allbuses_a
 
 % Assumes DC only
 for a = 1:size(allbuses_a,1)
-    theta(a,1) = x_a(a)
+    theta(a,1) = x_a(a);
 end
 V = ones(numbus,1);
 
