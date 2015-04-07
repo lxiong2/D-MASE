@@ -2,10 +2,12 @@ clc
 clear all
 
 k = 1;
-maxiter = 10;
+maxiter = 3;
 
+%example_2bus_SG
 example_3bus_Abur
 
+% x = [e1; e2; f2]
 % x = [e1; e2; e3; f2; f3]
 
 %% AC flat start
@@ -21,8 +23,8 @@ B = imag(Ybus);
 
 while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     %% AC version
-    e = x(1:3,k);
-    f = [0; x(4:5,k)];
+    e = x(1:numbus,k);
+    f = [0; x(numbus+1:(2*numbus-1),k)];
 
     % Form the measurement function h(x^k)
     h(:,k) = createhvector_rect(e,f,G,B,type,indices,numbus,buses);
@@ -47,7 +49,7 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     temp2(:,k+1) = [deltax(1:slackIndex-1,k+1); 0; deltax(slackIndex:(2*numbus-1),k+1)]; % shift indices
     
     % update x and increase iteration count
-    x(:,k+1) = x(:,k)+temp2(2:6,k+1);
+    x(:,k+1) = x(:,k)+temp2(2:2*numbus,k+1);
     k = k+1;
     
     %% DC version
@@ -100,9 +102,9 @@ end
 
 %% AC new central measurements
 finalx = x(:,k);
-newth = [0; finalx(1:2)]
-newV = finalx(3:5)
-newz = createhvector(newth,newV,G,B,type,indices,numbus,buses,lines)
+newe = finalx(1:numbus);
+newf = [0; finalx(numbus+1:(2*numbus-1))];
+newz = createhvector_rect(newe,newf,G,B,type,indices,numbus,buses)
 
 %% DC new central measurements
 % finalx = x(:,k);
