@@ -1,4 +1,4 @@
-function h = createhvector_rect(e,f,G,B,type,indices,numbus,buses)
+function h = createhvector_rect(e,f,G,B,type,indices,numbus,buses,lines)
 % Rectangular power flow
 % V_i = e_i + j*f_i = |V_i| ang (theta_i)
 
@@ -33,14 +33,21 @@ for a = 1:size(type,1)
     elseif strcmp(type(a),'pf') == 1
         m = busIndex(buses==indices(a,1));
         n = busIndex(buses==indices(a,2));
-        h(a) = (e(m)^2+f(m)^2)*G(m,m)+e(m)*(G(m,n)*e(n)-B(m,n)*f(n))+...
-            f(m)*(G(m,n)*f(n)+B(m,n)*e(n));
+        h(a) = -G(m,n)*(e(m)^2+f(m)^2)+G(m,n)*(e(m)*e(n)+f(m)*f(n))+B(m,n)*(f(m)*e(n)-e(m)*f(n));
     % Reactive power flow measurements 
     elseif strcmp(type(a),'qf') == 1
         m = busIndex(buses==indices(a,1));
         n = busIndex(buses==indices(a,2));
-        h(a) = -(e(m)^2+f(m)^2)*B(m,m)+e(m)*(-G(m,n)*f(n)-B(m,n)*e(n))+...
-            f(m)*(G(m,n)*e(n)-B(m,n)*f(n));
+        for c = 1:size(lines,1)
+            if sum(indices(a,1:3) == lines(c,1:3))==3
+                lineNum = c;
+            end
+        end
+        if lines(lineNum,6) ~= 0
+            bsi = lines(lineNum,6)/2;
+        else bsi = 0;
+        end
+        h(a) = (B(m,n)-bsi)*(e(m)^2+f(m)^2)-B(m,n)*(e(m)*e(n)+f(m)*f(n))+G(m,n)*(f(m)*e(n)-e(m)*f(n));
     % Voltage magnitude measurements SQUARED (NOTE: SQUARED, so to get the
     % actual V magnitude, take the sqrt)
     elseif strcmp(type(a),'v') == 1
