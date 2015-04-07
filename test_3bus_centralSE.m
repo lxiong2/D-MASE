@@ -102,9 +102,24 @@ end
 
 %% AC new central measurements
 finalx = x(:,k);
-newe = finalx(1:numbus);
-newf = [0; finalx(numbus+1:(2*numbus-1))];
-newz = createhvector_rect(newe,newf,G,B,type,indices,numbus,buses)
+% newe = finalx(1:numbus);
+% newf = [0; finalx(numbus+1:(2*numbus-1))];
+% newz = createhvector_rect(newe,newf,G,B,type,indices,numbus,buses)
+
+newth = [0;
+        -0.014524509;
+        -0.021118663];
+newV = [0.99999836;
+        0.994807597
+        0.991718701];
+newe = [newV(1)*cos(newth(1));
+        newV(2)*cos(newth(2));
+        newV(3)*cos(newth(3))];
+newf = [newV(1)*sin(newth(1));
+        newV(2)*sin(newth(2));
+        newV(3)*sin(newth(3))];
+    
+    
 
 %% DC new central measurements
 % finalx = x(:,k);
