@@ -46,8 +46,8 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     % WARNING: Assumed gsi = 0 in realPowerFlowMeas.m
     
     % Polar
-    %temp = createHmatrix(theta,V,G,B,type,indices,numbus,buses,lines);
-    %H(:,:,k) = [temp(:,1:slackIndex-1) temp(:,slackIndex+1:(2*numbus))];
+%     temp = createHmatrix(theta,V,G,B,type,indices,numbus,buses,lines);
+%     H(:,:,k) = [temp(:,1:slackIndex-1) temp(:,slackIndex+1:(2*numbus))];
     
     % Rectangular
     temp = createHmatrix_rect(e,f,G,B,type,indices,numbus,buses,lines);
@@ -57,16 +57,13 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     Gain(:,:,k) = H(:,:,k).'*(R\H(:,:,k));
    
     % Compute right-hand side
-    rhs(:,k) = H(:,:,k).'*(R\(z-h(:,k)));
+    rhs(:,k) = H(:,:,k).'*(R\(z-h(:,k)))
     
     % Solve for dx
     deltax(:,k+1) = Gain(:,:,k)\rhs(:,k);
     
-    %temp2(:,k+1) = [deltax(1:slackIndex-1,k+1); 0; deltax(slackIndex:(2*numbus-1),k+1)]; % polar shift indices
-    temp2(:,k+1) = [deltax(1:3,k+1); 0; deltax(4:(2*numbus-1),k+1)]; % rectangular
-    
     % update x and increase iteration count
-    x(:,k+1) = x(:,k)+temp2(2:2*numbus,k+1);
+    x(:,k+1) = x(:,k) + deltax(:,k+1);
     k = k+1;
     
     %% DC version
@@ -123,23 +120,23 @@ finalx = x(:,k);
 % newf = [0; finalx(numbus+1:(2*numbus-1))];
 % newz = createhvector_rect(newe,newf,G,B,type,indices,numbus,buses)
 
-newth = [0,0,0;
-         0,-0.0144481940000000,-0.0145245110000000;
-         0,-0.0209409680000000,-0.0211187040000000];
-newV = [1,1.00001597400000,0.999998362000000;
-        1,0.994790210000000,0.994807596000000;
-        1,0.991460477000000,0.991718683000000];
+newth = [0,0,0,0;
+         0,-0.0144481940000000,-0.0145245110000000,-0.0145245090000000;
+         0,-0.0209409680000000,-0.0211187040000000,-0.0211186630000000];
+newV = [1,1.00001597400000,0.999998362000000,0.999998360000000;
+        1,0.994790210000000,0.994807596000000,0.994807597000000;
+        1,0.991460477000000,0.991718683000000,0.991718701000000];
 newe = [newV(1,:).*cos(newth(1,:));
         newV(2,:).*cos(newth(2,:));
         newV(3,:).*cos(newth(3,:))];
 newf = [newV(1,:).*sin(newth(1,:));
         newV(2,:).*sin(newth(2,:));
         newV(3,:).*sin(newth(3,:))];
-for k = 1:3
-    newh_pol(:,k) = createhvector(newth(:,k),newV(:,k),G,B,type,indices,numbus,buses,lines);    
-    newh_rect(:,k) = createhvector_rect(newe(:,k),newf(:,k),G,B,type,indices,numbus,buses,lines);
-    Hpol(:,:,k) = createHmatrix(newth(:,k),newV(:,k),G,B,type,indices,numbus,buses,lines);
-    Hrect(:,:,k) = createHmatrix_rect(newe(:,k),newf(:,k),G,B,type,indices,numbus,buses,lines);
+for k = 1:4
+    correcth_pol(:,k) = createhvector(newth(:,k),newV(:,k),G,B,type,indices,numbus,buses,lines);    
+    correcth_rect(:,k) = createhvector_rect(newe(:,k),newf(:,k),G,B,type,indices,numbus,buses,lines);
+    correctH_pol(:,:,k) = createHmatrix(newth(:,k),newV(:,k),G,B,type,indices,numbus,buses,lines);
+    correctH_rect(:,:,k) = createHmatrix_rect(newe(:,k),newf(:,k),G,B,type,indices,numbus,buses,lines);
 end
     
 %% DC new central measurements
