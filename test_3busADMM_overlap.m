@@ -8,7 +8,10 @@ format long
 % System parameters
 example_3bus_Abur
 
-Ybus = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), {'Closed';'Closed';'Closed'})
+numlines = size(lines,1);
+lineStatus = repmat({'Closed'},[numlines 1]);
+
+Ybus = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);
 B = imag(Ybus);
 
@@ -21,7 +24,7 @@ iter = 1;
 maxiter = 20;
 rho = 1; % step size
 
-% AC initialize
+%% Rectangular AC initialize
 x1_k = zeros(5,maxiter);
 dx1_k = zeros(5,maxiter);
 x2_k = zeros(5,maxiter);
@@ -47,14 +50,11 @@ normres_s = zeros(1,maxiter);
 f1 = zeros(1,maxiter);
 f2 = zeros(1,maxiter);
 
-% initialize first guess
-% x1 = [th2; th3; V1; V2; V3];
-% x2 = [th2; th3; V1; V2; V3];
-x1_k(:,1) = [0; 0; 1; 1; 1]; %AC flat start
-x2_k(:,1) = [0; 0; 1; 1; 1]; %AC flat start
-
-% x1_k(:,1) = [0; 0]; %DC flat start
-% x2_k(:,1) = [0; 0]; %DC flat start
+% first guess - rectangular flat start
+% x1 = [e1; e2; e3; f2; f3]
+% x2 = [e1; e2; e3; f2; f3]
+x1_k(:,1) = [1; 1; 1; 0; 0]; %AC flat start
+x2_k(:,1) = [1; 1; 1; 0; 0]; %AC flat start
 
 normres_r(:,1) = 1; %primal residual - initialize to nonzero number
 normres_s(:,1) = 1; %dual residual - initialize to nonzero number

@@ -13,7 +13,6 @@ example_3bus_Abur
 %x(:,1) = [zeros(numbus-1,1); ones(numbus,1)];
 
 %% Rectangular AC flat start
-% x = [e1; e2; f2]
 % x = [e1; e2; e3; f2; f3]
 
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];
@@ -51,7 +50,7 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     
     % Rectangular
     temp = createHmatrix_rect(e,f,G,B,type,indices,numbus,buses,lines);
-    H(:,:,k) = [temp(:,1:3) temp(:,5:(2*numbus))];
+    H(:,:,k) = [temp(:,1:numbus) temp(:,numbus+2:(2*numbus))];
   
     % Calculate gain matrix G(x^k) = H.'*R^(-1)*H
     Gain(:,:,k) = H(:,:,k).'*(R\H(:,:,k));
