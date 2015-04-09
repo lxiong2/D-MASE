@@ -12,15 +12,15 @@ function [f2, Gain2, g2, H2, h2] = myfun_Part2_AC_3bus(buses, numbus, allbuses_a
 
 % Slack bus zeroed out
 numbus_a = size(allbuses_a,1);
-theta = [0; x_a(1); x_a(2)];
-V = [x_a(3); x_a(4); x_a(5)];
+e = [x_a(1); x_a(2); x_a(3)];
+f = [0; x_a(4); x_a(5)];
 
 %% Nonlinear h's
-h2 = createhvector_ADMM(theta,V,G,B,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
+h2 = createhvector_rect(e,f,G,B,type_a,allindices_a,numbus,buses,lines);
 
-H2 = createHmatrix_ADMM(theta,V,G,B,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
+H2 = createHmatrix_rect(e,f,G,B,type_a,allindices_a,numbus,buses,lines);
 %assumes slack is bus 1 so remove first column
-H2 = H2(:,2:6);
+H2 = [H2(:,1:3) H2(:,5:6)];
 
 f2 = (z_a-h2).'*(R_a\(z_a-h2));
 Gain2 = 2*H2.'*(R_a\H2)+rho;

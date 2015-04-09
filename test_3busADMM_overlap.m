@@ -21,7 +21,7 @@ B = imag(Ybus);
 
 numPart = 2;
 iter = 1;
-maxiter = 20;
+maxiter = 10;
 rho = 1; % step size
 
 %% Rectangular AC initialize
