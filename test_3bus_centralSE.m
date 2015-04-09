@@ -27,7 +27,7 @@ B = imag(Ybus);
 
 while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     % Polar AC version
-%     theta = [0; x(1:numbus-1,k)];
+%     theta = [0; x(1:numbus-1,k)]; % assumes slack bus is bus 1
 %     V = x(numbus:(2*numbus-1),k);
     
     % Rectangular AC version
