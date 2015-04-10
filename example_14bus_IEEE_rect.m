@@ -73,8 +73,8 @@ adjbuses = [2 5 0 0 0;
 
 % PowerWorld AC; took out measurement P5-4
 z = [% Area 1
-    0.0000000000;
-    1.0599999428;
+%     0.0000000000^2;
+%     1.0599999428^2; % V^2
     1.564407319;
     -0.203009359;
     0.759168813;
@@ -84,8 +84,8 @@ z = [% Area 1
     2.323576212;
     -0.204564422;
     % Area 2
-    -0.2212527222;
-    1.0099999973;
+%     -0.2212527222^2;
+%     1.0099999973^2; % V^2
     -0.235697408;
     0.009685915;
     0.29247688;
@@ -93,8 +93,8 @@ z = [% Area 1
     4.93889E-07;
     -0.231382548;
     % Area 3
-    -0.2551056339;
-    1.0385379020;
+%     -0.2551056339^2;
+%     1.0385379020^2; % V^2
     0.064193753;
     0.015779898;
     0.076111237;
@@ -106,8 +106,8 @@ z = [% Area 1
     -0.061;
     -0.016;
     % Area 4
-    -0.2680699059;
-    1.0349152577;
+%     -0.2680699059;
+%     1.0349152577^2; % V^2
     0.061481308;
     0.061776975;
     0.101258308;
@@ -124,43 +124,60 @@ z = [% Area 1
     0.110919777;
     -0.94199997;
     0.024613438;
-    -0.2212527222;
-    1.0099999973;
+%     -0.2212527222;
+%     1.0099999973^2; % V^2
     % Boundary 3
     0.049650161;
     0.005242763;
     -0.135;
     -0.058;
-    -0.2551056339;
-    1.0385379020;
+%     -0.2551056339;
+%     1.0385379020^2; % V^2
     % Boundary 4
     -0.028744037;
     0.003177905;
     -0.149;
-    -0.05;
-    -0.2680699059;
-    1.0349152577];
+    -0.05];
+%     -0.2680699059;
+%     1.0349152577^2]; % V^2
 
+% type = {% Area 1
+%         'th'; 'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
+%         % Area 2
+%         'th'; 'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf';
+%         % Area 3
+%         'th'; 'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
+%         % Area 4
+%         'th'; 'v'; 'pf'; 'qf'; 'pf'; 'qf';
+%         % Boundary 1
+%         'p'; 'q';
+%         % Boundary 2
+%         'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q'; 'th'; 'v';
+%         % Boundary 3
+%         'pf'; 'qf'; 'p'; 'q'; 'th'; 'v';
+%         % Boundary 4
+%         'pf'; 'qf'; 'p'; 'q'; 'th'; 'v'};
+        
 type = {% Area 1
-        'th'; 'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
+        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
         % Area 2
-        'th'; 'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf';
+        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf';
         % Area 3
-        'th'; 'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
+        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
         % Area 4
-        'th'; 'v'; 'pf'; 'qf'; 'pf'; 'qf';
+        'pf'; 'qf'; 'pf'; 'qf';
         % Boundary 1
         'p'; 'q';
         % Boundary 2
-        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q'; 'th'; 'v';
+        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
         % Boundary 3
-        'pf'; 'qf'; 'p'; 'q'; 'th'; 'v';
+        'pf'; 'qf'; 'p'; 'q';
         % Boundary 4
-        'pf'; 'qf'; 'p'; 'q'; 'th'; 'v'};
+        'pf'; 'qf'; 'p'; 'q'};
 
 indices = [% Area 1
-            1 0 0;
-            1 0 0;
+%             1 0 0;
+%             1 0 0;
             1 2 1;
             1 2 1;
             1 5 1;
@@ -170,8 +187,8 @@ indices = [% Area 1
             1 0 0;
             1 0 0;
             % Area 2
-            3 0 0;
-            3 0 0;
+%             3 0 0;
+%             3 0 0;
             3 4 1;
             3 4 1;
             4 7 1;
@@ -179,8 +196,8 @@ indices = [% Area 1
             7 8 1;
             7 8 1;
             % Area 3
-            6 0 0;
-            6 0 0;
+%             6 0 0;
+%             6 0 0;
             6 11 1;
             6 11 1;
             6 12 1;
@@ -192,8 +209,8 @@ indices = [% Area 1
             12 0 0;
             12 0 0;
             % Area 4
-            9 0 0;
-            9 0 0;
+%             9 0 0;
+%             9 0 0;
             9 10 1;
             9 10 1;
             9 14 1;
@@ -210,49 +227,50 @@ indices = [% Area 1
             7 9 1;
             3 0 0;
             3 0 0;
-            3 0 0;
-            3 0 0;
+%             3 0 0;
+%             3 0 0;
             % Boundary 3
             13 14 1;
             13 14 1;
             13 0 0;
             13 0 0;
-            6 0 0;
-            6 0 0;
+%             6 0 0;
+%             6 0 0;
             % Boundary 4
             10 11 1;
             10 11 1;
             14 0 0;
             14 0 0;
-            9 0 0;
-            9 0 0];
+%             9 0 0;
+%             9 0 0
+];
 
 R = diag(0.01^2*ones(1,size(z,1)));
 
 % Decentralized case: include boundary measurements for each area
 allbuses1 = [1; 2; 4; 5; 6]; %indices of x1
-allz1 = [z(1:5); z(19)]; 
+allz1 = [z(1:8); z(29:30)]; 
 allR1 = diag(0.01^2*ones(1,size(allz1,1)));
-alltype1 = [type(1:5); type(19)]; 
-allindices1 = [indices(1:5,:); indices(19,:)]; 
+alltype1 = [type(1:8); type(29:30)]; 
+allindices1 = [indices(1:8,:); indices(29:30,:)]; 
 
 allbuses2 = [2; 3; 4; 5; 7; 8; 9];
-allz2 = [z(6:9); z(20:24)];
+allz2 = [z(9:14); z(31:38)];
 allR2 = diag(0.01^2*ones(1,size(allz2,1)));
-alltype2 = [type(6:9); type(20:24)];
-allindices2 = [indices(6:9,:); indices(20:24,:)];
+alltype2 = [type(9:14); type(31:38)];
+allindices2 = [indices(9:14,:); indices(31:38,:)];
 
 allbuses3 = [6; 11; 12; 13; 14];
-allz3 = [z(10:15); z(25:27)];
+allz3 = [z(15:24); z(39:42)];
 allR3 = diag(0.01^2*ones(1,size(allz3,1)));
-alltype3 = [type(10:15); type(25:27)];
-allindices3 = [indices(10:15,:); indices(25:27,:)];
+alltype3 = [type(15:24); type(39:42)];
+allindices3 = [indices(15:24,:); indices(39:42,:)];
 
 allbuses4 = [9; 10; 11; 13; 14];
-allz4 = [z(16:18); z(28:30)];
+allz4 = [z(25:28); z(43:46)];
 allR4 = diag(0.01^2*ones(1,size(allz4,1)));
-alltype4 = [type(16:18); type(28:30)];
-allindices4 = [indices(16:18,:); indices(28:30,:)];
+alltype4 = [type(25:28); type(43:46)];
+allindices4 = [indices(25:28,:); indices(43:46,:)];
 
 %% PowerWorld DC R = 0, C = 0, X = actual; took out measurement P5-4 AND angle measurements
 % Central solution converges just fine; however, decentralized solution 

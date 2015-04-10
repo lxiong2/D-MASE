@@ -70,8 +70,8 @@ for a = 1:size(type,1)
 %         h(a) = sqrt((gij^2+bij^2)*(V(m).^2+V(n)^2-...
 %             2*V(m)*V(n)*cos(theta(m)-theta(n))));
     % Angle measurement from PMUs
-%     elseif strcmp(type(a),'th') == 1
-%         m = busIndex(buses==indices(a,1));
-%         h(a) = theta(m);
+    elseif strcmp(type(a),'th') == 1
+        m = busIndex(buses==indices(a,1));
+        h(a) = atan(f(m)/e(m));
     end
 end

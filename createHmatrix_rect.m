@@ -57,10 +57,10 @@ for a = 1:size(type,1)
 %         indImeas = indices(a,:);  
 %         [dIijdth dIijdV] = iMeas(theta,V,I,numbus,buses,lines,numImeas,indImeas);
 %         H(a,:) = [dIijdth dIijdV];
-%     elseif strcmp(type(a),'th') == 1
-%         numthmeas = numthmeas + 1;
-%         indthmeas = indices(a,:);
-%         [dthdth, dthdV] = thMeas(numbus,buses,indthmeas);
-%         H(a,:) = [dthdth dthdV];
+    elseif strcmp(type(a),'th') == 1
+        numthmeas = numthmeas + 1;
+        indthmeas = indices(a,:);
+        [dth2de, dth2df] = thMeas_rect(e,f,numbus,buses,indthmeas);
+        H(a,:) = [dth2de dth2df];
     end
 end
