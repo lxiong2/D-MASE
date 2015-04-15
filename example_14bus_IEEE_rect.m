@@ -245,6 +245,14 @@ indices = [% Area 1
 %             9 0 0
 ];
 
+% for a = 1:size(type,1)
+%     if strcmp(type,'th') == 1
+%         z(a) = 
+%     elseif strcmp(type,'V') == 1
+%         
+%     end
+% end
+
 R = diag(0.01^2*ones(1,size(z,1)));
 
 % Decentralized case: include boundary measurements for each area

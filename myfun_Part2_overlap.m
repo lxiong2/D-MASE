@@ -20,6 +20,7 @@ V = ones(numbus,1);
 h2 = createhvector_ADMM_DC(theta,V,G,B,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 
 H2 = createHmatrix_ADMM_DC(theta,V,G,B,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
+size(H2)
 [Hrow,Hcol] = size(H2);
 
 %DC so remove the voltage columns
@@ -28,8 +29,16 @@ H2 = H2(:,1:size(allbuses_a,1)); %assumes slack is bus 1 so remove first column
 f2 = (z_a-h2).'*(R_a\(z_a-h2));
 Gain2 = 2*H2.'*(R_a\H2)+rho;
 
-for a = 1:size(allbuses_a,1)
+c2 = zeros(size(allbuses_a,1)*2-1,1);
+c = 1:numbus*2;
+for a = 1:(size(allbuses_a,1)) 
     c2(a,1) = c(allbuses_a(a));
+    c2(size(allbuses_a,1)+a,1) = c(numbus+allbuses_a(a));
 end
+c2
+
+size(-2*H2.'*(R_a\(z_a-h2)))
+size(y)
+size(rho*(x_a-c2))
 
 g2 = -2*H2.'*(R_a\(z_a-h2)) + y + rho*(x_a-c2); %DEBUG: is y a row or column vector? What about c?

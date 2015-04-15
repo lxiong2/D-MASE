@@ -20,30 +20,30 @@ B = imag(Ybus);
 %% Partition a 14-bus system into 4 pieces
 numPart = 2;
 iter = 1;
-maxiter = 100;
+maxiter = 20;
 rho = 10; % step size
 
 % Initialize each partition's state vectors
 % x1_k = [th1 th2 th4' th5 th6']
-x1_k = zeros(4,maxiter); % Area S1: 3 buses, bus 1 is the slack; if you remove bus1 from x1_k, then the Gain matrix is singular
-dx1_k = zeros(4,maxiter);
+x1_k = zeros(size(allbuses1,1)*2-1,maxiter); % Area S1: 3 buses, bus 1 is the slack; if you remove bus1 from x1_k, then the Gain matrix is singular
+dx1_k = zeros(size(allbuses1,1)*2-1,maxiter);
 % x2_k = [th2' th3 th4 th5' th7 th8 th9']
-x2_k = zeros(7,maxiter); % Area S2: 4 buses
-dx2_k = zeros(7,maxiter);
+x2_k = zeros(size(allbuses2,1)*2,maxiter); % Area S2: 4 buses
+dx2_k = zeros(size(allbuses2,1)*2,maxiter);
 % x3_k = [th6 th11 th12 th13 th14']
-x3_k = zeros(5,maxiter); % Area S3: 4 buses
-dx3_k = zeros(5,maxiter);
+x3_k = zeros(size(allbuses3,1)*2,maxiter); % Area S3: 4 buses
+dx3_k = zeros(size(allbuses3,1)*2,maxiter);
 % x4_k = [th9 th10 th11' th13' th14]
-x4_k = zeros(5,maxiter); % Area S4: 3 buses
-dx4_k = zeros(5,maxiter);
+x4_k = zeros(size(allbuses4,1)*2,maxiter); % Area S4: 3 buses
+dx4_k = zeros(size(allbuses4,1)*2,maxiter);
 
 % Constraints
 % c_k = [th1 th2 th3 th4 th5 th6 th7 th8 th9 th10 th11 th12 th13 th14]
-c_k = zeros(14,maxiter);
-y1_kl = zeros(4,maxiter); %same length as x1_k vector
-y2_kl = zeros(7,maxiter);
-y3_kl = zeros(5,maxiter);
-y4_kl = zeros(5,maxiter);
+c_k = zeros(numbus*2,maxiter);
+y1_kl = zeros(size(allbuses1,1)*2-1,maxiter); %same length as x1_k vector
+y2_kl = zeros(size(allbuses2,1)*2,maxiter);
+y3_kl = zeros(size(allbuses3,1)*2,maxiter);
+y4_kl = zeros(size(allbuses4,1)*2,maxiter);
 
 normres_r = zeros(1,maxiter);
 normres_s = zeros(1,maxiter);
@@ -58,10 +58,10 @@ f4 = zeros(1,maxiter);
 % x2_k = [th2' th3 th4 th5' th7 th8 th9']
 % x3_k = [th6 th11 th12 th13 th14']
 % x4_k = [th9 th10 th11' th13' th14]
-x1_k(:,1) = [0; 0; 0; 0]; %DC flat start
-x2_k(:,1) = [0; 0; 0; 0; 0; 0; 0]; %DC flat start
-x3_k(:,1) = [0; 0; 0; 0; 0]; %DC flat start
-x4_k(:,1) = [0; 0; 0; 0; 0]; %DC flat start
+x1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1)-1,1)]; %DC flat start
+x2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1),1)]; %DC flat start
+x3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1),1)]; %DC flat start
+x4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1),1)]; %DC flat start
 
 normres_r(:,1) = 1; %primal residual - initialize to nonzero number
 normres_s(:,1) = 1; %dual residual - initialize to nonzero number
@@ -82,7 +82,7 @@ eps_dual = 1e-4;
 
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)   
     % Partition 1 calculations
-    [tempf1, tempGain1, g1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, adjbuses, lines, G, B, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c_k(:,iter), y1_kl(:,iter), rho);
+    [tempf1, tempGain1, g1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, lines, G, B, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c_k(:,iter), y1_kl(:,iter), rho);
     Gain1(:,:,iter) = tempGain1;
     H1(:,:,iter) = tempH1;
     h1(:,iter) = temph1;
