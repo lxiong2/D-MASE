@@ -1,13 +1,14 @@
-function [dPde, dPdf] = realPowerInjMeas_rect(e,f,G,B,numbus,buses,indPmeas)
+function [dPde, dPdf] = realPowerInjMeas_rect(e,f,G,B,numbus,buses,buses_a,adjbuses,indPmeas)
 % Elements of the measurement Jacobian H corresponding to
 % real power injection measurements
 
 dPde = zeros(1,numbus);
 dPdf = zeros(1,numbus);
 busIndex = (1:numbus).';
+busIndex_a = (1:size(buses_a,1)).';
 
 for n = 1:numbus
-    m = busIndex(buses==indPmeas(1,1));
+    m = busIndex_a(buses_a==indPmeas(1,1));
     if m == n
         dPde(1,m) = G(m,m)*e(m)+B(m,m)*f(m);
         for a = 1:numbus

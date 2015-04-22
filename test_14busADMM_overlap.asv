@@ -19,16 +19,16 @@ B = imag(Ybus);
 
 % Partial G, B matrices for each partition
 G1 = G(allbuses1,allbuses1); % get submatrix for Partition 1
-B1 = B(allbuses1,allbuses1);
+B1 = B(size(allbuses1,1),size(allbuses1,1));
 
-G2 = G(allbuses2,allbuses2); % get submatrix for Partition 2
-B2 = B(allbuses2,allbuses2);
+G2 = zeros(size(allbuses2,1),size(allbuses2,1));
+B2 = zeros(size(allbuses2,1),size(allbuses2,1));
 
-G3 = G(allbuses3,allbuses3); % get submatrix for Partition 3
-B3 = B(allbuses3,allbuses3);
+G3 = zeros(size(allbuses3,1),size(allbuses3,1));
+G3 = zeros(size(allbuses3,1),size(allbuses3,1));
 
-G4 = G(allbuses4,allbuses4); % get submatrix for Partition 4
-B4 = B(allbuses4,allbuses4);
+G4 = zeros(size(allbuses4,1),size(allbuses4,1));
+G4 = zeros(size(allbuses4,1),size(allbuses4,1));
 
 %% Partition a 14-bus system into 4 pieces
 numPart = 2;
@@ -95,7 +95,7 @@ eps_dual = 1e-4;
 
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)   
     % Partition 1 calculations
-    [tempf1, tempGain1, g1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, adjbuses, lines, G1, B1, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c_k(:,iter), y1_kl(:,iter), rho);
+    [tempf1, tempGain1, g1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, adjbuses, lines, G, B, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c_k(:,iter), y1_kl(:,iter), rho);
     Gain1(:,:,iter) = tempGain1;
     H1(:,:,iter) = tempH1;
     h1(:,iter) = temph1;
@@ -104,7 +104,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     x1_k(:,iter+1) = x1_k(:,iter) + dx1_k(:,iter+1);
     
     % Partition 2 calculations
-    [tempf2, tempGain2, g2, tempH2, temph2] = myfun_Part2_overlap(buses, numbus, allbuses2, adjbuses, lines, G2, B2, allz2, allR2, alltype2, allindices2, x2_k(:,iter), c_k(:,iter), y2_kl(:,iter), rho);
+    [tempf2, tempGain2, g2, tempH2, temph2] = myfun_Part2_overlap(buses, numbus, allbuses2, adjbuses, lines, G, B, allz2, allR2, alltype2, allindices2, x2_k(:,iter), c_k(:,iter), y2_kl(:,iter), rho);
     Gain2(:,:,iter) = tempGain2;
     H2(:,:,iter) = tempH2;
     h2(:,iter) = temph2;
@@ -113,7 +113,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     x2_k(:,iter+1) = x2_k(:,iter) + dx2_k(:,iter+1);
    
     % Partition 3 calculations
-    [tempf3, tempGain3, g3, tempH3, temph3] = myfun_Part2_overlap(buses, numbus, allbuses3, adjbuses, lines, G3, B3, allz3, allR3, alltype3, allindices3, x3_k(:,iter), c_k(:,iter), y3_kl(:,iter), rho);
+    [tempf3, tempGain3, g3, tempH3, temph3] = myfun_Part2_overlap(buses, numbus, allbuses3, adjbuses, lines, G, B, allz3, allR3, alltype3, allindices3, x3_k(:,iter), c_k(:,iter), y3_kl(:,iter), rho);
     Gain3(:,:,iter) = tempGain3;
     H3(:,:,iter) = tempH3;
     h3(:,iter) = temph3;
@@ -122,7 +122,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     x3_k(:,iter+1) = x3_k(:,iter) + dx3_k(:,iter+1);
     
     % Partition 4 calculations
-    [tempf4, tempGain4, g4, tempH4, temph4] = myfun_Part2_overlap(buses, numbus, allbuses4, adjbuses, lines, G4, B4, allz4, allR4, alltype4, allindices4, x4_k(:,iter), c_k(:,iter), y4_kl(:,iter), rho);
+    [tempf4, tempGain4, g4, tempH4, temph4] = myfun_Part2_overlap(buses, numbus, allbuses4, adjbuses, lines, G, B, allz4, allR4, alltype4, allindices4, x4_k(:,iter), c_k(:,iter), y4_kl(:,iter), rho);
     Gain4(:,:,iter) = tempGain4;
     H4(:,:,iter) = tempH4;
     h4(:,iter) = temph4;

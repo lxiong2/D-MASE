@@ -10,31 +10,38 @@ function [f1, Gain1, g1, H1, h1] = myfun_Part1_overlap(buses, numbus, allbuses_a
 % lines         list of lines in overall system
 % G_a           real part of the LOCAL Ybus matrix
 % B_a           imaginary part of the LOCAL Ybus matrix
-% z_a           list of LOCAL measurements
-% R_a           each PARTITION's standard deviation for each measurement
-% type_a        each PARTITION's measurement type
-% allindices_a  list of LOCAL indices for each measurement
-% x_a           LOCAL system state
-% c             
-% y
-% rho           ADMM step size
 
-%% Outputs: See Decentralized ADMM formulation.docx
-% f1
-% Gain1         LOCAL Gain matrix
-% g1            LOCAL right hand side
-% H1            LOCAL measurement Jacobian
-% h1            LOCAL ideal measurement vector
+% e         partial vector of real V components (V cos theta)
+% size(buses_a) x 1
+% f         partial vector of imaginary V components (V sin theta)
 
-%% Slack bus zeroed out
+% type_a    each PARTITION's measurement type
+% indices_a each PARTITION's measurement indices
+
+
+% buses_a   
+% lines     list of lines in overall system 
+
+
+% buses: 
+% numbus:
+% adjbuses: 
+% lines: 
+% x_a is the system state
+% z_a: measurements for Partition 1
+% R_a: % deviation for each measurement
+% type_a: measurement type
+% indices_a: indices for each measurement
+
+% Slack bus zeroed out
 numbus_a = size(allbuses_a,1);
 e = x_a(1:size(allbuses_a,1));
 f = [0; x_a(size(allbuses_a,1)+1:(2*numbus_a-1),1)]; % assumes slack bus is bus 1
 
-% Nonlinear h's
+%% Nonlinear h's
 h1 = createhvector_rect(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 
-H1 = createHmatrix_rect(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
+H1 = createHmatrix_rect(e,f,G_a,B_a,type_a,allindices_a,numbus_a,buses,lines);
 H1 = H1(:,2:size(allbuses_a,1)*2); %assumes slack is bus 1 so remove first column
 
 f1 = (z_a-h1).'*(R_a\(z_a-h1));

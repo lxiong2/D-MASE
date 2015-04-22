@@ -1,15 +1,15 @@
-function [dQijde, dQijdf] = reactivePowerFlowMeas_rect(e,f,G,B,numbus,buses,lines,indQFmeas)
+function [dQijde, dQijdf] = reactivePowerFlowMeas_rect(e,f,G,B,numbus,buses_a,lines,indQFmeas)
 % Elements of the measurement Jacobian H corresponding to
 % reactive power flow measurements
 
-dQijde = zeros(1, numbus);
-dQijdf = zeros(1, numbus);
-busIndex = (1:numbus).';
+dQijde = zeros(1,numbus);
+dQijdf = zeros(1,numbus);
+busIndex_a = (1:size(buses_a,1)).';
 bsi = 0;
 lineNum = 0;
 
-m = busIndex(buses==indQFmeas(1,1));
-n = busIndex(buses==indQFmeas(1,2));
+m = busIndex_a(buses_a==indQFmeas(1,1));
+n = busIndex_a(buses_a==indQFmeas(1,2));
 for c = 1:size(lines,1)
     if sum(indQFmeas(1,1:3) == lines(c,1:3))==3
         lineNum = c;
