@@ -16,11 +16,10 @@ e = x_a(1:size(allbuses_a,1));
 f = [0; x_a(size(allbuses_a,1)+1:(2*numbus_a-1),1)]; % assumes slack bus is bus 1
 
 %% Nonlinear h's
-h1 = createhvector_rect(e,f,G,B,type_a,allindices_a,numbus_a,buses,lines);
+h1 = createhvector_rect(e,f,G,B,type_a,allindices_a,numbus,buses,allbuses_a,lines);
+%h1 = createhvector_rect(e,f,G,B,type_a,allindices_a,numbus_a,buses,lines);
 
 H1 = createHmatrix_rect(e,f,G,B,type_a,allindices_a,numbus_a,buses,lines);
-
-%DC so remove the voltage columns
 H1 = H1(:,2:size(allbuses_a,1)*2); %assumes slack is bus 1 so remove first column
 
 f1 = (z_a-h1).'*(R_a\(z_a-h1));

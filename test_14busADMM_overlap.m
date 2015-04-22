@@ -58,10 +58,10 @@ f4 = zeros(1,maxiter);
 % x2_k = [th2' th3 th4 th5' th7 th8 th9']
 % x3_k = [th6 th11 th12 th13 th14']
 % x4_k = [th9 th10 th11' th13' th14]
-x1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1)-1,1)]; %DC flat start
-x2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1),1)]; %DC flat start
-x3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1),1)]; %DC flat start
-x4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1),1)]; %DC flat start
+x1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1)-1,1)]; %AC flat start
+x2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1),1)]; %AC flat start
+x3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1),1)]; %AC flat start
+x4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1),1)]; %AC flat start
 
 normres_r(:,1) = 1; %primal residual - initialize to nonzero number
 normres_s(:,1) = 1; %dual residual - initialize to nonzero number

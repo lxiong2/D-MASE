@@ -13,7 +13,7 @@ function [f2, Gain2, g2, H2, h2] = myfun_Part2_overlap(buses, numbus, allbuses_a
 % Slack bus zeroed out
 numbus_a = size(allbuses_a,1);
 e = x_a(1:size(allbuses_a,1));
-f = x_a(size(allbuses_a,1)+1:(2*numbus_a)); % assumes slack bus is bus 1
+f = [(x_a(size(allbuses_a,1)+1):(2*numbus_a),1)]; % assumes slack bus is bus 1
 
 %% Nonlinear h's
 h2 = createhvector_rect(e,f,G,B,type_a,allindices_a,numbus_a,buses,lines);
