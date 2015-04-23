@@ -35,7 +35,7 @@ f = [0; x_a(size(allbuses_a,1)+1:(2*numbus_a-1),1)]; % assumes slack bus is bus 
 h1 = createhvector_rect(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 
 H1 = createHmatrix_rect(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
-H1 = H1(:,2:size(allbuses_a,1)*2); %assumes slack is bus 1 so remove first column
+H1 = [H1(:,1:size(allbuses_a,1)) H1(:,(size(allbuses_a,1)+2):size(allbuses_a,1)*2)]; %assumes slack is bus 1 so remove first column
 
 f1 = (z_a-h1).'*(R_a\(z_a-h1));
 Gain1 = 2*H1.'*(R_a\H1)+rho;

@@ -23,13 +23,13 @@ busIndex_a = (1:size(buses_a,1)).';
 for a = 1:size(type_a,1)
     % Real power injection measurements
     if strcmp(type_a(a),'p') == 1
-        m_global = busIndex(buses == indices_a(a,1));
-        m = busIndex_a(buses_a==indices_a(a,1)); 
+        m_global = busIndex(buses == indices_a(a,1)); % map m to global bus index
+        m = busIndex_a(buses_a==indices_a(a,1)); % m = bus at which P is injected
         temp = 0;
         temp2 = 0;
         temp3 = adjbuses(m_global,:); % get list of adjacent buses for bus m
         temp3 = temp3(temp3~=0); % remove padded zeros
-        for b = 1:size(temp3,2) % go through each adjacent bus
+        for b = 1:size(temp3,2) % go through each adjacent bus, including the injection bus itself
             n = busIndex_a(buses_a == temp3(b)); 
             temp = temp+(G_a(m,n)*e(n)-B_a(m,n)*f(n));
             temp2 = temp2+(G_a(m,n)*f(n)+B_a(m,n)*e(n));
@@ -37,13 +37,13 @@ for a = 1:size(type_a,1)
         h(a) = e(m)*temp+f(m)*temp2;
     % Reactive power injection measurements  
     elseif strcmp(type_a(a),'q') == 1
-        m_global = busIndex(buses == indices_a(a,1));
-        m = busIndex_a(buses_a==indices_a(a,1)); % m = bus at which P is injected
+        m_global = busIndex(buses == indices_a(a,1)); % map m to global bus index
+        m = busIndex_a(buses_a==indices_a(a,1)); % m = local bus index at which P is injected
         temp = 0;
         temp2 = 0;
-        temp3 = adjbuses(m_global,:);
-        temp3 = temp3(temp3~=0);
-        for b = 1:size(temp3,2)
+        temp3 = adjbuses(m_global,:); % get list of adjacent buses for bus m
+        temp3 = temp3(temp3~=0); % remove padded zeros
+        for b = 1:size(temp3,2) % go through each adjacent bus, including the injection bus itself
             n = busIndex_a(buses_a == temp3(b));
             temp = temp+(-G_a(m,n)*f(n)-B_a(m,n)*e(n));
             temp2 = temp2+(G_a(m,n)*e(n)-B_a(m,n)*f(n));

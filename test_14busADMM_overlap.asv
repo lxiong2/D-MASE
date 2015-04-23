@@ -54,9 +54,9 @@ dx4_k = zeros(size(allbuses4,1)*2,maxiter);
 % c_k = [e1 ... e14 f1 ... f14]
 c_k = zeros(numbus*2,maxiter);
 c1_k = zeros(size(x1_k,1),1);
-c2_k = zeros(size(x2_k,1),1);
-c3_k = zeros(size(x3_k,1),1);
-c4_k = zeros(size(x4_k,1),1);
+c2_k = zeros(size(x1_k,1),1);
+c1_k = zeros(size(x1_k,1),1);
+c1_k = zeros(size(x1_k,1),1);
 
 y1_kl = zeros(size(allbuses1,1)*2-1,maxiter); %same length as x1_k vector
 y2_kl = zeros(size(allbuses2,1)*2,maxiter);

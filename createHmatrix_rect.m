@@ -20,7 +20,6 @@ H = zeros(size(type,1),size(buses_a,1)*2);
 
 %% Determine type of measurement
 for a = 1:size(type,1)
-    a
     % Real power injection measurements [dPdth dPdV]
     if strcmp(type(a),'p') == 1
         numPmeas = numPmeas + 1;
@@ -45,12 +44,12 @@ for a = 1:size(type,1)
         indQFmeas = indices(a,:);
         [dQijde, dQijdf] = reactivePowerFlowMeas_rect(e,f,G_a,B_a,buses_a,lines,indQFmeas);
         H(a,:) = [dQijde dQijdf];
-%     % Voltage magnitude measurements    
-%     elseif strcmp(type(a),'v') == 1
-%         numVmeas = numVmeas + 1;
-%         indVmeas = indices(a,:);
-%         [dV2de, dV2df] = vMeas_rect(e,f,numbus,buses,buses_a,indVmeas);
-%         H(a,:) = [dV2de dV2df];
+    % Voltage magnitude measurements    
+    elseif strcmp(type(a),'v') == 1
+        numVmeas = numVmeas + 1;
+        indVmeas = indices(a,:);
+        [dV2de, dV2df] = vMeas_rect(e,f,buses_a,indVmeas);
+        H(a,:) = [dV2de dV2df];
 % %     % Current magnitude measurements
 %     %FIX: NOT DEBUGGED OR TESTED
 % %     elseif strcmp(type(a),'i') == 1

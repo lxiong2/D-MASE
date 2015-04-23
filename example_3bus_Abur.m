@@ -17,9 +17,9 @@ lines = [1 2 1 0.01 0.03 0;
 lineNum = size(lines,1);
 
 % list of adjacent buses
-adjbuses = [2 3;
-            1 3;
-            1 2];
+adjbuses = [1 2 3;
+            2 1 3;
+            3 1 2];
 
 % x = [ang2; ang3; V1; V2; V3]; %slack bus not included
 
