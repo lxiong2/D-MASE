@@ -33,7 +33,7 @@ B4 = B(allbuses4,allbuses4);
 %% Partition a 14-bus system into 4 pieces
 numPart = 2;
 iter = 1;
-maxiter = 10;
+maxiter = 2;
 rho = 10; % step size
 
 % Initialize each partition's state vectors
@@ -138,22 +138,30 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % How global variables are collected and averaged
     % DEBUG: need function to automatically map how the state variable for each partition
     % matches up with the global c indexing
-    c_k(2,iter+1) = 1/numPart*(x1_k(1,iter+1) + x2_k(1,iter+1)); % the other two variables are 0
-    c_k(4,iter+1) = 1/numPart*(x1_k(2,iter+1) + x2_k(3,iter+1));
-    c_k(5,iter+1) = 1/numPart*(x1_k(3,iter+1) + x2_k(4,iter+1));
-    c_k(6,iter+1) = 1/numPart*(x1_k(4,iter+1) + x3_k(1,iter+1));
+    c_k(2,iter+1) = 1/numPart*(x1_k(2,iter+1) + x2_k(1,iter+1)); % the other two variables are 0
+    c_k(4,iter+1) = 1/numPart*(x1_k(3,iter+1) + x2_k(3,iter+1));
+    c_k(5,iter+1) = 1/numPart*(x1_k(4,iter+1) + x2_k(4,iter+1));
+    c_k(6,iter+1) = 1/numPart*(x1_k(5,iter+1) + x3_k(1,iter+1));
     c_k(9,iter+1) = 1/numPart*(x2_k(7,iter+1) + x4_k(1,iter+1));
     c_k(11,iter+1) = 1/numPart*(x3_k(2,iter+1) + x4_k(3,iter+1));
-    c_k(13,iter+1) = 1/numPart*(x3_k(4,iter+1) + x4_k(5,iter+1));
+    c_k(13,iter+1) = 1/numPart*(x3_k(4,iter+1) + x4_k(4,iter+1));
     c_k(14,iter+1) = 1/numPart*(x3_k(5,iter+1) + x4_k(5,iter+1));
+    c_k(numbus+2,iter+1) = 1/numPart*(x1_k(6,iter+1) + x2_k(8,iter+1)); % the other two variables are 0
+    c_k(numbus+4,iter+1) = 1/numPart*(x1_k(7,iter+1) + x2_k(10,iter+1));
+    c_k(numbus+5,iter+1) = 1/numPart*(x1_k(8,iter+1) + x2_k(11,iter+1));
+    c_k(numbus+6,iter+1) = 1/numPart*(x1_k(9,iter+1) + x3_k(6,iter+1));
+    c_k(numbus+9,iter+1) = 1/numPart*(x2_k(14,iter+1) + x4_k(6,iter+1));
+    c_k(numbus+11,iter+1) = 1/numPart*(x3_k(7,iter+1) + x4_k(8,iter+1));
+    c_k(numbus+13,iter+1) = 1/numPart*(x3_k(9,iter+1) + x4_k(9,iter+1));
+    c_k(numbus+14,iter+1) = 1/numPart*(x3_k(10,iter+1) + x4_k(10,iter+1));
    
     % Remap from global c_k to the indexing for each partition's state
     % vector
     % DEBUG - also need automatic function to do that
-    c1_k(:,iter+1) = [c_k(2,iter+1); c_k(4,iter+1); c_k(5,iter+1); c_k(6,iter+1)];
-    c2_k(:,iter+1) = [c_k(2,iter+1); c_k(3,iter+1); c_k(4,iter+1); c_k(5,iter+1); c_k(7,iter+1); c_k(8,iter+1); c_k(9,iter+1)];
-    c3_k(:,iter+1) = [c_k(6,iter+1); c_k(11,iter+1); c_k(12,iter+1); c_k(13,iter+1); c_k(14,iter+1)];
-    c4_k(:,iter+1) = [c_k(9,iter+1); c_k(10,iter+1); c_k(11,iter+1); c_k(13,iter+1); c_k(14,iter+1)];
+    c1_k(:,iter+1) = [c_k(allbuses1,iter+1); c_k(numbus+allbuses1(2:size(allbuses1,1)),iter+1)];
+    c2_k(:,iter+1) = [c_k(allbuses2,iter+1); c_k(numbus+allbuses2,iter+1)];
+    c3_k(:,iter+1) = [c_k(allbuses3,iter+1); c_k(numbus+allbuses3,iter+1)];
+    c4_k(:,iter+1) = [c_k(allbuses4,iter+1); c_k(numbus+allbuses4,iter+1)];
         
     y1_kl(:,iter+1) = y1_kl(:,iter) + rho*(x1_k(:,iter+1) - c1_k(:,iter+1));
     y2_kl(:,iter+1) = y2_kl(:,iter) + rho*(x2_k(:,iter+1) - c2_k(:,iter+1));
