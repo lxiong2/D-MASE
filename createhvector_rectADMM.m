@@ -71,11 +71,11 @@ for a = 1:size(type_a,1)
     % Voltage magnitude measurements SQUARED (NOTE: SQUARED, so to get the
     % actual V magnitude, take the sqrt)
     elseif strcmp(type_a(a),'v') == 1
-        m = busIndex(buses==indices_a(a,1));
+        m = busIndex_a(buses_a==indices_a(a,1));
         h(a) = e(m)^2+f(m)^2;
     % Angle measurement from PMUs
-    elseif strcmp(type_a(a),'th') == 1
-        m = busIndex(buses==indices_a(a,1));
-        h(a) = atan(f(m)/e(m));
+%     elseif strcmp(type_a(a),'th') == 1
+%         m = busIndex(buses==indices_a(a,1));
+%         h(a) = atan(f(m)/e(m));
     end
 end

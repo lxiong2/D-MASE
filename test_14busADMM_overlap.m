@@ -33,7 +33,7 @@ B4 = B(allbuses4,allbuses4);
 %% Partition a 14-bus system into 4 pieces
 numPart = 2;
 iter = 1;
-maxiter = 2;
+maxiter = 20;
 rho = 10; % step size
 
 % Initialize each partition's state vectors

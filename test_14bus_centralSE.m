@@ -11,7 +11,8 @@ clear all
 k = 1;
 maxiter = 10;
 
-example_14bus_IEEE_rect
+%example_14bus_IEEE_rect
+example_14bus_IEEE_rectADMM
 
 % flat start for AC
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];

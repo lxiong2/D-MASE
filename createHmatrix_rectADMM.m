@@ -42,7 +42,7 @@ for a = 1:size(type,1)
     elseif strcmp(type(a),'qf') == 1
         numQFmeas = numQFmeas + 1;
         indQFmeas = indices(a,:);
-        [dQijde, dQijdf] = reactivePowerFlowMeas_rect(e,f,G_a,B_a,buses_a,lines,indQFmeas);
+        [dQijde, dQijdf] = reactivePowerFlowMeas_rectADMM(e,f,G_a,B_a,buses_a,lines,indQFmeas);
         H(a,:) = [dQijde dQijdf];
     % Voltage magnitude measurements    
     elseif strcmp(type(a),'v') == 1

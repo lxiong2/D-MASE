@@ -55,6 +55,8 @@ z = [% Area 1
 %     1.0599999428^2; %Bus1 V^2
 %     1.044999957975790^2; %Bus2 V^2
     1.023712864563319^2; %Bus4 V^2
+%     1.028092514790582^2; %Bus5 V^2
+%     1.038537901983267^2; %Bus6 V^2
     1.564407319;
     -0.203009359;
     0.759168813;
@@ -121,8 +123,7 @@ z = [% Area 1
 %     -0.2680699059;
     1.0349152577^2;
     % Area 1
-    1.028092514790582^2; %Bus5 V^2
-    1.038537901983267^2; %Bus6 V^2
+%     1.038537901983267^2; %Bus6 V^2
     ]; % V^2
 
 %% PowerWorld AC case: angle and voltage measurements
@@ -147,8 +148,6 @@ z = [% Area 1
 % ADMM converges for partitions 2, 3, and 4; however partition 1 doesn't converge
 % Buses 1, 2, and 5 give extremely high errors (1e11)
 % Buses 4 and 6 voltages give better errors (1e3)
-% Partition 1 converges when you include V5 and V6
-
 type = {% Area 1
         'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
         % Area 2
@@ -164,9 +163,7 @@ type = {% Area 1
         % Boundary 3
         'pf'; 'qf'; 'p'; 'q'; 'v';
         % Boundary 4
-        'pf'; 'qf'; 'p'; 'q'; 'v';
-        % Area 1
-        'v'; 'v'};
+        'pf'; 'qf'; 'p'; 'q'; 'v'};
     
 indices = [% Area 1
 %             1 0 0;
@@ -236,9 +233,8 @@ indices = [% Area 1
             14 0 0;
             14 0 0;
 %             9 0 0;
-            9 0 0;
+            9 0 0
             % Area 1
-            5 0 0;
             6 0 0
 ];
 
@@ -246,10 +242,10 @@ R = diag(0.01^2*ones(1,size(z,1)));
 
 % Decentralized case: include boundary measurements for each area
 allbuses1 = [1; 2; 4; 5; 6]; %indices of x1
-allz1 = [z(1:9); z(33:34); z(54:55)]; 
+allz1 = [z(1:9); z(33:34)]; 
 allR1 = diag(0.01^2*ones(1,size(allz1,1)));
-alltype1 = [type(1:9); type(33:34); type(54:55)]; 
-allindices1 = [indices(1:9,:); indices(33:34,:); indices(54:55,:)]; 
+alltype1 = [type(1:9); type(33:34)]; 
+allindices1 = [indices(1:9,:); indices(33:34,:)]; 
 
 allbuses2 = [2; 3; 4; 5; 7; 8; 9];
 allz2 = [z(10:16); z(35:43)];
