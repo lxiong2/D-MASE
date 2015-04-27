@@ -8,7 +8,7 @@ close all
 format long
 
 % System parameters
-example_14bus_IEEE_rect
+example_14bus_IEEE_rectADMM
 
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);

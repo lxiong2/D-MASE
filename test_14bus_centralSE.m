@@ -79,8 +79,8 @@ newf = [0; x(numbus+1:(2*numbus-1),k)];
 newth = zeros(numbus,1);
 newV = zeros(numbus,1);
 for a = 1:numbus
-    newth(a) = sqrt(newe(a)^2+newf(a)^2);
-    newV(a) = atan(newf(a)/newe(a));
+    newV(a) = sqrt(newe(a)^2+newf(a)^2);
+    newth(a) = atan(newf(a)/newe(a));
 end
 
 newth

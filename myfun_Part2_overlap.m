@@ -35,7 +35,7 @@ f = x_a(size(allbuses_a,1)+1:(2*numbus_a)); % no need to take out slack since as
 h2 = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 %(e,f,G,B,type_a,allindices_a,numbus_a,buses,lines);
 
-H2 = createHmatrix_rect(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
+H2 = createHmatrix_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 [Hrow,Hcol] = size(H2);
 
 f2 = (z_a-h2).'*(R_a\(z_a-h2));

@@ -1,13 +1,13 @@
-function [dPijde, dPijdf] = realPowerFlowMeas_rect(e,f,G,B,buses,indPFmeas)
+function [dPijde, dPijdf] = realPowerFlowMeas_rectADMM(e,f,G,B,buses_a,indPFmeas)
 % Elements of the measurement Jacobian H corresponding to
 % real power flow measurements
 
-dPijde = zeros(1,size(buses,1));
-dPijdf = zeros(1,size(buses,1));
-busIndex = (1:size(buses,1)).';
+dPijde = zeros(1,size(buses_a,1));
+dPijdf = zeros(1,size(buses_a,1));
+busIndex_a = (1:size(buses_a,1)).';
 
-m = busIndex(buses==indPFmeas(1,1));
-n = busIndex(buses==indPFmeas(1,2));
+m = busIndex_a(buses_a==indPFmeas(1,1));
+n = busIndex_a(buses_a==indPFmeas(1,2));
 
 dPijde(1,m) = -2*G(m,n)*e(m)+G(m,n)*e(n)-B(m,n)*f(n);
 dPijde(1,n) = G(m,n)*e(m)+B(m,n)*f(m);
