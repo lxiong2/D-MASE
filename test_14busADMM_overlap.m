@@ -13,7 +13,8 @@ example_14bus_IEEE_rectADMM
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-Ybus = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
+YBus_14AC
+%Ybus = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);
 B = imag(Ybus);
 
@@ -31,22 +32,23 @@ G4 = G(allbuses4,allbuses4); % get submatrix for Partition 4
 B4 = B(allbuses4,allbuses4);
 
 %% Partition a 14-bus system into 4 pieces
+%numPart = zeros(numbus*2,1);
 numPart = 2;
 iter = 1;
-maxiter = 20;
+maxiter = 10;
 rho = 10; % step size
 
 % Initialize each partition's state vectors
-% x1_k = [bus1 bus2 bus4' bus5 bus6']
+% x1_k = [bus1 bus2 bus3' bus4' bus5 bus6']
 x1_k = zeros(size(allbuses1,1)*2-1,maxiter); % Area S1: 3 buses, bus 1 is the slack; if you remove bus1 from x1_k, then the Gain matrix is singular
 dx1_k = zeros(size(allbuses1,1)*2-1,maxiter);
 % x2_k = [bus2' bus3 bus4 bus5' bus7 bus8 bus9']
 x2_k = zeros(size(allbuses2,1)*2,maxiter); % Area S2: 4 buses
 dx2_k = zeros(size(allbuses2,1)*2,maxiter);
-% x3_k = [bus6 bus11 bus12 bus13 bus14']
+% x3_k = [bus5' bus6 bus10' bus11 bus12 bus13 bus14']
 x3_k = zeros(size(allbuses3,1)*2,maxiter); % Area S3: 4 buses
 dx3_k = zeros(size(allbuses3,1)*2,maxiter);
-% x4_k = [bus9 bus10 bus11' bus13' bus14]
+% x4_k = [bus4' bus7' bus9 bus10 bus11' bus13' bus14]
 x4_k = zeros(size(allbuses4,1)*2,maxiter); % Area S4: 3 buses
 dx4_k = zeros(size(allbuses4,1)*2,maxiter);
 
@@ -138,6 +140,45 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % How global variables are collected and averaged
     % DEBUG: need function to automatically map how the state variable for each partition
     % matches up with the global c indexing
+    % Map Partition 1's state variables to global index
+%     for a = 1:size(allbuses1,1)
+%         numPart(allbuses1(a)) = numPart(allbuses1(a))+1;
+%         c_k(allbuses1(a),iter+1) = c_k(allbuses1(a),iter+1)+x1_k(a,iter+1);
+%     end
+%     % Assumes slack bus is bus 1 and in Partition 1
+%     for a = 2:size(allbuses1,1)
+%         numPart(numbus+allbuses1(a)) = numPart(numbus+allbuses1(a))+1;
+%         c_k(numbus+allbuses1(a),iter+1) = c_k(numbus+allbuses1(a),iter+1)+x1_k(size(allbuses1,1)+a-1,iter+1); 
+%     end
+%     % Map Partition 2's state variables to global index
+%     for a = 1:size(allbuses2,1)
+%         numPart(allbuses2(a)) = numPart(allbuses2(a))+1;
+%         numPart(numbus+allbuses2(a)) = numPart(numbus+allbuses2(a))+1;
+%         c_k(allbuses2(a),iter+1) = c_k(allbuses2(a),iter+1)+x2_k(a,iter+1);
+%         c_k(numbus+allbuses2(a),iter+1) = c_k(numbus+allbuses2(a),iter+1)+x2_k(size(allbuses2,1)+a,iter+1);
+%     end
+%     % Map Partition 3's state variables to global index
+%     for a = 1:size(allbuses3,1)
+%         numPart(allbuses3(a)) = numPart(allbuses3(a))+1;
+%         numPart(numbus+allbuses3(a)) = numPart(numbus+allbuses3(a))+1;
+%         c_k(allbuses3(a),iter+1) = c_k(allbuses3(a),iter+1)+x3_k(a,iter+1);
+%         c_k(numbus+allbuses3(a),iter+1) = c_k(numbus+allbuses3(a),iter+1)+x3_k(size(allbuses3,1)+a,iter+1);
+%     end
+%     % Map Partition 4's state variables to global index
+%     for a = 1:size(allbuses4,1)
+%         numPart(allbuses4(a)) = numPart(allbuses4(a))+1;
+%         numPart(numbus+allbuses4(a)) = numPart(numbus+allbuses4(a))+1;
+%         c_k(allbuses4(a),iter+1) = c_k(allbuses4(a),iter+1)+x4_k(a,iter+1);
+%         c_k(numbus+allbuses4(a),iter+1) = c_k(numbus+allbuses4(a),iter+1)+x4_k(size(allbuses4,1)+a,iter+1);    
+%     end
+%     % Actually average across partitions
+%     for a = 1:numbus*2
+%         if numPart(a) ~= 0
+%             c_k(a,iter+1) = c_k(a,iter+1)/numPart(a);
+%         end
+%     end
+%     c_k
+    
     c_k(2,iter+1) = 1/numPart*(x1_k(2,iter+1) + x2_k(1,iter+1)); % the other two variables are 0
     c_k(4,iter+1) = 1/numPart*(x1_k(3,iter+1) + x2_k(3,iter+1));
     c_k(5,iter+1) = 1/numPart*(x1_k(4,iter+1) + x2_k(4,iter+1));
@@ -172,7 +213,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
                           (norm(x2_k(:,iter+1) - c2_k(:,iter+1)))^2 +...
                           (norm(x3_k(:,iter+1) - c3_k(:,iter+1)))^2 +...
                           (norm(x4_k(:,iter+1) - c4_k(:,iter+1)))^2;
-    normres_s(:,iter+1) = numPart*rho^2*(norm(c_k(:,iter+1) - c_k(:,iter)))^2;
+    normres_s(:,iter+1) = numPart(:,1).*rho^2*(norm(c_k(:,iter+1) - c_k(:,iter)))^2;
     
     iter = iter+1;
 end
@@ -201,10 +242,17 @@ title('4-Partition, 14-Bus State Estimation Consensus Problem')
 legend('Primal residual', 'Dual residual')
 
 figure(2)
-for a = 1:maxiter
-    temp(a) = norm(x1_k(:,a));
+for a = 1:maxiter-1
+    temp1(a) = det(Gain1(:,:,a));
+    temp2(a) = det(Gain2(:,:,a)); 
+    temp3(a) = det(Gain3(:,:,a));
+    temp4(a) = det(Gain4(:,:,a));
 end
-plot(1:maxiter,temp)
+plot(1:maxiter-1,temp1)
+hold on
+plot(1:maxiter-1,temp2,'r')
+plot(1:maxiter-1,temp3,'bl')
+plot(1:maxiter-1,temp4,'g')
 
 % 
 % figure(2)
