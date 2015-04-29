@@ -105,18 +105,18 @@ z = [% Area 1
     -0.149;
     -0.05;
     % Extra measurements
-    0.729345746;
-    0.035900361;
-    0.424671655;
-    -0.021273249;
-     % V1^2
-     % V5^2
-     % V3^2
-     % V8^2
-     % V12^2
-     % V13^2
-     % V10^2
-     % V9^2
+    0.729345746; % P2-3
+    0.035900361; % Q2-3
+    0.424671655; % P5-6
+    -0.021273249; % Q5-6
+    1.059999943^2; % V1^2
+    1.028092515^2; % V5^2
+    1.009999997^2; % V3^2
+    1.085083507^2; % V8^2
+    1.024052523^2; % V12^2
+    1.019923836^2; % V13^2
+    1.027986216^2; % V10^2
+    1.034915258^2; % V9^2
     ];
 
 %% PowerWorld AC case: angle and voltage measurements
@@ -144,29 +144,26 @@ z = [% Area 1
 % Partition 1 converges when you include V5 and V6
 
 type = {% Area 1
-        'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
+        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
         % Area 2
-        'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf';
+        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf';
         % Area 3
-        'v'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
+        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
         % Area 4
-        'v'; 'pf'; 'qf'; 'pf'; 'qf';
+        'pf'; 'qf'; 'pf'; 'qf';
         % Boundary 1
         'p'; 'q';
         % Boundary 2
-        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q'; 'v';
+        'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'p'; 'q';
         % Boundary 3
-        'pf'; 'qf'; 'p'; 'q'; 'v';
+        'pf'; 'qf'; 'p'; 'q';
         % Boundary 4
-        'pf'; 'qf'; 'p'; 'q'; 'v';
+        'pf'; 'qf'; 'p'; 'q';
         % Extra measurements
-        'pf'; 'qf'; 'pf'; 'qf'; 'v'; 'v'
+        'pf'; 'qf'; 'pf'; 'qf'; 'v'; 'v'; 'v'; 'v'; 'v'; 'v'; 'v'; 'v'
         };
     
 indices = [% Area 1
-%             1 0 0;
-%             1 0 0;
-            4 0 0;
             1 2 1;
             1 2 1;
             1 5 1;
@@ -176,8 +173,6 @@ indices = [% Area 1
             1 0 0;
             1 0 0;
             % Area 2
-%             3 0 0;
-            3 0 0;
             3 4 1;
             3 4 1;
             4 7 1;
@@ -185,8 +180,6 @@ indices = [% Area 1
             7 8 1;
             7 8 1;
             % Area 3
-%             6 0 0;
-            6 0 0;
             6 11 1;
             6 11 1;
             6 12 1;
@@ -198,8 +191,6 @@ indices = [% Area 1
             12 0 0;
             12 0 0;
             % Area 4
-%             9 0 0;
-            9 0 0;
             9 10 1;
             9 10 1;
             9 14 1;
@@ -216,29 +207,29 @@ indices = [% Area 1
             7 9 1;
             3 0 0;
             3 0 0;
-%             3 0 0;
-            3 0 0;
             % Boundary 3
             13 14 1;
             13 14 1;
             13 0 0;
             13 0 0;
-%             6 0 0;
-            6 0 0;
             % Boundary 4
             10 11 1;
             10 11 1;
             14 0 0;
             14 0 0;
-%             9 0 0;
-            9 0 0;
             % Extra measurements
             2 3 1;
             2 3 1;
             5 6 1;
             5 6 1;
+            1 0 0;
+            5 0 0;
+            3 0 0;
             8 0 0;
-            10 0 0
+            12 0 0;
+            13 0 0;
+            10 0 0;
+            9 0 0
 ];
 
 R = diag(0.01^2*ones(1,size(z,1)));
@@ -250,28 +241,28 @@ R = diag(0.01^2*ones(1,size(z,1)));
 % x4_k = [bus4' bus7' bus9 bus10 bus11' bus13' bus14]
 
 allbuses1 = [1; 2; 4; 5; 6]; %indices of x1
-allz1 = [z(1:9); z(33:34)]; %z(54:58)]; 
+allz1 = [z(1:8); z(29:30); z(49:52)]; 
 allR1 = diag(0.01^2*ones(1,size(allz1,1)));
-alltype1 = [type(1:9); type(33:34)]; %type(54:58)]; 
-allindices1 = [indices(1:9,:); indices(33:34,:)]; %indices(54:58,:)]; 
+alltype1 = [type(1:8); type(29:30); type(49:52)]; 
+allindices1 = [indices(1:8,:); indices(29:30,:); indices(49:52,:)]; 
 
 allbuses2 = [2; 3; 4; 5; 7; 8; 9];
-allz2 = [z(10:16); z(35:43)]; %z(54:55); z(58)];
+allz2 = [z(9:14); z(31:38); z(47:48); z(53:54); z(58)];
 allR2 = diag(0.01^2*ones(1,size(allz2,1)));
-alltype2 = [type(10:16); type(35:43)]; %type(54:55); type(58)];
-allindices2 = [indices(10:16,:); indices(35:43,:)]; %indices(54:55,:); indices(58,:)];
+alltype2 = [type(9:14); type(31:38); type(47:48); type(53:54); type(58)];
+allindices2 = [indices(9:14,:); indices(31:38,:); indices(47:48,:); indices(53:54,:); indices(58,:)];
 
 allbuses3 = [6; 11; 12; 13; 14];
-allz3 = [z(17:27); z(44:48)]; %z(56:57)];
+allz3 = [z(15:24); z(39:42); z(55:56)];
 allR3 = diag(0.01^2*ones(1,size(allz3,1)));
-alltype3 = [type(17:27); type(44:48)]; %type(56:57)];
-allindices3 = [indices(17:27,:); indices(44:48,:)]; %indices(56:57,:)];
+alltype3 = [type(15:24); type(39:42); type(55:56)];
+allindices3 = [indices(15:24,:); indices(39:42,:); indices(55:56,:)];
 
 allbuses4 = [9; 10; 11; 13; 14];
-allz4 = [z(28:32); z(49:53)];
+allz4 = [z(25:28); z(43:46); z(57)];
 allR4 = diag(0.01^2*ones(1,size(allz4,1)));
-alltype4 = [type(28:32); type(49:53)];
-allindices4 = [indices(28:32,:); indices(49:53,:)];
+alltype4 = [type(25:28); type(43:46); type(57)];
+allindices4 = [indices(25:28,:); indices(43:46,:); indices(57,:)];
 
 %% PowerWorld AC measurements: no angle or V measurements - ADMM solution doesn't converge
 % type = {% Area 1
