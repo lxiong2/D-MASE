@@ -39,7 +39,8 @@ for a = 1:size(type,1)
         m = busIndex(buses==indices(a,1));
         n = busIndex(buses==indices(a,2));
         for c = 1:size(lines,1)
-            if sum(indices(a,1:3) == lines(c,1:3))==3
+            if (sum(indices(a,1:3) == lines(c,1:3))==3) || ...
+                ((indices(a,2) == lines(c,1)) && (indices(a,1) == lines(c,2)) && (indices(a,3) == lines(c,3)))
                 lineNum = c;
             end
         end

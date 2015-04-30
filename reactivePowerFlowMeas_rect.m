@@ -11,13 +11,14 @@ lineNum = 0;
 m = busIndex(buses==indQFmeas(1,1));
 n = busIndex(buses==indQFmeas(1,2));
 for c = 1:size(lines,1)
-    if sum(indQFmeas(1,1:3) == lines(c,1:3))==3
+    if sum(indQFmeas(1,1:3) == lines(c,1:3))==3 || ...
+       ((indQFmeas(1,2) == lines(c,1)) && (indQFmeas(1,1) == lines(c,2)) && (indQFmeas(1,3) == lines(c,3)))
         lineNum = c;
     end
 end
 if lines(lineNum,6) ~= 0
     bsi = lines(lineNum,6)/2;
-end 
+end
 
 dQijde(1,m) = 2*B(m,n)*e(m)-B(m,n)*e(n)-G(m,n)*f(n)-2*e(m)*bsi;
 dQijde(1,n) = -B(m,n)*e(m)+G(m,n)*f(m);
