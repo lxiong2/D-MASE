@@ -2,9 +2,6 @@
 % Measurement data from Korres 2011
 % "A distributed multiarea state estimation"
 
-% Assumes R = 0 (effectively DC)
-% Uses DC equations for h and Haa
-
 clc
 clear all
 
@@ -14,23 +11,22 @@ maxiter = 10;
 example_14bus_IEEE_partitions
 
 % flat start for AC
-x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];
-
-% flat start for DC
-%x(:,1) = ones(numbus,1);
+x(:,1) = [ones(numbus2,1); zeros(numbus2-1,1)];
 deltax(:,1) = ones(size(x,1),1);
 
-numlines = size(lines,1);
+numlines = size(lines1,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-YBus_14AC
+%YBus_14AC
+%YBus_14AC_Part1
+YBus_14AC_Part2
 %Ybus2 = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);
 B = imag(Ybus);
 
 % Partial G, B matrices for each partition
-G1 = G(buses,buses); % get submatrix for Partition 1
-B1 = B(buses,buses);
+% G1 = G(buses,buses); % get submatrix for Partition 1
+% B1 = B(buses,buses);
 % G2 = G(allbuses2,allbuses2); % get submatrix for Partition 2
 % B2 = B(allbuses2,allbuses2);
 % G3 = G(allbuses3,allbuses3); % get submatrix for Partition 3
@@ -38,38 +34,31 @@ B1 = B(buses,buses);
 % G4 = G(allbuses4,allbuses4); % get submatrix for Partition 4
 % B4 = B(allbuses4,allbuses4);
 
-while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
-    % Polar AC version
-%     theta = [0; x(1:numbus-1,k)]; % assumes slack bus is bus 1
-%     V = x(numbus:(2*numbus-1),k);
-    
+while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)  
     % Rectangular AC version
-    e = x(1:numbus,k);
-    f = [x(numbus+1:(numbus+slackIndex)); x((numbus+slackIndex):(2*numbus-1),k)];
+    e = x(1:numbus2,k);
+    f = [x(numbus2+1:(numbus2+slackIndex)); x((numbus2+slackIndex):(2*numbus2-1),k)];
 
     %h(:,k) = zeros(size(z,1),1);
     % Form the measurement function h(x^k)
-    %h(:,k) = createhvector_DC2(theta,V,G,B,type,indices,numbus,buses,lines);
-    h(:,k) = createhvector_rect(e,f,G,B,type,indices,numbus,buses,lines); % rectangular
-    r(:,k) = z-h(:,k);
-    J(k) = (z-h(:,k)).'*(R\(z-h(:,k)));
+    h(:,k) = createhvector_rect(e,f,G,B,alltype2,allindices2,numbus2,allbuses2,lines2); % rectangular
+    r(:,k) = allz2-h(:,k);
+    J(k) = (allz2-h(:,k)).'*(allR2\(allz2-h(:,k)));
     
     % Form measurement Jacobian H
     % FIX: Test and debug iMeas.m
     % WARNING: Assumed gsi = 0 in realPowerFlowMeas.m
-    %temp = createHmatrix_DC2(theta,V,G,B,type,indices,numbus,buses,lines);
-    temp = createHmatrix_rect(e,f,G,B,type,indices,numbus,buses,lines);
+    temp = createHmatrix_rect(e,f,G,B,alltype2,allindices2,numbus2,allbuses2,lines2);
     
     % only slackIndex+1:(numbus) instead of slackIndex+1:(2*numbus) when
     % we're looking only at DC
-    %H(:,:,k) = [temp(:,1:slackIndex-1) temp(:,slackIndex+1:numbus)];
-    H(:,:,k) = [temp(:,1:numbus) temp(:,numbus+2:2*numbus)];
+    H(:,:,k) = [temp(:,1:numbus2) temp(:,numbus2+2:2*numbus2)];
 
     % Calculate gain matrix G(x^k) = H.'*R^(-1)*H
-    Gain(:,:,k) = H(:,:,k).'*(R\H(:,:,k));
+    Gain(:,:,k) = H(:,:,k).'*(allR2\H(:,:,k));
    
     % Compute right-hand side
-    rhs(:,k) = H(:,:,k).'*(R\(z-h(:,k)));
+    rhs(:,k) = H(:,:,k).'*(allR2\(allz2-h(:,k)));
     
     % Solve for dx
     deltax(:,k+1) = Gain(:,:,k)\rhs(:,k);
@@ -83,11 +72,11 @@ x
 k
 
 % Convert rectangular state variables to polar form
-newe = x(1:numbus,k);
-newf = [0; x(numbus+1:(2*numbus-1),k)];
-newth = zeros(numbus,1);
-newV = zeros(numbus,1);
-for a = 1:numbus
+newe = x(1:numbus2,k);
+newf = [0; x(numbus2+1:(2*numbus2-1),k)];
+newth = zeros(numbus2,1);
+newV = zeros(numbus2,1);
+for a = 1:numbus2
     newV(a) = sqrt(newe(a)^2+newf(a)^2);
     newth(a) = atan(newf(a)/newe(a));
 end
