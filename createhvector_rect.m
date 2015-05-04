@@ -15,6 +15,7 @@ for a = 1:size(type,1)
         temp = 0;
         temp2 = 0;
         for n = 1:numbus
+            n;
             temp = temp+(G(m,n)*e(n)-B(m,n)*f(n));
             temp2 = temp2+(G(m,n)*f(n)+B(m,n)*e(n));
         end
