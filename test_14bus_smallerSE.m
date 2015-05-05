@@ -38,7 +38,8 @@ B = imag(Ybus);
 while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)  
     % Rectangular AC version
     e = x(1:numbus1,k);
-    f = [x(numbus1+1:(numbus1+slackIndex1)); x((numbus1+slackIndex1):(2*numbus1-1),k)];
+    f = [x(numbus1+1:(numbus1+slackIndex1-1),k); 0; x((numbus1+slackIndex1):(2*numbus1-1),k)];
+    %f = [0; x((numbus1+slackIndex1):(2*numbus1-1),k)]
 
     %h(:,k) = zeros(size(z,1),1);
     % Form the measurement function h(x^k)
