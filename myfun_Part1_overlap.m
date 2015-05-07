@@ -1,4 +1,4 @@
-function [f1, Gain1, g1, H1, h1] = myfun_Part1_overlap(buses, numbus, allbuses_a, adjbuses, lines, G_a, B_a, z_a, R_a, type_a, allindices_a, x_a, c, y, rho)
+function [f1, Gain1, g1, H1, h1] = myfun_Part1_overlap(buses, numbus, allbuses_a, adjbuses, lines, slackIndex_a, G_a, B_a, z_a, R_a, type_a, allindices_a, x_a, c, y, rho)
 %% Inputs:
 % This function calculates rectangular state estimation
 % Uses rectangular power flow, i.e. V_i = e_i + j*f_i = |V_i| ang (theta_i)
@@ -28,24 +28,23 @@ function [f1, Gain1, g1, H1, h1] = myfun_Part1_overlap(buses, numbus, allbuses_a
 
 %% Slack bus zeroed out
 numbus_a = size(allbuses_a,1);
-e = x_a(1:size(allbuses_a,1));
-f = [0; x_a(size(allbuses_a,1)+1:(2*numbus_a-1),1)]; % assumes slack bus is bus 1
+e = x_a(1:numbus_a,1);
+f = [x_a(numbus_a+1:(numbus_a+slackIndex_a-1),1); 0; x_a((numbus_a+slackIndex_a):(2*numbus_a-1),1)];
+%[0; x_a(size(allbuses_a,1)+1:(2*numbus_a-1),1)]; % assumes slack bus is bus 1
 
 % Nonlinear h's
 h1 = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 
 H1 = createHmatrix_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
-H1 = [H1(:,1:size(allbuses_a,1)) H1(:,(size(allbuses_a,1)+2):size(allbuses_a,1)*2)]; %assumes slack is bus 1 so remove first column
+H1 = [H1(:,1:numbus_a) H1(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) H1(:,(numbus_a+slackIndex_a+1):2*numbus_a)];
+%H1 = [H1(:,1:size(allbuses_a,1)) H1(:,(size(allbuses_a,1)+2):size(allbuses_a,1)*2)]; %assumes slack is bus 1 so remove first column
 
 f1 = (z_a-h1).'*(R_a\(z_a-h1));
 Gain1 = 2*H1.'*(R_a\H1)+rho;
 
-c1 = zeros(size(allbuses_a,1)*2-1,1);
-for a = 1:(size(allbuses_a,1)) 
-    c1(a,1) = c(allbuses_a(a));
-end
-for a = 1:(size(allbuses_a,1)-1) %remove slack bus from f
-    c1(size(allbuses_a,1)+a,1) = c(numbus+allbuses_a(a+1));
-end
+c1 = zeros(numbus_a*2-1,1);
+c1(1:numbus_a,1) = c(allbuses_a);
+selectBuses = [allbuses_a(1:slackIndex_a-1); allbuses_a((slackIndex_a+1):numbus_a)];
+c1((numbus_a+1):(2*numbus_a-1)) = c(numbus+selectBuses);
 
 g1 = -2*H1.'*(R_a\(z_a-h1)) + y + rho*(x_a-c1); %DEBUG: is y a row or column vector? What about c?

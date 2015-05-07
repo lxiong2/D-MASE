@@ -8,7 +8,8 @@ close all
 format long
 
 % System parameters
-example_14bus_IEEE_rectADMM
+%example_14bus_IEEE_rectADMM
+example_14bus_IEEE_partitions
 
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
@@ -40,17 +41,17 @@ rho = 10; % step size
 
 % Initialize each partition's state vectors
 % x1_k = [bus1 bus2 bus3' bus4' bus5 bus6']
-x1_k = zeros(size(allbuses1,1)*2-1,maxiter); % Area S1: 3 buses, bus 1 is the slack; if you remove bus1 from x1_k, then the Gain matrix is singular
+x1_k = zeros(size(allbuses1,1)*2-1,maxiter); % Area S1: 3 buses, bus 1 is the slack for Partition 1; if you remove bus1 from x1_k, then the Gain matrix is singular
 dx1_k = zeros(size(allbuses1,1)*2-1,maxiter);
 % x2_k = [bus2' bus3 bus4 bus5' bus7 bus8 bus9']
-x2_k = zeros(size(allbuses2,1)*2,maxiter); % Area S2: 4 buses
-dx2_k = zeros(size(allbuses2,1)*2,maxiter);
+x2_k = zeros(size(allbuses2,1)*2-1,maxiter); % Area S2: 4 buses, bus 3 is the slack for Partition 2
+dx2_k = zeros(size(allbuses2,1)*2-1,maxiter);
 % x3_k = [bus5' bus6 bus10' bus11 bus12 bus13 bus14']
-x3_k = zeros(size(allbuses3,1)*2,maxiter); % Area S3: 4 buses
-dx3_k = zeros(size(allbuses3,1)*2,maxiter);
+x3_k = zeros(size(allbuses3,1)*2-1,maxiter); % Area S3: 4 buses, bus 6 is the slack for Partition 3
+dx3_k = zeros(size(allbuses3,1)*2-1,maxiter);
 % x4_k = [bus4' bus7' bus9 bus10 bus11' bus13' bus14]
-x4_k = zeros(size(allbuses4,1)*2,maxiter); % Area S4: 3 buses
-dx4_k = zeros(size(allbuses4,1)*2,maxiter);
+x4_k = zeros(size(allbuses4,1)*2-1,maxiter); % Area S4: 3 buses, bus 9 is the slack for Partition 4
+dx4_k = zeros(size(allbuses4,1)*2-1,maxiter);
 
 % Constraints
 % c_k = [e1 ... e14 f1 ... f14]
@@ -61,9 +62,9 @@ c3_k = zeros(size(x3_k,1),1);
 c4_k = zeros(size(x4_k,1),1);
 
 y1_kl = zeros(size(allbuses1,1)*2-1,maxiter); %same length as x1_k vector
-y2_kl = zeros(size(allbuses2,1)*2,maxiter);
-y3_kl = zeros(size(allbuses3,1)*2,maxiter);
-y4_kl = zeros(size(allbuses4,1)*2,maxiter);
+y2_kl = zeros(size(allbuses2,1)*2-1,maxiter);
+y3_kl = zeros(size(allbuses3,1)*2-1,maxiter);
+y4_kl = zeros(size(allbuses4,1)*2-1,maxiter);
 
 normres_r = zeros(1,maxiter);
 normres_s = zeros(1,maxiter);
@@ -74,14 +75,17 @@ f3 = zeros(1,maxiter);
 f4 = zeros(1,maxiter);
 
 % initialize first guess
-% x1_k = [e1 e2 e4' e5 e6' f2 f4' f5 f6'] %f1 - bus 1 is slack
-% x2_k = [e2' e3 e4 e5' e7 e8 e9' f2' f3 f4 f5' f7 f8 f9']
-% x3_k = [e6 e11 e12 e13 e14' f6 f11 f12 f13 f14']
-% x4_k = [e9 e10 e11' e13' e14 f9 f10 f11' f13' f14]
+% x1_k = [e1 e2 e3' e4' e5 e6' f2 f3' f4' f5 f6'] %f1 - bus 1 is slack
+% x2_k = [e2' e3 e4 e5' e7 e8 e9' f2' f4 f5' f7 f8 f9'] % f3 - bus 3 is the
+% slack
+% x3_k = [e5' e6 e11 e12 e13 e14' f5' f11 f12 f13 f14'] % f6 - bus 6 is
+% the slack
+% x4_k = [e4' e7' e9 e10 e11' e13' e14 f4' f7' f10 f11' f13' f14] % f9 - bus 9 is the
+% slack
 x1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1)-1,1)]; %AC flat start
-x2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1),1)]; %AC flat start
-x3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1),1)]; %AC flat start
-x4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1),1)]; %AC flat start
+x2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1)-1,1)]; %AC flat start
+x3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1)-1,1)]; %AC flat start
+x4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1)-1,1)]; %AC flat start
 
 normres_r(:,1) = 1; %primal residual - initialize to nonzero number
 normres_s(:,1) = 1; %dual residual - initialize to nonzero number
@@ -102,7 +106,7 @@ eps_dual = 1e-4;
 
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)   
     % Partition 1 calculations
-    [tempf1, tempGain1, g1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, adjbuses, lines, G1, B1, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c_k(:,iter), y1_kl(:,iter), rho);
+    [tempf1, tempGain1, g1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, adjbuses, lines1, slackIndex1, G1, B1, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c_k(:,iter), y1_kl(:,iter), rho);
     Gain1(:,:,iter) = tempGain1;
     H1(:,:,iter) = tempH1;
     h1(:,iter) = temph1;
@@ -111,7 +115,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     x1_k(:,iter+1) = x1_k(:,iter) + dx1_k(:,iter+1);
     
     % Partition 2 calculations
-    [tempf2, tempGain2, g2, tempH2, temph2] = myfun_Part2_overlap(buses, numbus, allbuses2, adjbuses, lines, G2, B2, allz2, allR2, alltype2, allindices2, x2_k(:,iter), c_k(:,iter), y2_kl(:,iter), rho);
+    [tempf2, tempGain2, g2, tempH2, temph2] = myfun_Part2_overlap(buses, numbus, allbuses2, adjbuses, lines2, slackIndex2, G2, B2, allz2, allR2, alltype2, allindices2, x2_k(:,iter), c_k(:,iter), y2_kl(:,iter), rho);
     Gain2(:,:,iter) = tempGain2;
     H2(:,:,iter) = tempH2;
     h2(:,iter) = temph2;
@@ -120,7 +124,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     x2_k(:,iter+1) = x2_k(:,iter) + dx2_k(:,iter+1);
    
     % Partition 3 calculations
-    [tempf3, tempGain3, g3, tempH3, temph3] = myfun_Part2_overlap(buses, numbus, allbuses3, adjbuses, lines, G3, B3, allz3, allR3, alltype3, allindices3, x3_k(:,iter), c_k(:,iter), y3_kl(:,iter), rho);
+    [tempf3, tempGain3, g3, tempH3, temph3] = myfun_Part2_overlap(buses, numbus, allbuses3, adjbuses, lines3, slackIndex3, G3, B3, allz3, allR3, alltype3, allindices3, x3_k(:,iter), c_k(:,iter), y3_kl(:,iter), rho);
     Gain3(:,:,iter) = tempGain3;
     H3(:,:,iter) = tempH3;
     h3(:,iter) = temph3;
@@ -129,7 +133,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     x3_k(:,iter+1) = x3_k(:,iter) + dx3_k(:,iter+1);
     
     % Partition 4 calculations
-    [tempf4, tempGain4, g4, tempH4, temph4] = myfun_Part2_overlap(buses, numbus, allbuses4, adjbuses, lines, G4, B4, allz4, allR4, alltype4, allindices4, x4_k(:,iter), c_k(:,iter), y4_kl(:,iter), rho);
+    [tempf4, tempGain4, g4, tempH4, temph4] = myfun_Part2_overlap(buses, numbus, allbuses4, adjbuses, lines4, slackIndex4, G4, B4, allz4, allR4, alltype4, allindices4, x4_k(:,iter), c_k(:,iter), y4_kl(:,iter), rho);
     Gain4(:,:,iter) = tempGain4;
     H4(:,:,iter) = tempH4;
     h4(:,iter) = temph4;
