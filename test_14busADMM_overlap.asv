@@ -122,8 +122,6 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     f2(:,iter+1) = tempf2;
     dx2_k(:,iter+1) = -Gain2(:,:,iter)\g2;
     x2_k(:,iter+1) = x2_k(:,iter) + dx2_k(:,iter+1);
-%     x2_k(1:numbus2,iter+1) = x2_k(1:numbus,iter+1) + (slack2 - slack1);
-%     x2_k(numbus2+1:(2*numbus-1),iter+1) = x2_k(numbus2+1:(2*numbus-1),iter+1) + ;
    
     % Partition 3 calculations
     [tempf3, tempGain3, g3, tempH3, temph3] = myfun_Part2_overlap(buses, numbus, allbuses3, adjbuses, lines3, slackIndex3, G3, B3, allz3, allR3, alltype3, allindices3, x3_k(:,iter), c_k(:,iter), y3_kl(:,iter), rho);
@@ -185,29 +183,29 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
 %     end
 %     c_k
     
-%     c_k(2,iter+1) = 1/numPart*(x1_k(2,iter+1) + x2_k(1,iter+1)); % the other two variables are 0
-%     c_k(3,iter+1) = 1/numPart*(x1_k(3,iter+1) + x2_k(2,iter+1));
-%     c_k(4,iter+1) = 1/3*(x1_k(4,iter+1) + x2_k(3,iter+1) + x4_k(1,iter+1));
-%     c_k(5,iter+1) = 1/3*(x1_k(5,iter+1) + x2_k(4,iter+1) + x3_k(1,iter+1));
-%     c_k(6,iter+1) = 1/numPart*(x1_k(6,iter+1) + x3_k(2,iter+1));
-%     c_k(7,iter+1) = 1/numPart*(x2_k(5,iter+1) + x4_k(2,iter+1));
-%     c_k(9,iter+1) = 1/numPart*(x2_k(7,iter+1) + x4_k(3,iter+1));
-%     c_k(10,iter+1) = 1/numPart*(x3_k(3,iter+1) + x4_k(4,iter+1));
-%     c_k(11,iter+1) = 1/numPart*(x3_k(4,iter+1) + x4_k(5,iter+1));
-%     c_k(13,iter+1) = 1/numPart*(x3_k(6,iter+1) + x4_k(6,iter+1));
-%     c_k(14,iter+1) = 1/numPart*(x3_k(7,iter+1) + x4_k(7,iter+1));
-%     
-%     c_k(numbus+2,iter+1) = 1/numPart*(x1_k(7,iter+1) + x2_k(8,iter+1)); % the other two variables are 0
-%     c_k(numbus+3,iter+1) = 1/numPart*(x1_k(8,iter+1) + 0); % slack2 = bus 3
-%     c_k(numbus+4,iter+1) = 1/numPart*(x1_k(9,iter+1) + x2_k(9,iter+1));
-%     c_k(numbus+5,iter+1) = 1/numPart*(x1_k(10,iter+1) + x2_k(10,iter+1));
-%     c_k(numbus+6,iter+1) = 1/numPart*(x1_k(11,iter+1) + x3_k(11,iter+1));
-%     c_k(numbus+7,iter+1) = ;
-%     c_k(numbus+9,iter+1) = 1/numPart*(x2_k(14,iter+1) + x4_k(6,iter+1));
-%     c_k(numbus+10,iter+1) = ;
-%     c_k(numbus+11,iter+1) = 1/numPart*(x3_k(7,iter+1) + x4_k(8,iter+1));
-%     c_k(numbus+13,iter+1) = 1/numPart*(x3_k(9,iter+1) + x4_k(9,iter+1));
-%     c_k(numbus+14,iter+1) = 1/numPart*(x3_k(10,iter+1) + x4_k(10,iter+1));
+    c_k(2,iter+1) = 1/numPart*(x1_k(2,iter+1) + x2_k(1,iter+1)); % the other two variables are 0
+    c_k(3,iter+1) = 1/numPart*(x1_k(3,iter+1) + x2_k(2,iter+1));
+    c_k(4,iter+1) = 1/3*(x1_k(4,iter+1) + x2_k(3,iter+1) + x4_k(1,iter+1));
+    c_k(5,iter+1) = 1/3*(x1_k(5,iter+1) + x2_k(4,iter+1) + x3_k(1,iter+1));
+    c_k(6,iter+1) = 1/numPart*(x1_k(6,iter+1) + x3_k(2,iter+1));
+    c_k(7,iter+1) = 1/numPart*(x2_k(5,iter+1) + x4_k(2,iter+1));
+    c_k(9,iter+1) = 1/numPart*(x2_k(7,iter+1) + x4_k(3,iter+1));
+    c_k(10,iter+1) = 1/numPart*(x3_k(3,iter+1) + x4_k(4,iter+1));
+    c_k(11,iter+1) = 1/numPart*(x3_k(4,iter+1) + x4_k(5,iter+1));
+    c_k(13,iter+1) = 1/numPart*(x3_k(6,iter+1) + x4_k(6,iter+1));
+    c_k(14,iter+1) = 1/numPart*(x3_k(7,iter+1) + x4_k(7,iter+1));
+    
+    c_k(numbus+2,iter+1) = 1/numPart*(x1_k(7,iter+1) + x2_k(8,iter+1)); % the other two variables are 0
+    c_k(numbus+3,iter+1) = 1/numPart*(x1_k(8,iter+1) + 0); % slack2 = bus 3
+    c_k(numbus+4,iter+1) = 1/numPart*(x1_k(7,iter+1) + x2_k(10,iter+1));
+    c_k(numbus+5,iter+1) = 1/numPart*(x1_k(8,iter+1) + x2_k(11,iter+1));
+    c_k(numbus+6,iter+1) = 1/numPart*(x1_k(9,iter+1) + x3_k(6,iter+1));
+    c_k(numbus+7,iter+1) = ;
+    c_k(numbus+9,iter+1) = 1/numPart*(x2_k(14,iter+1) + x4_k(6,iter+1));
+    c_k(numbus+10,iter+1) = ;
+    c_k(numbus+11,iter+1) = 1/numPart*(x3_k(7,iter+1) + x4_k(8,iter+1));
+    c_k(numbus+13,iter+1) = 1/numPart*(x3_k(9,iter+1) + x4_k(9,iter+1));
+    c_k(numbus+14,iter+1) = 1/numPart*(x3_k(10,iter+1) + x4_k(10,iter+1));
    
     % Remap from global c_k to the indexing for each partition's state
     % vector

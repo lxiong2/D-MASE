@@ -26,8 +26,8 @@ G = real(Ybus);
 B = imag(Ybus);
 
 % Partial G, B matrices for each partition
-% G1 = G(buses,buses); % get submatrix for Partition 1
-% B1 = B(buses,buses);
+%G1 = G(buses,buses); % get submatrix for Partition 1
+%B1 = B(buses,buses);
 % G2 = G(allbuses2,allbuses2); % get submatrix for Partition 2
 % B2 = B(allbuses2,allbuses2);
 % G3 = G(allbuses3,allbuses3); % get submatrix for Partition 3
