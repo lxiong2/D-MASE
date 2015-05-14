@@ -2,8 +2,11 @@
 % see topology and measurement data from Korres 2011 
 % "A distributed multiarea state estimation" 
 
+busIndex = (1:14).';
 buses = (1:14).';
 numbus = size(buses,1);
+globalSlack = 1;
+globalSlackIndex = busIndex(buses == globalSlack);
 
 %% Line Information
 % line data for full AC system

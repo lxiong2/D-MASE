@@ -34,6 +34,7 @@ B4 = B(allbuses4,allbuses4);
 
 %% Partition a 14-bus system into 4 pieces
 %numPart = zeros(numbus*2,1);
+numArea = 4;
 numPart = 2;
 iter = 1;
 maxiter = 10;
@@ -143,6 +144,54 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     dx4_k(:,iter+1) = -Gain4(:,:,iter)\g4;
     x4_k(:,iter+1) = x4_k(:,iter) + dx4_k(:,iter+1);
     
+    % Reference all the other partitions to the global index and then
+    % take the global slack area - the area you want to reference to the
+    % global slack bus
+    allStates = zeros(numbus*2,numArea);
+    allStates(allbuses1,1) = x1_k(1:numbus1,iter+1);
+    allStates(numbus+allbuses1,1) = [x1_k(numbus1+(1:slackIndex1-1),iter+1); 0; x1_k(numbus1+(slackIndex1:(numbus1-1)),iter+1)];
+    allStates(allbuses2,2) = x2_k(1:numbus2,iter+1);
+    allStates(numbus+allbuses2,2) = [x2_k(1:slackIndex2-1,iter+1); 0; x2_k(slackIndex2:(numbus2-1),iter+1)];
+    allStates(allbuses3,3) = x3_k(1:numbus3,iter+1);
+    allStates(numbus+allbuses3,3) = [x3_k(1:slackIndex3-1,iter+1); 0; x3_k((slackIndex3+1):numbus3,iter+1)];
+    allStates(allbuses4,4) = x4_k(1:numbus4,iter+1);
+    allStates(numbus+allbuses4,4) = [x4_k(1:slackIndex4-1,iter+1); 0; x4_k((slackIndex4+1):numbus4,iter+1)];
+    
+    commonStates12 = intersect(allbuses1,allbuses2);
+    commonStates13 = intersect(allbuses1,allbuses3);
+    commonStates14 = intersect(allbuses1,allbuses4);
+    diffSlack = zeros(numbus*2,numArea-1);
+    for a = 1:numbus*2
+        for b = 2:numArea
+            if (allbuses(a,1) ~= 0) && (allStates(a,b) ~= 0)
+                diffSlack(a,b-1) = allStates(a,1) - allStates(a,b);
+            end
+        end
+    end
+    diffSlack
+    
+    % DEBUGGING ONLY
+    % Convert from rectangular to polar
+%     e1 = x1_k(1:6,2);
+%     f1 = [0; x1_k(7:11,2)];
+%     th1 = atan(f1./e1)
+%     V1 = sqrt(e1.^2 + f1.^2)
+%     
+%     e2 = x2_k(1:7,2);
+%     f2 = [x2_k(8,2); 0; x2_k(9:13,2)];
+%     th2 = atan(f2./e2)
+%     V2 = sqrt(e2.^2 + f2.^2)
+%     
+%     e3 = x3_k(1:7,2);
+%     f3 = [x3_k(8,2); 0; x3_k(9:13,2)];
+%     th3 = atan(f3./e3)
+%     V3 = sqrt(e3.^2 + f3.^2)
+%     
+%     e4 = x4_k(1:7,2);
+%     f4 = [x4_k(8:9,2); 0; x4_k(10:13,2)];
+%     th4 = atan(f4./e4)
+%     V4 = sqrt(e4.^2 + f4.^2)
+    
     % How global variables are collected and averaged
     % DEBUG: need function to automatically map how the state variable for each partition
     % matches up with the global c indexing
@@ -234,12 +283,17 @@ end
 % for i = 1:maxiter
 %     diffx(:,i) = norm(x1_k(:,i) - x2_k(:,i));
 % end
-% 
+%
+
+% Convert x_k from rectangular to polar
 x1_k
 x2_k
 x3_k
 x4_k
-c_k
+
+%th1 = atan(x1_k(1:6,iter);
+%e1 = x2_k(1:7,2)
+% c_k
 % y1_kl
 % y2_kl
 % y3_kl
