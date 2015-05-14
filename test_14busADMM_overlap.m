@@ -151,30 +151,62 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     allStates(allbuses1,1) = x1_k(1:numbus1,iter+1);
     allStates(numbus+allbuses1,1) = [x1_k(numbus1+(1:slackIndex1-1),iter+1); 0; x1_k(numbus1+(slackIndex1:(numbus1-1)),iter+1)];
     allStates(allbuses2,2) = x2_k(1:numbus2,iter+1);
-    allStates(numbus+allbuses2,2) = [x2_k(1:slackIndex2-1,iter+1); 0; x2_k(slackIndex2:(numbus2-1),iter+1)];
+    allStates(numbus+allbuses2,2) = [x2_k(numbus2+(1:slackIndex2-1),iter+1); 0; x2_k(numbus2+(slackIndex2:(numbus2-1)),iter+1)];
     allStates(allbuses3,3) = x3_k(1:numbus3,iter+1);
-    allStates(numbus+allbuses3,3) = [x3_k(1:slackIndex3-1,iter+1); 0; x3_k((slackIndex3+1):numbus3,iter+1)];
+    allStates(numbus+allbuses3,3) = [x3_k(numbus3+(1:slackIndex3-1),iter+1); 0; x3_k(numbus3+(slackIndex3:(numbus3-1)),iter+1)];
     allStates(allbuses4,4) = x4_k(1:numbus4,iter+1);
-    allStates(numbus+allbuses4,4) = [x4_k(1:slackIndex4-1,iter+1); 0; x4_k((slackIndex4+1):numbus4,iter+1)];
+    allStates(numbus+allbuses4,4) = [x4_k(numbus4+(1:slackIndex4-1),iter+1); 0; x4_k(numbus4+(slackIndex4:(numbus4-1)),iter+1)];
     
+    % Find the shared buses between Area 1 (bus 1 is the global slack) and
+    % the other areas, and calc Area 1 angles - Area X angles
     commonStates12 = intersect(allbuses1,allbuses2);
     commonStates13 = intersect(allbuses1,allbuses3);
     commonStates14 = intersect(allbuses1,allbuses4);
-    diffSlack = zeros(numbus*2,numArea-1);
-    for a = 1:numbus*2
+    diffSlack = zeros(numbus,3);
+    diffSlack(commonStates12,1) = atan(allStates(numbus+commonStates12,1)./allStates(commonStates12,1)) - atan(allStates(numbus+commonStates12,2)./allStates(commonStates12,2));
+    diffSlack(commonStates13,2) = atan(allStates(numbus+commonStates13,1)./allStates(commonStates13,1)) - atan(allStates(numbus+commonStates13,3)./allStates(commonStates13,3));
+    diffSlack(commonStates14,3) = atan(allStates(numbus+commonStates14,1)./allStates(commonStates14,1)) - atan(allStates(numbus+commonStates14,4)./allStates(commonStates14,4));
+    
+    diffSlack(commonStates12,1) = atan(allStates(numbus+commonStates12,1)./allStates(commonStates12,1)) - atan(allStates(numbus+commonStates12,2)./allStates(commonStates12,2));
+    diffSlack(commonStates13,2) = atan(allStates(numbus+commonStates13,1)./allStates(commonStates13,1)) - atan(allStates(numbus+commonStates13,3)./allStates(commonStates13,3));
+    diffSlack(commonStates14,3) = atan(allStates(numbus+commonStates14,1)./allStates(commonStates14,1)) - atan(allStates(numbus+commonStates14,4)./allStates(commonStates14,4));
+    
+    % Take the average of the difference in slack angles
+    % Assume Vmag = 1 -> addE = 1 cos 
+    addSlack = zeros(1,size(diffSlack,2));
+    for a = 1:size(diffSlack,2)
+        temp = diffSlack(:,a);
+        addSlack(a) = mean(temp(temp~=0));
+    end
+    
+    % Convert the other areas to the global reference (Area 1 in this case)
+    for a = 1:numbus
         for b = 2:numArea
-            if (allbuses(a,1) ~= 0) && (allStates(a,b) ~= 0)
-                diffSlack(a,b-1) = allStates(a,1) - allStates(a,b);
+            newe(a,b-1) = allStates(a,b)*cos(addSlack(b-1)) - allStates(numbus+a,b)*sin(addSlack(b-1));
+            newf(a,b-1) = allStates(numbus+a,b)*cos(addSlack(b-1)) + allStates(a,b)*sin(addSlack(b-1));
+        end
+    end
+    newStates = [newe; newf];
+    
+    % For debugging purposes only
+    newth = zeros(numbus,3);
+    newV = zeros(numbus,3);
+    for a = 1:numbus
+        for b = 1:3
+            newV(a,b) = sqrt(newe(a,b)^2+newf(a,b)^2);
+            if newe(a,b) ~= 0
+                newth(a,b) = atan(newf(a,b)/newe(a,b));
             end
         end
     end
-    diffSlack
+    newV
+    newth
     
     % DEBUGGING ONLY
     % Convert from rectangular to polar
 %     e1 = x1_k(1:6,2);
 %     f1 = [0; x1_k(7:11,2)];
-%     th1 = atan(f1./e1)
+%     th1 = atan(f1./e1) 
 %     V1 = sqrt(e1.^2 + f1.^2)
 %     
 %     e2 = x2_k(1:7,2);
@@ -245,7 +277,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
 %     c_k(11,iter+1) = 1/numPart*(x3_k(4,iter+1) + x4_k(5,iter+1));
 %     c_k(13,iter+1) = 1/numPart*(x3_k(6,iter+1) + x4_k(6,iter+1));
 %     c_k(14,iter+1) = 1/numPart*(x3_k(7,iter+1) + x4_k(7,iter+1));
-%     
+    
 %     c_k(numbus+2,iter+1) = 1/numPart*(x1_k(7,iter+1) + x2_k(8,iter+1)); % the other two variables are 0
 %     c_k(numbus+3,iter+1) = 1/numPart*(x1_k(8,iter+1) + 0); % slack2 = bus 3
 %     c_k(numbus+4,iter+1) = 1/numPart*(x1_k(9,iter+1) + x2_k(9,iter+1));
