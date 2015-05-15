@@ -37,24 +37,28 @@ B4 = B(allbuses4,allbuses4);
 numArea = 4;
 numPart = 2;
 iter = 1;
-maxiter = 10;
+maxiter = 2;
 rho = 10; % step size
 
 % Initialize each partition's state vectors
 % x1_k = [bus1 bus2 bus3' bus4' bus5 bus6']
-x1_k = zeros(size(allbuses1,1)*2-1,maxiter); % Area S1: 3 buses, bus 1 is the slack for Partition 1; if you remove bus1 from x1_k, then the Gain matrix is singular
+x1_k = zeros(size(allbuses1,1)*2-1,maxiter); % Area S1: 3 buses, bus 1 is the slack for Partition 1 and the global slack bus for the entire system; if you remove bus1 from x1_k, then the Gain matrix is singular
 dx1_k = zeros(size(allbuses1,1)*2-1,maxiter);
+adjx1_k = zeros(size(allbuses1,1)*2,maxiter);
 % x2_k = [bus2' bus3 bus4 bus5' bus7 bus8 bus9']
-x2_k = zeros(size(allbuses2,1)*2-1,maxiter); % Area S2: 4 buses, bus 3 is the slack for Partition 2
+x2_k = zeros(size(allbuses2,1)*2-1,maxiter); % Area S2: 4 buses, bus 3 is the slack for Partition 2; however, to adjust all slacks to the same reference, need to keep f entry for bus 3
 dx2_k = zeros(size(allbuses2,1)*2-1,maxiter);
+adjx2_k = zeros(size(allbuses2,1)*2,maxiter);
 % x3_k = [bus5' bus6 bus10' bus11 bus12 bus13 bus14']
-x3_k = zeros(size(allbuses3,1)*2-1,maxiter); % Area S3: 4 buses, bus 6 is the slack for Partition 3
+x3_k = zeros(size(allbuses3,1)*2-1,maxiter); % Area S3: 4 buses, bus 6 is the slack for Partition 3; however, to adjust all slacks to the same reference, need to keep f entry for bus 6
 dx3_k = zeros(size(allbuses3,1)*2-1,maxiter);
+adjx3_k = zeros(size(allbuses3,1)*2,maxiter);
 % x4_k = [bus4' bus7' bus9 bus10 bus11' bus13' bus14]
-x4_k = zeros(size(allbuses4,1)*2-1,maxiter); % Area S4: 3 buses, bus 9 is the slack for Partition 4
+x4_k = zeros(size(allbuses4,1)*2-1,maxiter); % Area S4: 3 buses, bus 9 is the slack for Partition 4; however, to adjust all slacks to the same reference, need to keep f entry for bus 9
 dx4_k = zeros(size(allbuses4,1)*2-1,maxiter);
+adjx4_k = zeros(size(allbuses4,1)*2,maxiter);
 
-% Constraints
+% Constraints: size of adjusted x_k (i.e. size(x_k) + 1 for the new slack bus value)
 % c_k = [e1 ... e14 f1 ... f14]
 c_k = zeros(numbus*2,maxiter);
 c1_k = zeros(size(x1_k,1),1);
@@ -62,10 +66,10 @@ c2_k = zeros(size(x2_k,1),1);
 c3_k = zeros(size(x3_k,1),1);
 c4_k = zeros(size(x4_k,1),1);
 
-y1_kl = zeros(size(allbuses1,1)*2-1,maxiter); %same length as x1_k vector
-y2_kl = zeros(size(allbuses2,1)*2-1,maxiter);
-y3_kl = zeros(size(allbuses3,1)*2-1,maxiter);
-y4_kl = zeros(size(allbuses4,1)*2-1,maxiter);
+y1_kl = zeros(size(x1_k,1),maxiter); %same length as x_k vector
+y2_kl = zeros(size(x2_k,1),maxiter);
+y3_kl = zeros(size(x3_k,1),maxiter);
+y4_kl = zeros(size(x4_k,1),maxiter);
 
 normres_r = zeros(1,maxiter);
 normres_s = zeros(1,maxiter);
@@ -87,6 +91,12 @@ x1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1)-1,1)]; %AC flat 
 x2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1)-1,1)]; %AC flat start
 x3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1)-1,1)]; %AC flat start
 x4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1)-1,1)]; %AC flat start
+
+% x_k's that are adjusted to the global slack reference
+adjx1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1),1)]; %AC flat start
+adjx2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1),1)]; %AC flat start
+adjx3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1),1)]; %AC flat start
+adjx4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1),1)]; %AC flat start
 
 normres_r(:,1) = 1; %primal residual - initialize to nonzero number
 normres_s(:,1) = 1; %dual residual - initialize to nonzero number
@@ -157,6 +167,8 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     allStates(allbuses4,4) = x4_k(1:numbus4,iter+1);
     allStates(numbus+allbuses4,4) = [x4_k(numbus4+(1:slackIndex4-1),iter+1); 0; x4_k(numbus4+(slackIndex4:(numbus4-1)),iter+1)];
     
+    allStates
+    
     % Find the shared buses between Area 1 (bus 1 is the global slack) and
     % the other areas, and calc Area 1 angles - Area X angles
     commonStates12 = intersect(allbuses1,allbuses2);
@@ -186,23 +198,41 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
             newf(a,b-1) = allStates(numbus+a,b)*cos(addSlack(b-1)) + allStates(a,b)*sin(addSlack(b-1));
         end
     end
-    newStates = [newe; newf];
+    allStates(:,2:4) = [newe; newf];
+    allStates
     
-    % For debugging purposes only
-    newth = zeros(numbus,3);
-    newV = zeros(numbus,3);
-    for a = 1:numbus
-        for b = 1:3
-            newV(a,b) = sqrt(newe(a,b)^2+newf(a,b)^2);
-            if newe(a,b) ~= 0
-                newth(a,b) = atan(newf(a,b)/newe(a,b));
-            end
+    x1_k(:,iter+1) = allStates(allbuses1(allbuses1~=slack1),1)
+    
+    adjx1_k(:,iter+1) = [allStates(allbuses1,1); allStates(numbus+allbuses1,1)];
+    adjx2_k(:,iter+1) = [allStates(allbuses2,2); allStates(numbus+allbuses2,2)];
+    adjx3_k(:,iter+1) = [allStates(allbuses3,3); allStates(numbus+allbuses3,3)];
+    adjx4_k(:,iter+1) = [allStates(allbuses4,4); allStates(numbus+allbuses4,4)];
+    
+    % Look at allStates and average the buses that overlap
+    for a = 1:numbus*2
+        numPart(a) = sum(allStates(a,:)~=0);
+        temp(a) = sum(allStates(a,:));
+        if numPart(a) > 1
+            c_k(a,iter+1) = temp(a)/numPart(a);
         end
     end
-    newV
-    newth
-    
+    temp
+    c_k
+
     % DEBUGGING ONLY
+%     newth = zeros(numbus,3);
+%     newV = zeros(numbus,3);
+%     for a = 1:numbus
+%         for b = 1:3
+%             newV(a,b) = sqrt(newe(a,b)^2+newf(a,b)^2);
+%             if newe(a,b) ~= 0
+%                 newth(a,b) = atan(newf(a,b)/newe(a,b));
+%             end
+%         end
+%     end
+%     newV
+%     newth
+    
     % Convert from rectangular to polar
 %     e1 = x1_k(1:6,2);
 %     f1 = [0; x1_k(7:11,2)];
@@ -266,7 +296,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
 %     end
 %     c_k
     
-%     c_k(2,iter+1) = 1/numPart*(x1_k(2,iter+1) + x2_k(1,iter+1)); % the other two variables are 0
+%     c_k(2,iter+1) = 1/numPart(2)*(x1_k(2,iter+1) + x2_k(1,iter+1)) % the other two variables are 0
 %     c_k(3,iter+1) = 1/numPart*(x1_k(3,iter+1) + x2_k(2,iter+1));
 %     c_k(4,iter+1) = 1/3*(x1_k(4,iter+1) + x2_k(3,iter+1) + x4_k(1,iter+1));
 %     c_k(5,iter+1) = 1/3*(x1_k(5,iter+1) + x2_k(4,iter+1) + x3_k(1,iter+1));
@@ -291,17 +321,17 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
 %     c_k(numbus+14,iter+1) = 1/numPart*(x3_k(10,iter+1) + x4_k(10,iter+1));
    
     % Remap from global c_k to the indexing for each partition's state
-    % vector
+    % vector; get rid of each area's slack bus
     % DEBUG - also need automatic function to do that
-    c1_k(:,iter+1) = [c_k(allbuses1,iter+1); c_k(numbus+allbuses1(2:size(allbuses1,1)),iter+1)];
+    c1_k(:,iter+1) = [c_k(allbuses1,iter+1); c_k(numbus+allbuses1(allbuses1~=slack1),iter+1)];
     c2_k(:,iter+1) = [c_k(allbuses2,iter+1); c_k(numbus+allbuses2,iter+1)];
     c3_k(:,iter+1) = [c_k(allbuses3,iter+1); c_k(numbus+allbuses3,iter+1)];
     c4_k(:,iter+1) = [c_k(allbuses4,iter+1); c_k(numbus+allbuses4,iter+1)];
         
     y1_kl(:,iter+1) = y1_kl(:,iter) + rho*(x1_k(:,iter+1) - c1_k(:,iter+1));
-    y2_kl(:,iter+1) = y2_kl(:,iter) + rho*(x2_k(:,iter+1) - c2_k(:,iter+1));
-    y3_kl(:,iter+1) = y3_kl(:,iter) + rho*(x3_k(:,iter+1) - c3_k(:,iter+1));
-    y4_kl(:,iter+1) = y4_kl(:,iter) + rho*(x4_k(:,iter+1) - c4_k(:,iter+1));
+    y2_kl(:,iter+1) = y2_kl(:,iter) + rho*(adjx2_k(:,iter+1) - c2_k(:,iter+1));
+    y3_kl(:,iter+1) = y3_kl(:,iter) + rho*(adjx3_k(:,iter+1) - c3_k(:,iter+1));
+    y4_kl(:,iter+1) = y4_kl(:,iter) + rho*(adjx4_k(:,iter+1) - c4_k(:,iter+1));
     
     normres_r(:,iter+1) = (norm(x1_k(:,iter+1) - c1_k(:,iter+1)))^2 +...
                           (norm(x2_k(:,iter+1) - c2_k(:,iter+1)))^2 +...

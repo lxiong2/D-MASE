@@ -29,7 +29,9 @@ function [f2, Gain2, g2, H2, h2] = myfun_Part2_overlap(buses, numbus, allbuses_a
 %% Slack bus zeroed out
 numbus_a = size(allbuses_a,1);
 e = x_a(1:numbus_a);
-f = [x_a(numbus_a+1:(numbus_a+slackIndex_a-1),1); 0; x_a((numbus_a+slackIndex_a):(2*numbus_a-1),1)];
+size(e)
+f = x_a(numbus_a+1:(2*numbus_a),1);
+size(f)
 %f = x_a(size(allbuses_a,1)+1:(2*numbus_a)); % no need to take out slack since assume slack bus is bus 1
 
 %% Nonlinear h's
@@ -37,8 +39,8 @@ h2 = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuse
 %(e,f,G,B,type_a,allindices_a,numbus_a,buses,lines);
 
 H2 = createHmatrix_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
-H2 = [H2(:,1:numbus_a) H2(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) H2(:,(numbus_a+slackIndex_a+1):2*numbus_a)];
-%[Hrow,Hcol] = size(H2);
+H2 = [H2(:,1:numbus_a) H2(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) H2(:,(numbus_a+slackIndex_a+1):2*numbus_a)]
+[Hrow,Hcol] = size(H2)
 
 f2 = (z_a-h2).'*(R_a\(z_a-h2));
 Gain2 = 2*H2.'*(R_a\H2)+rho;
@@ -56,5 +58,7 @@ c2((numbus_a+1):(2*numbus_a-1)) = c(numbus+selectBuses);
 % end
 % 
 % size(c2)
+
+
 
 g2 = -2*H2.'*(R_a\(z_a-h2)) + y + rho*(x_a-c2); %DEBUG: is y a row or column vector? What about c?

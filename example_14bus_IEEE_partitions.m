@@ -6,6 +6,7 @@ busIndex = (1:14).';
 buses = (1:14).';
 numbus = size(buses,1);
 globalSlack = 1;
+globalSlackArea = 1;
 globalSlackIndex = busIndex(buses == globalSlack);
 
 %% Line Information
