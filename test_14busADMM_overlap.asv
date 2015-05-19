@@ -37,38 +37,39 @@ B4 = B(allbuses4,allbuses4);
 numArea = 4;
 numPart = 2;
 iter = 1;
-maxiter = 2;
-rho = 10; % step size
+maxiter = 10;
+rho = 2; % step size
 
 % Initialize each partition's state vectors
 % x1_k = [bus1 bus2 bus3' bus4' bus5 bus6']
-x1_k = zeros(size(allbuses1,1)*2-1,maxiter); % Area S1: 3 buses, bus 1 is the slack for Partition 1 and the global slack bus for the entire system; if you remove bus1 from x1_k, then the Gain matrix is singular
-dx1_k = zeros(size(allbuses1,1)*2-1,maxiter);
-adjx1_k = zeros(size(allbuses1,1)*2,maxiter);
+x1_k = zeros(size(allbuses1,1)*2,maxiter); % Area S1: 3 buses, bus 1 is the slack for Partition 1 and the global slack bus for the entire system; if you remove bus1 from x1_k, then the Gain matrix is singular
+dx1_k = zeros(size(allbuses1,1)*2,maxiter);
+adjx1_k = zeros(size(allbuses1,1)*2-1,maxiter);
 % x2_k = [bus2' bus3 bus4 bus5' bus7 bus8 bus9']
-x2_k = zeros(size(allbuses2,1)*2-1,maxiter); % Area S2: 4 buses, bus 3 is the slack for Partition 2; however, to adjust all slacks to the same reference, need to keep f entry for bus 3
-dx2_k = zeros(size(allbuses2,1)*2-1,maxiter);
-adjx1_k = zeros(size(allbuses1,1)*2,maxiter);
+x2_k = zeros(size(allbuses2,1)*2,maxiter); % Area S2: 4 buses, bus 3 is the slack for Partition 2; however, to adjust all slacks to the same reference, need to keep f entry for bus 3
+dx2_k = zeros(size(allbuses2,1)*2,maxiter);
+adjx2_k = zeros(size(allbuses2,1)*2-1,maxiter);
 % x3_k = [bus5' bus6 bus10' bus11 bus12 bus13 bus14']
-x3_k = zeros(size(allbuses3,1)*2-1,maxiter); % Area S3: 4 buses, bus 6 is the slack for Partition 3; however, to adjust all slacks to the same reference, need to keep f entry for bus 6
-dx3_k = zeros(size(allbuses3,1)*2-1,maxiter);
-adjx1_k = zeros(size(allbuses1,1)*2,maxiter);
+x3_k = zeros(size(allbuses3,1)*2,maxiter); % Area S3: 4 buses, bus 6 is the slack for Partition 3; however, to adjust all slacks to the same reference, need to keep f entry for bus 6
+dx3_k = zeros(size(allbuses3,1)*2,maxiter);
+adjx3_k = zeros(size(allbuses3,1)*2-1,maxiter);
 % x4_k = [bus4' bus7' bus9 bus10 bus11' bus13' bus14]
-x4_k = zeros(size(allbuses4,1)*2-1,maxiter); % Area S4: 3 buses, bus 9 is the slack for Partition 4; however, to adjust all slacks to the same reference, need to keep f entry for bus 9
-dx4_k = zeros(size(allbuses4,1)*2-1,maxiter);
+x4_k = zeros(size(allbuses4,1)*2,maxiter); % Area S4: 3 buses, bus 9 is the slack for Partition 4; however, to adjust all slacks to the same reference, need to keep f entry for bus 9
+dx4_k = zeros(size(allbuses4,1)*2,maxiter);
+adjx4_k = zeros(size(allbuses4,1)*2-1,maxiter);
 
-% Constraints
+% Constraints: size of adjusted x_k (i.e. size(x_k) + 1 for the new slack bus value)
 % c_k = [e1 ... e14 f1 ... f14]
 c_k = zeros(numbus*2,maxiter);
-c1_k = zeros(size(x1_k,1),1);
-c2_k = zeros(size(x2_k,1),1);
-c3_k = zeros(size(x3_k,1),1);
-c4_k = zeros(size(x4_k,1),1);
+c1_k = zeros(size(x1_k,1)-1,1);
+c2_k = zeros(size(x2_k,1)-1,1);
+c3_k = zeros(size(x3_k,1)-1,1);
+c4_k = zeros(size(x4_k,1)-1,1);
 
-y1_kl = zeros(size(x1_k,1),maxiter); %same length as x_k vector
-y2_kl = zeros(size(x2_k,1),maxiter);
-y3_kl = zeros(size(x3_k,1),maxiter);
-y4_kl = zeros(size(x4_k,1),maxiter);
+y1_kl = zeros(size(x1_k,1)-1,maxiter); %same length as x_k vector
+y2_kl = zeros(size(x2_k,1)-1,maxiter);
+y3_kl = zeros(size(x3_k,1)-1,maxiter);
+y4_kl = zeros(size(x4_k,1)-1,maxiter);
 
 normres_r = zeros(1,maxiter);
 normres_s = zeros(1,maxiter);
@@ -86,16 +87,16 @@ f4 = zeros(1,maxiter);
 % the slack
 % x4_k = [e4' e7' e9 e10 e11' e13' e14 f4' f7' f10 f11' f13' f14] % f9 - bus 9 is the
 % slack
-x1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1)-1,1)]; %AC flat start
-x2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1)-1,1)]; %AC flat start
-x3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1)-1,1)]; %AC flat start
-x4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1)-1,1)]; %AC flat start
+x1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1),1)]; %AC flat start
+x2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1),1)]; %AC flat start
+x3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1),1)]; %AC flat start
+x4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1),1)]; %AC flat start
 
 % x_k's that are adjusted to the global slack reference
-adjx1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1),1)]; %AC flat start
-adjx2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1),1)]; %AC flat start
-adjx3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1),1)]; %AC flat start
-adjx4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1),1)]; %AC flat start
+adjx1_k(:,1) = [ones(size(allbuses1,1),1); zeros(size(allbuses1,1)-1,1)]; %AC flat start
+adjx2_k(:,1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1)-1,1)]; %AC flat start
+adjx3_k(:,1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1)-1,1)]; %AC flat start
+adjx4_k(:,1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1)-1,1)]; %AC flat start
 
 normres_r(:,1) = 1; %primal residual - initialize to nonzero number
 normres_s(:,1) = 1; %dual residual - initialize to nonzero number
@@ -116,41 +117,47 @@ eps_dual = 1e-4;
 
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)   
     % Partition 1 calculations
-    [tempf1, tempGain1, g1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, adjbuses, lines1, slackIndex1, G1, B1, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c_k(:,iter), y1_kl(:,iter), rho);
+    [tempf1, tempGain1, g1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, adjbuses, lines1, slackIndex1, G1, B1, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c1_k(:,iter), y1_kl(:,iter), rho);
     Gain1(:,:,iter) = tempGain1;
     H1(:,:,iter) = tempH1;
     h1(:,iter) = temph1;
     f1(:,iter+1) = tempf1;
-    dx1_k(:,iter+1) = -Gain1(:,:,iter)\g1;
+    tempdx1_k(:,iter+1) = -Gain1(:,:,iter)\g1;
+    adjx1_k(:,iter+1) = adjx1_k(:,iter) + tempdx1_k(:,iter+1);
+    dx1_k(:,iter+1) = [tempdx1_k(1:numbus1,iter+1); tempdx1_k(numbus1+(1:slackIndex1-1),iter+1); 0; tempdx1_k(numbus1+(slackIndex1:(numbus1-1)),iter+1)];
     x1_k(:,iter+1) = x1_k(:,iter) + dx1_k(:,iter+1);
     
     % Partition 2 calculations
-    [tempf2, tempGain2, g2, tempH2, temph2] = myfun_Part2_overlap(buses, numbus, allbuses2, adjbuses, lines2, slackIndex2, G2, B2, allz2, allR2, alltype2, allindices2, x2_k(:,iter), c_k(:,iter), y2_kl(:,iter), rho);
+    [tempf2, tempGain2, g2, tempH2, temph2] = myfun_Part2_overlap(buses, numbus, allbuses2, adjbuses, lines2, slackIndex2, G2, B2, allz2, allR2, alltype2, allindices2, x2_k(:,iter), c2_k(:,iter), y2_kl(:,iter), rho);
     Gain2(:,:,iter) = tempGain2;
     H2(:,:,iter) = tempH2;
     h2(:,iter) = temph2;
     f2(:,iter+1) = tempf2;
-    dx2_k(:,iter+1) = -Gain2(:,:,iter)\g2;
+    tempdx2_k(:,iter+1) = -Gain2(:,:,iter)\g2;
+    adjx2_k(:,iter+1) = adjx2_k(:,iter) + tempdx2_k(:,iter+1);
+    dx2_k(:,iter+1) = [tempdx2_k(1:numbus2,iter+1); tempdx2_k(numbus2+(1:slackIndex2-1),iter+1); 0; tempdx2_k(numbus2+(slackIndex2:(numbus2-1)),iter+1)];
     x2_k(:,iter+1) = x2_k(:,iter) + dx2_k(:,iter+1);
-%     x2_k(1:numbus2,iter+1) = x2_k(1:numbus,iter+1) + (slack2 - slack1);
-%     x2_k(numbus2+1:(2*numbus-1),iter+1) = x2_k(numbus2+1:(2*numbus-1),iter+1) + ;
    
     % Partition 3 calculations
-    [tempf3, tempGain3, g3, tempH3, temph3] = myfun_Part2_overlap(buses, numbus, allbuses3, adjbuses, lines3, slackIndex3, G3, B3, allz3, allR3, alltype3, allindices3, x3_k(:,iter), c_k(:,iter), y3_kl(:,iter), rho);
+    [tempf3, tempGain3, g3, tempH3, temph3] = myfun_Part2_overlap(buses, numbus, allbuses3, adjbuses, lines3, slackIndex3, G3, B3, allz3, allR3, alltype3, allindices3, x3_k(:,iter), c3_k(:,iter), y3_kl(:,iter), rho);
     Gain3(:,:,iter) = tempGain3;
     H3(:,:,iter) = tempH3;
     h3(:,iter) = temph3;
     f3(:,iter+1) = tempf3;
-    dx3_k(:,iter+1) = -Gain3(:,:,iter)\g3;
+    tempdx3_k(:,iter+1) = -Gain3(:,:,iter)\g3;
+    adjx3_k(:,iter+1) = adjx3_k(:,iter) + tempdx3_k(:,iter+1);
+    dx3_k(:,iter+1) = [tempdx3_k(1:numbus3,iter+1); tempdx3_k(numbus3+(1:slackIndex3-1),iter+1); 0; tempdx3_k(numbus3+(slackIndex3:(numbus3-1)),iter+1)];
     x3_k(:,iter+1) = x3_k(:,iter) + dx3_k(:,iter+1);
-    
+   
     % Partition 4 calculations
-    [tempf4, tempGain4, g4, tempH4, temph4] = myfun_Part2_overlap(buses, numbus, allbuses4, adjbuses, lines4, slackIndex4, G4, B4, allz4, allR4, alltype4, allindices4, x4_k(:,iter), c_k(:,iter), y4_kl(:,iter), rho);
+    [tempf4, tempGain4, g4, tempH4, temph4] = myfun_Part2_overlap(buses, numbus, allbuses4, adjbuses, lines4, slackIndex4, G4, B4, allz4, allR4, alltype4, allindices4, x4_k(:,iter), c4_k(:,iter), y4_kl(:,iter), rho);
     Gain4(:,:,iter) = tempGain4;
     H4(:,:,iter) = tempH4;
     h4(:,iter) = temph4;
     f4(:,iter+1) = tempf4;
-    dx4_k(:,iter+1) = -Gain4(:,:,iter)\g4;
+    tempdx4_k(:,iter+1) = -Gain4(:,:,iter)\g4;
+    adjx4_k(:,iter+1) = adjx4_k(:,iter) + tempdx4_k(:,iter+1);
+    dx4_k(:,iter+1) = [tempdx4_k(1:numbus4,iter+1); tempdx4_k(numbus4+(1:slackIndex4-1),iter+1); 0; tempdx4_k(numbus4+(slackIndex4:(numbus4-1)),iter+1)];
     x4_k(:,iter+1) = x4_k(:,iter) + dx4_k(:,iter+1);
     
     % Reference all the other partitions to the global index and then
@@ -158,15 +165,13 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % global slack bus
     allStates = zeros(numbus*2,numArea);
     allStates(allbuses1,1) = x1_k(1:numbus1,iter+1);
-    allStates(numbus+allbuses1,1) = [x1_k(numbus1+(1:slackIndex1-1),iter+1); 0; x1_k(numbus1+(slackIndex1:(numbus1-1)),iter+1)];
+    allStates(numbus+allbuses1,1) = x1_k(numbus1+1:2*numbus1,iter+1);
     allStates(allbuses2,2) = x2_k(1:numbus2,iter+1);
-    allStates(numbus+allbuses2,2) = [x2_k(numbus2+(1:slackIndex2-1),iter+1); 0; x2_k(numbus2+(slackIndex2:(numbus2-1)),iter+1)];
+    allStates(numbus+allbuses2,2) = x2_k(numbus2+1:2*numbus2,iter+1);
     allStates(allbuses3,3) = x3_k(1:numbus3,iter+1);
-    allStates(numbus+allbuses3,3) = [x3_k(numbus3+(1:slackIndex3-1),iter+1); 0; x3_k(numbus3+(slackIndex3:(numbus3-1)),iter+1)];
+    allStates(numbus+allbuses3,3) = x3_k(numbus3+1:2*numbus3,iter+1);
     allStates(allbuses4,4) = x4_k(1:numbus4,iter+1);
-    allStates(numbus+allbuses4,4) = [x4_k(numbus4+(1:slackIndex4-1),iter+1); 0; x4_k(numbus4+(slackIndex4:(numbus4-1)),iter+1)];
-    
-    allStates
+    allStates(numbus+allbuses4,4) = x4_k(numbus4+1:2*numbus4,iter+1);
     
     % Find the shared buses between Area 1 (bus 1 is the global slack) and
     % the other areas, and calc Area 1 angles - Area X angles
@@ -198,23 +203,24 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         end
     end
     allStates(:,2:4) = [newe; newf];
-    allStates
+      
+    x1_k(:,iter+1) = [allStates(allbuses1,1); allStates(numbus+allbuses1,1)];
+    x2_k(:,iter+1) = [allStates(allbuses2,2); allStates(numbus+allbuses2,2)];
+    x3_k(:,iter+1) = [allStates(allbuses3,3); allStates(numbus+allbuses3,3)];
+    x4_k(:,iter+1) = [allStates(allbuses4,4); allStates(numbus+allbuses4,4)];
     
-    adjx1_k(:,iter+1) = [allStates(allbuses1,1); allStates(numbus1+allbuses1,1);]
-    adjx2_k(:,iter+1) = [ones(size(allbuses2,1),1); zeros(size(allbuses2,1)-1,1)]; %AC flat start
-    adjx3_k(:,iter+1) = [ones(size(allbuses3,1),1); zeros(size(allbuses3,1)-1,1)]; %AC flat start
-    adjx4_k(:,iter+1) = [ones(size(allbuses4,1),1); zeros(size(allbuses4,1)-1,1)]; %AC flat start
+    % Remove the slack buses from x_k's
+    nosx1_k(:,iter+1) = [x1_k(1:numbus1,iter+1); x1_k(numbus1+1:(numbus1+slackIndex1-1
     
     % Look at allStates and average the buses that overlap
     for a = 1:numbus*2
         numPart(a) = sum(allStates(a,:)~=0);
         temp(a) = sum(allStates(a,:));
-        if numPart(a) > 1
+        if numPart(a) > 0
             c_k(a,iter+1) = temp(a)/numPart(a);
         end
     end
-    temp
-    c_k
+    c_k;
 
     % DEBUGGING ONLY
 %     newth = zeros(numbus,3);
@@ -321,45 +327,33 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % vector; get rid of each area's slack bus
     % DEBUG - also need automatic function to do that
     c1_k(:,iter+1) = [c_k(allbuses1,iter+1); c_k(numbus+allbuses1(allbuses1~=slack1),iter+1)];
-    c2_k(:,iter+1) = [c_k(allbuses2,iter+1); c_k(numbus+allbuses2,iter+1)];
-    c3_k(:,iter+1) = [c_k(allbuses3,iter+1); c_k(numbus+allbuses3,iter+1)];
-    c4_k(:,iter+1) = [c_k(allbuses4,iter+1); c_k(numbus+allbuses4,iter+1)];
+    c2_k(:,iter+1) = [c_k(allbuses2,iter+1); c_k(numbus+allbuses2(allbuses2~=slack2),iter+1)];
+    c3_k(:,iter+1) = [c_k(allbuses3,iter+1); c_k(numbus+allbuses3(allbuses3~=slack3),iter+1)];
+    c4_k(:,iter+1) = [c_k(allbuses4,iter+1); c_k(numbus+allbuses4(allbuses4~=slack4),iter+1)];
         
-    y1_kl(:,iter+1) = y1_kl(:,iter) + rho*(x1_k(:,iter+1) - c1_k(:,iter+1));
-    y2_kl(:,iter+1) = y2_kl(:,iter) + rho*(x2_k(:,iter+1) - c2_k(:,iter+1));
-    y3_kl(:,iter+1) = y3_kl(:,iter) + rho*(x3_k(:,iter+1) - c3_k(:,iter+1));
-    y4_kl(:,iter+1) = y4_kl(:,iter) + rho*(x4_k(:,iter+1) - c4_k(:,iter+1));
+    y1_kl(:,iter+1) = y1_kl(:,iter) + rho*(adjx1_k(:,iter+1) - c1_k(:,iter+1));
+    y2_kl(:,iter+1) = y2_kl(:,iter) + rho*(adjx2_k(:,iter+1) - c2_k(:,iter+1));
+    y3_kl(:,iter+1) = y3_kl(:,iter) + rho*(adjx3_k(:,iter+1) - c3_k(:,iter+1));
+    y4_kl(:,iter+1) = y4_kl(:,iter) + rho*(adjx4_k(:,iter+1) - c4_k(:,iter+1));
     
-    normres_r(:,iter+1) = (norm(x1_k(:,iter+1) - c1_k(:,iter+1)))^2 +...
-                          (norm(x2_k(:,iter+1) - c2_k(:,iter+1)))^2 +...
-                          (norm(x3_k(:,iter+1) - c3_k(:,iter+1)))^2 +...
-                          (norm(x4_k(:,iter+1) - c4_k(:,iter+1)))^2;
+    adjx2_k(:,iter+1) - c2_k(:,iter+1)
+%     adjx3_k(:,iter+1) - c3_k(:,iter+1)
+%     adjx4_k(:,iter+1) - c4_k(:,iter+1)
+    
+    normres_r(:,iter+1) = (norm(adjx1_k(:,iter+1) - c1_k(:,iter+1)))^2 +...
+                          (norm(adjx2_k(:,iter+1) - c2_k(:,iter+1)))^2 +...
+                          (norm(adjx3_k(:,iter+1) - c3_k(:,iter+1)))^2 +...
+                          (norm(adjx4_k(:,iter+1) - c4_k(:,iter+1)))^2;
     normres_s(:,iter+1) = numPart(:,1).*rho^2*(norm(c_k(:,iter+1) - c_k(:,iter)))^2;
     
     iter = iter+1;
 end
 
-% for i = 1:maxiter
-%     diffx(:,i) = norm(x1_k(:,i) - x2_k(:,i));
-% end
-%
-
-% Convert x_k from rectangular to polar
 x1_k
 x2_k
 x3_k
 x4_k
 
-%th1 = atan(x1_k(1:6,iter);
-%e1 = x2_k(1:7,2)
-% c_k
-% y1_kl
-% y2_kl
-% y3_kl
-% y4_kl
-% 
-% diffx
-% 
 figure(1)
 semilogy(normres_r)
 hold on

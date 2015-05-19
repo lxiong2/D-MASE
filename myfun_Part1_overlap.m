@@ -1,4 +1,4 @@
-function [f1, Gain1, g1, H1, h1] = myfun_Part1_overlap(buses, numbus, allbuses_a, adjbuses, lines, slackIndex_a, G_a, B_a, z_a, R_a, type_a, allindices_a, x_a, c, y, rho)
+function [f1, Gain1, g1, H1, h1] = myfun_Part1_overlap(buses, numbus, allbuses_a, adjbuses, lines, slackIndex_a, G_a, B_a, z_a, R_a, type_a, allindices_a, x_a, c_a, y_a, rho)
 %% Inputs:
 % This function calculates rectangular state estimation
 % Uses rectangular power flow, i.e. V_i = e_i + j*f_i = |V_i| ang (theta_i)
@@ -29,8 +29,8 @@ function [f1, Gain1, g1, H1, h1] = myfun_Part1_overlap(buses, numbus, allbuses_a
 %% Slack bus zeroed out
 numbus_a = size(allbuses_a,1);
 e = x_a(1:numbus_a,1);
-f = [x_a(numbus_a+1:(numbus_a+slackIndex_a-1),1); 0; x_a((numbus_a+slackIndex_a):(2*numbus_a-1),1)];
-%[0; x_a(size(allbuses_a,1)+1:(2*numbus_a-1),1)]; % assumes slack bus is bus 1
+f = x_a(numbus_a+1:2*numbus_a);
+x_a = [x_a(1:numbus_a); x_a(numbus_a+(1:slackIndex_a-1)); x_a(numbus_a+(slackIndex_a+1:(numbus_a)))];
 
 % Nonlinear h's
 h1 = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
@@ -42,9 +42,4 @@ H1 = [H1(:,1:numbus_a) H1(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) H1(:,(numbus
 f1 = (z_a-h1).'*(R_a\(z_a-h1));
 Gain1 = 2*H1.'*(R_a\H1)+rho;
 
-c1 = zeros(numbus_a*2-1,1);
-c1(1:numbus_a,1) = c(allbuses_a);
-selectBuses = [allbuses_a(1:slackIndex_a-1); allbuses_a((slackIndex_a+1):numbus_a)];
-c1((numbus_a+1):(2*numbus_a-1)) = c(numbus+selectBuses);
-
-g1 = -2*H1.'*(R_a\(z_a-h1)) + y + rho*(x_a-c1); %DEBUG: is y a row or column vector? What about c?
+g1 = -2*H1.'*(R_a\(z_a-h1)) + y_a + rho*(x_a-c_a); %DEBUG: is y a row or column vector? What about c?
