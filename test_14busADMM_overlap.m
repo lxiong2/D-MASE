@@ -112,10 +112,11 @@ eps_rel = 1e-3;
 % eps_pri = sqrt(p)*eps_abs + eps_rel*max([normAxk normBzk normc]);
 % eps_dual = sqrt(n)*eps_abs + eps_rel*norm(A.'*yk);
 
-eps_pri = 1e-2;
-eps_dual = 1e-2;
+eps_pri = 1e-3;
+eps_dual = 1e-3;
 
-while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)   
+while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
+ 
     % Partition 1 calculations
     [tempf1, tempGain1, g1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, adjbuses, lines1, slackIndex1, G1, B1, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c1_k(:,iter), y1_kl(:,iter), rho);
     Gain1(:,:,iter) = tempGain1;
@@ -275,9 +276,10 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     y3_kl(:,iter+1) = y3_kl(:,iter) + rho*(adjx3_k(:,iter+1) - c3_k(:,iter+1));
     y4_kl(:,iter+1) = y4_kl(:,iter) + rho*(adjx4_k(:,iter+1) - c4_k(:,iter+1));
     
-    nosx2_k(:,iter+1) - c2_k(:,iter+1)
-%     adjx3_k(:,iter+1) - c3_k(:,iter+1)
-%     adjx4_k(:,iter+1) - c4_k(:,iter+1)
+    tempnorm1(:,iter+1) = nosx1_k(:,iter+1) - c1_k(:,iter+1);
+    tempnorm2(:,iter+1) = nosx2_k(:,iter+1) - c2_k(:,iter+1);
+    tempnorm3(:,iter+1) = nosx3_k(:,iter+1) - c3_k(:,iter+1);
+    tempnorm4(:,iter+1) = nosx4_k(:,iter+1) - c4_k(:,iter+1);
     
     normres_r(:,iter+1) = (norm(nosx1_k(:,iter+1) - c1_k(:,iter+1)))^2 +...
                           (norm(nosx2_k(:,iter+1) - c2_k(:,iter+1)))^2 +...
@@ -288,10 +290,15 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     iter = iter+1;
 end
 
-x1_k
-x2_k
-x3_k
-x4_k
+tempnorm1
+tempnorm2
+tempnorm3
+tempnorm4
+
+% x1_k
+% x2_k
+% x3_k
+% x4_k
 
 figure(1)
 semilogy(normres_r)
@@ -299,19 +306,6 @@ hold on
 semilogy(normres_s)
 title('4-Partition, 14-Bus State Estimation Consensus Problem')
 legend('Primal residual', 'Dual residual')
-
-figure(2)
-for a = 1:iter-1
-    temp1(a) = det(Gain1(:,:,a));
-    temp2(a) = det(Gain2(:,:,a)); 
-    temp3(a) = det(Gain3(:,:,a));
-    temp4(a) = det(Gain4(:,:,a));
-end
-plot(1:iter-1,temp1)
-hold on
-plot(1:iter-1,temp2,'r')
-plot(1:iter-1,temp3,'bl')
-plot(1:iter-1,temp4,'g')
 
 % 
 % figure(2)
