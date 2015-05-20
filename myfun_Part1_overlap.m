@@ -30,14 +30,13 @@ function [f1, Gain1, g1, H1, h1] = myfun_Part1_overlap(buses, numbus, allbuses_a
 numbus_a = size(allbuses_a,1);
 e = x_a(1:numbus_a,1);
 f = x_a(numbus_a+1:2*numbus_a);
-x_a = [x_a(1:numbus_a); x_a(numbus_a+(1:slackIndex_a-1)); x_a(numbus_a+(slackIndex_a+1:(numbus_a)))];
 
 % Nonlinear h's
 h1 = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 
 H1 = createHmatrix_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
-H1 = [H1(:,1:numbus_a) H1(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) H1(:,(numbus_a+slackIndex_a+1):2*numbus_a)];
-%H1 = [H1(:,1:size(allbuses_a,1)) H1(:,(size(allbuses_a,1)+2):size(allbuses_a,1)*2)]; %assumes slack is bus 1 so remove first column
+%Pad the slack column with zeros, so that the calculation of g isn't affected
+H1 = [H1(:,1:numbus_a) H1(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) zeros(size(z_a,1),1) H1(:,(numbus_a+slackIndex_a+1):2*numbus_a)]; 
 
 f1 = (z_a-h1).'*(R_a\(z_a-h1));
 Gain1 = 2*H1.'*(R_a\H1)+rho;

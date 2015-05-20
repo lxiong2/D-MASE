@@ -30,13 +30,12 @@ function [f2, Gain2, g2, H2, h2] = myfun_Part2_overlap(buses, numbus, allbuses_a
 numbus_a = size(allbuses_a,1);
 e = x_a(1:numbus_a);
 f = x_a(numbus_a+1:(2*numbus_a)); % take out slack bus for Areas 2-4
-x_a = [x_a(1:numbus_a); x_a(numbus_a+(1:slackIndex_a-1)); x_a(numbus_a+(slackIndex_a+1:(numbus_a)))];
 
 %% Nonlinear h's
 h2 = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 
 H2 = createHmatrix_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
-H2 = [H2(:,1:numbus_a) H2(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) H2(:,(numbus_a+slackIndex_a+1):2*numbus_a)];
+H2 = [H2(:,1:numbus_a) H2(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) zeros(size(z_a,1),1) H2(:,(numbus_a+slackIndex_a+1):2*numbus_a)];
 
 f2 = (z_a-h2).'*(R_a\(z_a-h2));
 Gain2 = 2*H2.'*(R_a\H2)+rho;
