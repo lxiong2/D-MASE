@@ -20,7 +20,7 @@ function [f1, Gain1, g1, H1, h1] = myfun_Part1_overlap(buses, numbus, allbuses_a
 % rho           ADMM step size
 
 %% Outputs: See Decentralized ADMM formulation.docx
-% f1
+% f1            LOCAL objective function?
 % Gain1         LOCAL Gain matrix
 % g1            LOCAL right hand side
 % H1            LOCAL measurement Jacobian
