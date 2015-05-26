@@ -14,7 +14,8 @@ example_14bus_IEEE_partitions
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-YBus_14AC
+YBus
+%YBus_14AC2
 %Ybus = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);
 B = imag(Ybus);
@@ -37,7 +38,7 @@ B4 = B(allbuses4,allbuses4);
 numArea = 4;
 numPart = 2;
 iter = 1;
-maxiter = 100;
+maxiter = 10;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -96,24 +97,21 @@ eps_abs = 1e-4; % machine epsilon
 eps_rel = 1e-2;
 n = 2*numbus;
 
-eps_pri = sqrt(n)*eps_abs + eps_rel*max([norm(x1_k) norm(x2_k) norm(x3_k) norm(x4_k) norm(c_k)])
-eps_dual = sqrt(n)*eps_abs + eps_rel*max([norm(y1_kl) norm(y2_kl) norm(y3_kl) norm(y4_kl)])
+%eps_pri = sqrt(n)*eps_abs + eps_rel*max([norm(x1_k) norm(x2_k) norm(x3_k) norm(x4_k) norm(c_k)])
+%eps_dual = sqrt(n)*eps_abs + eps_rel*max([norm(y1_kl) norm(y2_kl) norm(y3_kl) norm(y4_kl)])
+
+eps_pri = 1e-4
+eps_rel = 1e-4
 
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
  
     % Partition 1 calculations
     [tempf1, tempGain1, tempg1, tempH1, temph1] = myfun_Part1_overlap(buses, numbus, allbuses1, adjbuses, lines1, slackIndex1, G1, B1, allz1, allR1, alltype1, allindices1, x1_k(:,iter), c1_k(:,iter), y1_kl(:,iter), rho);
+    f1(:,iter) = tempf1;
     Gain1(:,:,iter) = tempGain1;
+    g1(:,iter) = tempg1;
     H1(:,:,iter) = tempH1;
     h1(:,iter) = temph1;
-    f1(:,iter) = tempf1;
-    g1(:,iter) = tempg1;
-    newH1 = [H1(:,1:(numbus1+slackIndex1-1),iter) H1(:,(numbus1+slackIndex1+1):(2*numbus1),iter)]
-    checkGain1(:,:,iter) = 2*newH1.'*(allR1\newH1)+rho;
-    checkg1(:,iter) = -2*newH1.'*(allR1\(allz1-h1(:,iter))) +...
-        [y1_kl(1:(numbus1+slackIndex1-1),iter); y1_kl((numbus1+slackIndex1+1):(2*numbus1),iter)] +...
-        rho*([x1_k(1:(numbus1+slackIndex1-1),iter); x1_k((numbus1+slackIndex1+1):(2*numbus1),iter)] - [c1_k(1:(numbus1+slackIndex1-1),iter); c1_k((numbus1+slackIndex1+1):(2*numbus1),iter)]);
-    checkdx(:,iter) = -checkGain1(:,:,iter)\checkg1(:,iter);
     dx1_k(:,iter+1) = -Gain1(:,:,iter)\g1(:,iter);
     dx1_k(numbus1+slackIndex1,iter+1) = 0;
     x1_k(:,iter+1) = x1_k(:,iter) + dx1_k(:,iter+1);
@@ -222,27 +220,6 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
 %     end
 %     newV
 %     newth
-    
-    % Convert from rectangular to polar
-%     e1 = x1_k(1:6,2);
-%     f1 = [0; x1_k(7:11,2)];
-%     th1 = atan(f1./e1) 
-%     V1 = sqrt(e1.^2 + f1.^2)
-%     
-%     e2 = x2_k(1:7,2);
-%     f2 = [x2_k(8,2); 0; x2_k(9:13,2)];
-%     th2 = atan(f2./e2)
-%     V2 = sqrt(e2.^2 + f2.^2)
-%     
-%     e3 = x3_k(1:7,2);
-%     f3 = [x3_k(8,2); 0; x3_k(9:13,2)];
-%     th3 = atan(f3./e3)
-%     V3 = sqrt(e3.^2 + f3.^2)
-%     
-%     e4 = x4_k(1:7,2);
-%     f4 = [x4_k(8:9,2); 0; x4_k(10:13,2)];
-%     th4 = atan(f4./e4)
-%     V4 = sqrt(e4.^2 + f4.^2)
    
     % Remap from global c_k to the indexing for each partition's state
     % vector; get rid of each area's slack bus
@@ -288,7 +265,6 @@ semilogy(sqrt(normres_s))
 title('4-Partition, 14-Bus State Estimation Consensus Problem')
 legend('Primal residual', 'Dual residual')
 
-% 
 % figure(2)
 % clf
 % plot(f1)
