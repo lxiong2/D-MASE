@@ -14,8 +14,7 @@ example_14bus_IEEE_partitions
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-YBus
-%YBus_14AC2
+YBus_14AC
 %Ybus = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);
 B = imag(Ybus);
@@ -101,7 +100,7 @@ n = 2*numbus;
 %eps_dual = sqrt(n)*eps_abs + eps_rel*max([norm(y1_kl) norm(y2_kl) norm(y3_kl) norm(y4_kl)])
 
 eps_pri = 1e-4
-eps_rel = 1e-4
+eps_dual = 1e-4
 
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
  

@@ -6,6 +6,8 @@ simauto = actxserver('pwrworld.SimulatorAuto');
 % NOTE: Check case file path before running
 simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb')
 
+simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\Ybus_14AC.m",NO)');
+
 simauto.RunScriptCommand('EnterMode(Run)');
 
 fieldarray = {'BusNum','BusNum:1','LineCircuit','LineMW','LineMVR','LineMW:1','LineMVR:1'}; %at from bus, at to bus
@@ -17,7 +19,7 @@ revMVARflows = str2double(results{2}{7})/100;
 
 fieldarray = {'BusNum','BusPUVolt','BusGenMW','BusGenMVR','BusLoadMW','BusLoadMVR'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
-busV = str2double(results{2}{2}); % base case line flows
+busV = str2double(results{2}{2}).^2; % need to square the bus voltages, since I'm using rectangular coordinates
 genMW = str2double(results{2}{3})/100;
 genMVAR = str2double(results{2}{4})/100;
 loadMW = str2double(results{2}{5})/100;
