@@ -1,12 +1,8 @@
-simauto = actxserver('pwrworld.SimulatorAuto');
-
 % Automatically create fake measurements using PowerWorld
 % Preemptively convert to per unit
 
-% NOTE: Check case file path before running
-simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb')
-
-simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\Ybus_14AC.m",NO)');
+% Automatically save 
+simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');
 
 simauto.RunScriptCommand('EnterMode(Run)');
 
@@ -24,8 +20,6 @@ genMW = str2double(results{2}{3})/100;
 genMVAR = str2double(results{2}{4})/100;
 loadMW = str2double(results{2}{5})/100;
 loadMVAR = str2double(results{2}{6})/100;
-
-simauto.CloseCase();
 
 % Get rid of NaN so you can calculate gen - load
 for a = 1:numbus

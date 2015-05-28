@@ -14,7 +14,7 @@ example_14bus_IEEE_partitions
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-YBus_14AC
+YBus
 %Ybus = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);
 B = imag(Ybus);
