@@ -1,4 +1,17 @@
+clc
+clear all
+
 % IEEE 118-bus case
+% NOTES:
+% 1. Changed line 69 to be 42-29-2 instead of both 68/69 being designated as 42-29-1
+% 2. Changed line 81 to be 49-66-2
+% 3. Changed line 83 to be 49-54-2
+% 4. Changed line 98 to be 56-58-2
+% 5. Changed line 97 to be 56-59-2
+% 6. Changed line 132 to be 77-80-2
+% 7. Changed line 152 to be 89-92-2
+% 8. Changed line 154 to be 89-90-2
+
 
 simauto = actxserver('pwrworld.SimulatorAuto');
 
@@ -6,7 +19,10 @@ simauto = actxserver('pwrworld.SimulatorAuto');
 % Preemptively convert to per unit
 
 % NOTE: Check case file path before running
-simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 bus.pwb')
+simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 bus_2parts.pwb')
+
+% Automatically save Ybus
+simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');
 
 simauto.RunScriptCommand('EnterMode(Run)');
 
@@ -28,34 +44,15 @@ fieldarray = {'BusNum','BusNum:1','LineCircuit','LineR','LineX','LineC'}; %at fr
 results = simauto.GetParametersMultipleElement('branch',fieldarray,'');
 lines = [str2double(results{2}{1}) str2double(results{2}{2}) str2double(results{2}{3})...
          str2double(results{2}{4}) str2double(results{2}{5}) str2double(results{2}{6})];
-
-% AC line data
-lines1 = [1 2 1 0.01938 0.05917 0.0528;
-          1 5 1 0.05403 0.22304 0.0492;
-          2 5 1 0.05695 0.17388 0.0346;
-          % Tie lines
-          23 24 1 0.01350 0.04920 0.04980; % CollCrnr to Trenton
-          65 68 1 0.00138 0.01600 0.63800; % Muskngum to Sporn
-          49 69 1 0.09850 0.32400 0.08280; % Philo to Sporn
-          ];
-     
-lines2 = [3 4 1 0.06701 0.17103 0.0128;
-          4 7 1 0 0.20912 0;
-          7 8 1 0 0.17615 0;
-          % Tie lines
-          2 3 1 0.04699 0.19797 0.0438;
-          4 5 1 0.01335 0.04211 0;
-          4 9 1 0 0.55618 0;
-          7 9 1 0 0.11001 0];
+numlines = size(lines,1);     
 
 % list of adjacent buses
-adjbuses = zeros(numbus,numbus);
-b = 1;
-for a = 1:numlines
-    adjbuses(numlines(a,1),numlines
-    
-end
-
+% adjbuses = zeros(numbus,numbus);
+% b = 1;
+% for a = 1:numlines
+%     adjbuses(numlines(a,1),numlines
+%     
+% end
 
 adjbuses = [1 2 5 0 0 0;
             2 1 3 4 5 0;
@@ -75,159 +72,83 @@ adjbuses = [1 2 5 0 0 0;
 %% Full measurement information from PowerWorld AC power flow results
 
 % Partition 1
-% x1_k = [bus1 bus2 bus3' bus4' bus5 bus6']
-allbuses1 = [1; 2; 3; 4; 5; 6];
+% Don't forget to include the overlap buses!
+allbuses1 = [(1:23).'; (25:47).'; (48:58).'; (60:67).'; (113:115).'; 117]; % does not include overlap buses yet
 numbus1 = size(allbuses1,1);
-alltype1 = {'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'v'; 'v'; 'v';
-            'p'; 'q'; 'p'; 'q'; 'p'; 'q';
-            'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'
-            };
+
+% Get AC line data for Partition 1
+lines1 = [];
+for a = 1:numlines
+    if ismember(lines(a,1),allbuses1)==1 || ismember(lines(a,2),allbuses1)==1
+        lines1 = [lines1; lines(a,:)]; 
+    end
+end
+numlines1 = size(lines1,1);
+
+alltype1(1:2*numlines1,:) = repmat({'pf'; 'qf'}, [numlines1 1]);
+alltype1(2*numlines1+(1:numbus1),:) = repmat({'v'}, [numbus1 1]);
+alltype1(2*numlines1+numbus1+1:(2*numlines1+3*numbus1),:)= repmat({'p'; 'q'}, [numbus1 1]);
+
 allR1 = diag(0.01^2*ones(1,size(alltype1,1)));        
-allindices1 = [1 2 1;
-               1 2 1;
-               1 5 1;
-               1 5 1;
-               2 5 1;
-               2 5 1;
-               1 0 0;
-               2 0 0;
-               5 0 0;
-               1 0 0;
-               1 0 0;
-               2 0 0;
-               2 0 0;
-               5 0 0;
-               5 0 0;
-               % Boundary measurements
-               2 3 1;
-               2 3 1;
-               5 4 1;
-               5 4 1;
-               5 6 1;
-               5 6 1
-               ];
+
+% FIX: Need to include those boundary measurements
+allindices1 = zeros(2*numlines1+3*numbus1,3);
+for a = 1:numlines1
+    allindices1((2*a-1):(2*a),:) = [lines1(a,1:3); lines1(a,1:3)]; 
+end
+for a = 1:numbus1
+    allindices1(2*numlines1+a,1) = allbuses1(a);
+end
+for a = 1:numbus1
+    allindices1(2*numlines1+numbus1+((2*a-1):(2*a)),1) = allbuses1(a);
+end                     
 
 %% Partition 2
-% x2_k = [bus2' bus3 bus4 bus5' bus7 bus8 bus9']
-allbuses2 = [2; 3; 4; 5; 7; 8; 9];
+allbuses2 = [24; 58; (68:112).'; 116; 118];
 numbus2 = size(allbuses2,1);
-alltype2 = {'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'v'; 'v'; 'v'; 'v';
-            'p'; 'q'; 'p'; 'q'; 'p'; 'q'; 'p'; 'q';
-            'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'};
-allR2 = diag(0.01^2*ones(1,size(alltype2,1)));        
-allindices2 = [3 4 1;
-               3 4 1;
-               4 7 1;
-               4 7 1;
-               7 8 1;
-               7 8 1;
-               3 0 0;
-               4 0 0;
-               7 0 0;
-               8 0 0;
-               3 0 0;
-               3 0 0;
-               4 0 0;
-               4 0 0;
-               7 0 0;
-               7 0 0;
-               8 0 0;
-               8 0 0;
-               3 2 1;
-               3 2 1;
-               4 5 1;
-               4 5 1;
-               7 9 1;
-               7 9 1];
 
-%% Partition 3
-% x3_k = [bus5' bus6 bus10' bus11 bus12 bus13 bus14']
-allbuses3 = [5; 6; 10; 11; 12; 13; 14];
-numbus3 = size(allbuses3,1);
-alltype3 = {'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'v'; 'v'; 'v'; 'v';
-            'p'; 'q'; 'p'; 'q'; 'p'; 'q'; 'p'; 'q';
-            'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'};
-allR3 = diag(0.01^2*ones(1,size(alltype3,1)));        
-allindices3 = [6 11 1;
-               6 11 1;
-               6 12 1;
-               6 12 1;
-               6 13 1; 
-               6 13 1;
-               12 13 1;
-               12 13 1;
-               6 0 0;
-               11 0 0;
-               12 0 0;
-               13 0 0;
-               6 0 0;
-               6 0 0;
-               11 0 0;
-               11 0 0;
-               12 0 0;
-               12 0 0;
-               13 0 0;
-               13 0 0;
-               % Boundary measurements
-               6 5 1;
-               6 5 1;
-               11 10 1;
-               11 10 1;
-               13 14 1;
-               13 14 1];
+% Get AC line data for Partition 2    
+lines2 = [];
+for a = 1:numlines
+    if ismember(lines(a,1),allbuses2)==1 || ismember(lines(a,2),allbuses2)==1
+        lines2 = [lines2; lines(a,:)]; 
+    end
+end
+numlines2 = size(lines2,1);
 
-%% Partition 4
-% x4_k = [bus4' bus7' bus9 bus10 bus11' bus13' bus14]
-allbuses4 = [4; 7; 9; 10; 11; 13; 14];
-numbus4 = size(allbuses4,1);
-alltype4 = {'pf'; 'qf'; 'pf'; 'qf'; 'v'; 'v'; 'v';
-            'p'; 'q'; 'p'; 'q'; 'p'; 'q';
-            'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'; 'pf'; 'qf'};
-allR4 = diag(0.01^2*ones(1,size(alltype4,1)));         
-allindices4 = [9 10 1;
-               9 10 1;
-               9 14 1;
-               9 14 1;
-               9 0 0;
-               10 0 0;
-               14 0 0;
-               9 0 0;
-               9 0 0;
-               10 0 0;
-               10 0 0;
-               14 0 0;
-               14 0 0;
-               % Boundary measurements
-               9 4 1;
-               9 4 1;
-               9 7 1;
-               9 7 1;
-               10 11 1;
-               10 11 1;
-               14 13 1;
-               14 13 1];
+alltype2(1:2*numlines2,:) = repmat({'pf'; 'qf'}, [numlines2 1]);
+alltype2(2*numlines2+1:(2*numlines2+numbus2),:) = repmat({'v'}, [numbus2 1]);
+alltype2(2*numlines2+numbus2+1:(2*numlines2+3*numbus2),:)= repmat({'p'; 'q'}, [numbus2 1]);
+
+allR2 = diag(0.01^2*ones(1,size(alltype2,1)));
+
+% FIX: Need to include those boundary measurements
+allindices2 = zeros(2*numlines2+3*numbus2,3);
+for a = 1:numlines2
+    allindices2((2*a-1):(2*a),:) = [lines2(a,1:3); lines2(a,1:3)]; 
+end
+for a = 1:numbus2
+    allindices2(2*numlines2+a,1) = allbuses2(a);
+end
+for a = 1:numbus2
+    allindices2(2*numlines2+numbus2+((2*a-1):(2*a)),1) = allbuses2(a);
+end
 
 % Automatically pull "measurements" from PowerWorld case
-autoMeas
+autoMeas2
 
 simauto.CloseCase();
 
 % Slack buses (one for each partition)
 slack1 = 1;
-slack2 = 3;
-slack3 = 6;
-slack4 = 9;
+slack2 = globalSlack;
 busIndex1 = (1:numbus1).';
 busIndex2 = (1:numbus2).';
-busIndex3 = (1:numbus3).';
-busIndex4 = (1:numbus4).';
 slackIndex1 = busIndex1(allbuses1==slack1);
 slackIndex2 = busIndex2(allbuses2==slack2);
-slackIndex3 = busIndex3(allbuses3==slack3);
-slackIndex4 = busIndex4(allbuses4==slack4);
            
 %% Aggregated measurements
-z = [allz1; allz2; allz3; allz4];
+z = [allz1; allz2];
 R = diag(0.01^2*ones(1,size(z,1)));
-type = [alltype1; alltype2; alltype3; alltype4];
-indices = [allindices1; allindices2; allindices3; allindices4];
+type = [alltype1; alltype2];
+indices = [allindices1; allindices2];

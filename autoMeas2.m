@@ -39,11 +39,7 @@ busMVAR = genMVAR - loadMVAR;
 
 numMeas1 = size(allindices1,1);
 numMeas2 = size(allindices2,1);
-numMeas3 = size(allindices3,1);
-numMeas4 = size(allindices4,1);
 allz1 = getMeas(lines,numMeas1,allindices1,alltype1,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
 allz2 = getMeas(lines,numMeas2,allindices2,alltype2,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
-allz3 = getMeas(lines,numMeas3,allindices3,alltype3,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
-allz4 = getMeas(lines,numMeas4,allindices4,alltype4,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
 
 

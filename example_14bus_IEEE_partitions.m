@@ -10,6 +10,9 @@ simauto = actxserver('pwrworld.SimulatorAuto');
 % NOTE: Check case file path before running
 simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb')
 
+% Automatically save Ybus
+simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');
+
 busIndex = (1:14).';
 buses = (1:14).';
 numbus = size(buses,1);
