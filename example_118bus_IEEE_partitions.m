@@ -123,7 +123,7 @@ for a = 1:numlines
     end
 end
 % Then also include the tie lines
-lines2 = [lines2; tielines12];
+lines2 = [lines2; tielines1];
 numlines2 = size(lines2,1);
 
 alltype2(1:2*numlines2,:) = repmat({'pf'; 'qf'}, [numlines2 1]);
