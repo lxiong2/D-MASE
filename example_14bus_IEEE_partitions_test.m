@@ -2,16 +2,14 @@
 % see topology and measurement data from Korres 2011 
 % "A distributed multiarea state estimation" 
 
-clc
-clear all
-
 simauto = actxserver('pwrworld.SimulatorAuto');
 
 % Automatically create fake measurements using PowerWorld
 % Preemptively convert to per unit
 
 % NOTE: Check case file path before running
-simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb')
+%simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb')
+simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb')
 
 % Automatically save Ybus
 simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');
@@ -39,11 +37,17 @@ lines = [str2double(results{2}{1}) str2double(results{2}{2}) str2double(results{
 numlines = size(lines,1);     
 
 % Tie lines
-tielines1 = [2 3 1 0.04699 0.19797 0.0438;
+% tielines1 = [2 3 1 0.04699 0.19797 0.0438;
+%              2 4 1 0.05811 0.17632 0.034;
+%              4 5 1 0.01335 0.04211 0;
+%              5 6 1 0 0.25202 0];
+
+tielines1 = [2 3 1 0.02 0.04 0.0438;
+             2 3 2 0.01 0.03 0.0438;
              2 4 1 0.05811 0.17632 0.034;
              4 5 1 0.01335 0.04211 0;
              5 6 1 0 0.25202 0];
-        
+
 tielines2 = [2 3 1 0.04699 0.19797 0.0438;
              4 5 1 0.01335 0.04211 0;
              4 9 1 0 0.55618 0;

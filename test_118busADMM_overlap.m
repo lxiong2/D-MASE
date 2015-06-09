@@ -28,7 +28,7 @@ B2 = B(allbuses2,allbuses2);
 numArea = 2;
 numPart = 2;
 iter = 1;
-maxiter = 5;
+maxiter = 2;
 rho = 1; % step size
 
 % Initialize each partition's state vectors

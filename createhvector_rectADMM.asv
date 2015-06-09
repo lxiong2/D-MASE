@@ -56,17 +56,13 @@ for a = 1:size(type_a,1)
         % Find the indices of the lines that have the same to and from
         % buses
         paraLines = intersect(find(lines(:,1)==indices_a(a,1)),find(lines(:,2)==indices_a(a,2)));
-        if size(paraLines,1) == 1 %no multiple lines (or if the matrix is empty)
+        if size(paraLines,1) == 1 %no multiple lines
             h(a) = -G_a(m,n)*(e(m)^2+f(m)^2)+G_a(m,n)*(e(m)*e(n)+f(m)*f(n))+B_a(m,n)*(f(m)*e(n)-e(m)*f(n));
         % Look ahead by 2 measurements. If it's a multiple line, then use
         % current divider to calculate the PF based on their impedances.
         else %multiple lines
-            line1Imped = lines(paraLines(1),4)+1i*lines(paraLines(1),5);
-            line2Imped = lines(paraLines(2),4)+1i*lines(paraLines(2),5);
-            totalImped = sum(lines(paraLines,4))+1i*sum(lines(paraLines,5));
-            h(a) = line2Imped/totalImped*(-G_a(m,n)*(e(m)^2+f(m)^2)+G_a(m,n)*(e(m)*e(n)+f(m)*f(n))+B_a(m,n)*(f(m)*e(n)-e(m)*f(n)));
-            
-            h(a+2) = line1Imped/totalImped*(-G_a(m,n)*(e(m)^2+f(m)^2)+G_a(m,n)*(e(m)*e(n)+f(m)*f(n))+B_a(m,n)*(f(m)*e(n)-e(m)*f(n)));
+            h(a) = -G_a(m,n)*(e(m)^2+f(m)^2)+G_a(m,n)*(e(m)*e(n)+f(m)*f(n))+B_a(m,n)*(f(m)*e(n)-e(m)*f(n));
+            h(a+2) = 
         end
     % Reactive power flow measurements 
     elseif strcmp(type_a(a),'qf') == 1
