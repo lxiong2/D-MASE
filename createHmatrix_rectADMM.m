@@ -36,7 +36,7 @@ for a = 1:size(type,1)
     elseif strcmp(type(a),'pf') == 1
         numPFmeas = numPFmeas + 1;
         indPFmeas = indices(a,:);
-        [dPijde, dPijdf] = realPowerFlowMeas_rectADMM(e,f,G_a,B_a,buses_a,indPFmeas);
+        [dPijde, dPijdf] = realPowerFlowMeas_rectADMM(e,f,G_a,B_a,buses_a,lines,indPFmeas);
         H(a,:) = [dPijde dPijdf];
     % Reactive power flow measurements [dQijdth dQijdV]   
     elseif strcmp(type(a),'qf') == 1

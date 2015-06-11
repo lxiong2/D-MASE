@@ -53,38 +53,54 @@ for a = 1:size(type_a,1)
     elseif strcmp(type_a(a),'pf') == 1
         m = busIndex_a(buses_a==indices_a(a,1));
         n = busIndex_a(buses_a==indices_a(a,2));
+        ckt = indices_a(a,3);
         % Find the indices of the lines that have the same to and from
-        % buses
-        paraLines = intersect(find(lines(:,1)==indices_a(a,1)),find(lines(:,2)==indices_a(a,2)));
+        % buses or vice versa
+        paraLines1 = intersect(find(lines(:,1)==indices_a(a,1)),find(lines(:,2)==indices_a(a,2)));
+        paraLines2 = intersect(find(lines(:,2)==indices_a(a,1)),find(lines(:,1)==indices_a(a,2)));
+        paraLines = [paraLines1; paraLines2];
         if size(paraLines,1) == 1 %no multiple lines (or if the matrix is empty)
-            h(a) = -G_a(m,n)*(e(m)^2+f(m)^2)+G_a(m,n)*(e(m)*e(n)+f(m)*f(n))+B_a(m,n)*(f(m)*e(n)-e(m)*f(n));
+            % See Decentralized ADMM formulation.docx for more details
+            h(a) = -G_a(m,n)*(e(m)^2+f(m)^2)+G_a(m,n)*(e(m)*e(n)+f(m)*f(n))+B_a(m,n)*(f(m)*e(n)-e(m)*f(n)); 
         % Look ahead by 2 measurements. If it's a multiple line, then use
         % current divider to calculate the PF based on their impedances.
         else %multiple lines
-            line1Imped = lines(paraLines(1),4)+1i*lines(paraLines(1),5);
-            line2Imped = lines(paraLines(2),4)+1i*lines(paraLines(2),5);
-            totalImped = sum(lines(paraLines,4))+1i*sum(lines(paraLines,5));
-            h(a) = line2Imped/totalImped*(-G_a(m,n)*(e(m)^2+f(m)^2)+G_a(m,n)*(e(m)*e(n)+f(m)*f(n))+B_a(m,n)*(f(m)*e(n)-e(m)*f(n)));
-            
-            h(a+2) = line1Imped/totalImped*(-G_a(m,n)*(e(m)^2+f(m)^2)+G_a(m,n)*(e(m)*e(n)+f(m)*f(n))+B_a(m,n)*(f(m)*e(n)-e(m)*f(n)));
+            lineNum = intersect(paraLines,find(lines(:,3)==ckt));
+            Zeq = lines(lineNum,4)+1i*lines(lineNum,5);         
+            g = real(1/Zeq);
+            b = imag(1/Zeq);
+            % See PowerWorld documentation for derivation
+            gmn = -g;
+            bmn = -b;
+            gmm = g;
+            h(a) = gmm*(e(m)^2+f(m)^2)+gmn*(e(m)*e(n)+f(m)*f(n))+bmn*(f(m)*e(n)-e(m)*f(n));
         end
     % Reactive power flow measurements 
     elseif strcmp(type_a(a),'qf') == 1
         m = busIndex_a(buses_a==indices_a(a,1));
         n = busIndex_a(buses_a==indices_a(a,2));
-        for c = 1:size(lines,1)
-            if sum(indices_a(a,1:3) == lines(c,1:3)) == 3 || ...
-               ((indices_a(a,2) == lines(c,1)) && ...
-               (indices_a(a,1) == lines(c,2)) && ...
-               (indices_a(a,3) == lines(c,3)))
-                lineNum = c;
-            end
-        end
+        ckt = indices_a(a,3);
+        % Find the indices of the lines that have the same to and from
+        % buses or vice versa
+        paraLines1 = intersect(find(lines(:,1)==indices_a(a,1)),find(lines(:,2)==indices_a(a,2)));
+        paraLines2 = intersect(find(lines(:,2)==indices_a(a,1)),find(lines(:,1)==indices_a(a,2)));
+        paraLines = [paraLines1; paraLines2];
+        lineNum = intersect(paraLines,find(lines(:,3)==ckt));
         if lines(lineNum,6) ~= 0
             bsi = lines(lineNum,6)/2;
         else bsi = 0;
         end
-        h(a) = (B_a(m,n)-bsi)*(e(m)^2+f(m)^2)-B_a(m,n)*(e(m)*e(n)+f(m)*f(n))+G_a(m,n)*(f(m)*e(n)-e(m)*f(n));
+        if size(paraLines,1) == 1  %no multiple lines (or if the matrix is empty)
+            h(a) = (B_a(m,n)-bsi)*(e(m)^2+f(m)^2)-B_a(m,n)*(e(m)*e(n)+f(m)*f(n))+G_a(m,n)*(f(m)*e(n)-e(m)*f(n));
+        else %multiple lines
+            Zeq = lines(lineNum,4)+1i*lines(lineNum,5);         
+            g = real(1/Zeq);
+            b = imag(1/Zeq);
+            gmn = -g;
+            bmn = -b;
+            bmm = b+bsi;
+            h(a) = -bmm*(e(m)^2+f(m)^2)-bmn*(e(m)*e(n)+f(m)*f(n))-gmn*(e(m)*f(n)-f(m)*e(n));
+        end
     % Voltage magnitude measurements SQUARED (NOTE: SQUARED, so to get the
     % actual V magnitude, take the sqrt)
     elseif strcmp(type_a(a),'v') == 1

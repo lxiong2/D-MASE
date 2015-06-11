@@ -14,6 +14,7 @@ maxiter = 10;
 %example_14bus_IEEE_rect
 %example_14bus_IEEE_rectADMM
 example_14bus_IEEE_partitions
+%example_14bus_IEEE_partitions_test
 
 % flat start for AC
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];
@@ -25,7 +26,7 @@ deltax(:,1) = ones(size(x,1),1);
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-YBus_14AC
+YBus
 %YBus_14DC
 %Ybus2 = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);
