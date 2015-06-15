@@ -5,16 +5,15 @@
 % Assumes R = 0 (effectively DC)
 % Uses DC equations for h and Haa
 
+% NOTE: for some reason, the 118 PW case's slack is not set to 0.
+
 clc
 clear all
 
 k = 1;
 maxiter = 20;
 
-%example_14bus_IEEE_rect
-%example_14bus_IEEE_rectADMM
-%example_14bus_IEEE_partitions
-example_14bus_IEEE_partitions_test
+example_118bus_IEEE_partitions
 
 % flat start for AC
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];

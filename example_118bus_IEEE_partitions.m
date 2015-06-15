@@ -22,6 +22,9 @@ simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\
 
 simauto.RunScriptCommand('EnterMode(Run)');
 
+% Run rectangular Newton-Raphson power flow
+simauto.RunScriptCommand('SolvePowerFlow(RECTNEWT,,,,)');
+
 % Get the list of buses in the system
 fieldarray = {'BusNum','BusSlack'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
@@ -30,8 +33,9 @@ numbus = size(buses,1);
 busIndex = (1:numbus).';
 
 % Get the slack bus number
-globalSlack = buses(strcmp(results{2}{2},'YES'));
-globalSlackArea = 2;
+%globalSlack = buses(strcmp(results{2}{2},'YES'));
+globalSlack = 1;
+globalSlackArea = 1;
 globalSlackIndex = busIndex(buses == globalSlack);
 
 %% Line Information
@@ -73,8 +77,8 @@ adjbuses = [(1:numbus).' adjbuses];
 
 % Partition 1
 % Don't forget to include the overlap buses!
-buses1 = [(1:23).'; (25:47).'; (48:58).'; (60:67).'; (113:115).'; 117];
-tiebuses1 = [24; 68; 69];
+buses1 = [24; 58; (68:112).'; 116; 118];
+tiebuses1 = [23; 47; 49; 65];
 allbuses1 = sort([buses1; tiebuses1]);
 numareabus1 = size(buses1,1); % only buses in area
 numbus1 = size(allbuses1,1); % includes buses in area + tie buses
@@ -111,8 +115,8 @@ end
 
 %% Partition 2
 % The non-chronological bus numbers are the boundary states
-buses2 = [24; 58; (68:112).'; 116; 118];
-tiebuses2 = [23; 47; 49; 65];
+buses2 = [(1:23).'; (25:47).'; (48:58).'; (60:67).'; (113:115).'; 117];
+tiebuses2 = [24; 68; 69];
 allbuses2 = sort([buses2; tiebuses2]);
 numareabus2 = size(buses2,1); % only buses in area
 numbus2 = size(allbuses2,1); % includes buses in area + tie buses

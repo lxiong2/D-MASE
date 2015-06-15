@@ -6,7 +6,6 @@ dQijde = zeros(1,size(buses_a,1));
 dQijdf = zeros(1,size(buses_a,1));
 busIndex_a = (1:size(buses_a,1)).';
 bsi = 0;
-lineNum = 0;
 
 m = busIndex_a(buses_a==indQFmeas(1,1));
 n = busIndex_a(buses_a==indQFmeas(1,2));

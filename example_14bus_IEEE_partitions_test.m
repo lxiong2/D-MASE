@@ -16,6 +16,9 @@ simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\
 
 simauto.RunScriptCommand('EnterMode(Run)');
 
+% Run rectangular Newton-Raphson power flow
+simauto.RunScriptCommand('SolvePowerFlow(RECTNEWT,,,,)');
+
 % Get the list of buses in the system
 fieldarray = {'BusNum','BusSlack'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
@@ -37,31 +40,36 @@ lines = [str2double(results{2}{1}) str2double(results{2}{2}) str2double(results{
 numlines = size(lines,1);     
 
 % Tie lines
-% tielines1 = [2 3 1 0.04699 0.19797 0.0438;
-%              2 4 1 0.05811 0.17632 0.034;
-%              4 5 1 0.01335 0.04211 0;
-%              5 6 1 0 0.25202 0];
+tielines = [2 3 1 0.02 0.05 0.0438;
+            2 3 2 0.02 0.05 0.0438;
+            2 4 1 0.05811 0.17632 0.034;
+            4 5 1 0.01335 0.04211 0;
+            4 9 1 0 0.55618 0;
+            5 6 1 0 0.25202 0;
+            7 9 1 0 0.11001 0;
+            10 11 1 0.08205 0.19207 0;
+            13 14 1 0.17093 0.34802 0];
 
-tielines1 = [2 3 1 0.02 0.04 0.0438;
-             2 3 2 0.01 0.03 0.0438;
-             2 4 1 0.05811 0.17632 0.034;
-             4 5 1 0.01335 0.04211 0;
-             5 6 1 0 0.25202 0];
-
-tielines2 = [2 3 1 0.02 0.04 0.0438;
-             2 3 2 0.01 0.03 0.0438;
-             4 5 1 0.01335 0.04211 0;
-             4 9 1 0 0.55618 0;
-             7 9 1 0 0.11001 0];
+tielines1 = [tielines(1,:);
+             tielines(2,:);
+             tielines(3,:);
+             tielines(4,:);
+             tielines(6,:)];
          
-tielines3 = [5 6 1 0 0.25202 0;
-             10 11 1 0.08205 0.19207 0;
-             13 14 1 0.17093 0.34802 0];
+tielines2 = [tielines(1,:);
+             tielines(2,:);
+             tielines(4,:);
+             tielines(5,:);
+             tielines(7,:)];
+             
+tielines3 = [tielines(6,:);
+             tielines(8,:);
+             tielines(9,:)];
          
-tielines4 = [4 9 1 0 0.55618 0;
-             7 9 1 0 0.11001 0;
-             10 11 1 0.08205 0.19207 0;
-             13 14 1 0.17093 0.34802 0];
+tielines4 = [tielines(5,:);
+             tielines(7,:);
+             tielines(8,:);
+             tielines(9,:)];
 
 % list of adjacent buses
 % NOTE: preset the size of adjbuses to be 15, may need to change that for

@@ -86,7 +86,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     h1(:,iter) = temph1;
     dx1_k(:,iter+1) = -Gain1(:,:,iter)\g1(:,iter);
     dx1_k(numbus1+slackIndex1,iter+1) = 0;
-    x1_k(:,iter+1) = x1_k(:,iter) + dx1_k(:,iter+1);
+    x1_k(:,iter+1) = x1_k(:,iter) + dx1_k(:,iter+1)
     
     % Partition 2 calculations
     [tempf2, tempGain2, g2, tempH2, temph2] = myfun_Part2_overlap(buses, numbus, allbuses2, adjbuses, lines2, slackIndex2, G2, B2, allz2, allR2, alltype2, allindices2, x2_k(:,iter), c2_k(:,iter), y2_kl(:,iter), rho);
