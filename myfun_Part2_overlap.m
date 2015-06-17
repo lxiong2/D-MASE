@@ -35,12 +35,18 @@ f = x_a(numbus_a+1:(2*numbus_a)); % take out slack bus for Areas 2-4
 h2 = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 
 H2 = createHmatrix_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
+% size(H2(:,1:numbus_a))
+% size(H2(:,(numbus_a+1):(numbus_a+slackIndex_a-1)))
+% size(zeros(size(z_a,1),1))
+% size(H2(:,(numbus_a+slackIndex_a+1):2*numbus_a))
 H2 = [H2(:,1:numbus_a) H2(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) zeros(size(z_a,1),1) H2(:,(numbus_a+slackIndex_a+1):2*numbus_a)];
 
 f2 = (z_a-h2).'*(R_a\(z_a-h2));
 Gain2 = 2*H2.'*(R_a\H2)+rho;
 
-% size(-2*H2.'*(R_a\(z_a-h2)))
+% size(-2*H2.')
+% size(R_a)
+% size(z_a-h2)
 % size(y_a)
 % size(x_a)
 % size(c_a)

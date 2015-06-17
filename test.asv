@@ -1,29 +1,16 @@
-%% Debug 118 ADMM H2
-
-clc
-clear all
-
 load('centralH_iter1.mat')
 
 numbus = 118;
-slack2 = 69;
 buses2 = [24; (68:112).'; 116; 118];
 tiebuses2 = [23; 47; 49; 65];
 allbuses2 = sort([buses2; tiebuses2]);
 
-newH = zeros(size(H,1),numbus*2);
-newH(:,1:numbus) = H(:,1:numbus);
-newH(:,numbus+1:numbus*2) = [H(:,numbus+(1:slack2-1)) zeros(size(H,1),1) H(:,numbus+(slack2+1:numbus))]
+H = 
 
-correctH2 = [newH(435:734,allbuses2,1) newH(435:734,numbus+allbuses2,1)]
+correctH2 = [H(434:734,allbuses2,1) H(434:734,numbus+allbuses2,1)]
 
-load('correctH2.mat')
-firstH2 = correctH2;
-load('myH2.mat')
-secH2 = myH2;
-diff = firstH2 - secH2
 
-%% Check how parallel power flows are calculated
+
 % V1 = 1;
 % V2 = 1.044999957975790;
 % V5 = 1.028092514790582;
