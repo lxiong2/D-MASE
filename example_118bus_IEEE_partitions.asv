@@ -106,15 +106,15 @@ for a = 1:numParts
     allR{a} = diag(0.01^2*ones(1,size(alltype{a},1)));
 
     % FIX: Need to include those boundary measurements
-    allindices{a} = zeros(2*numarealines{a}+3*numonlybus{a},3);
+    temp = zeros(2*numarealines{a}+3*numonlybus{a},3)
     for b = 1:numarealines{a}
-        temp((2*b-1):(2*b),:) = [arealines{a}(b,1:3); arealines{a}(b,1:3)]; 
+        temp((2*b-1):(2*b),:) = [lines1(b,1:3); lines1(b,1:3)]; 
     end
     for b = 1:numareabus1
         temp(2*numarealines{a}+b,1) = onlybuses{a,b};
     end
     for b = 1:numareabus1
-        temp(2*numarealines{a}+numonlybus{a}+((2*b-1):(2*b)),1) = onlybuses{a,b};
+        temp(2*numarealines{a}+numonlybus{a}+((2*b-1):(2*b)),1) = onlybuses1(b);
     end
     allindices{a} = temp;
     

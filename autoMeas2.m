@@ -37,9 +37,9 @@ end
 busMW = genMW - loadMW;
 busMVAR = genMVAR - loadMVAR;
 
-numMeas1 = size(allindices1,1);
-numMeas2 = size(allindices2,1);
-allz1 = getMeas(lines,numMeas1,allindices1,alltype1,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
-allz2 = getMeas(lines,numMeas2,allindices2,alltype2,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
-
-
+numMeas = cell(numParts,1);
+allz = cell(numParts,1);
+for a = 1:numParts
+    numMeas{a} = size(allindices{a},1);
+    allz{a} = getMeas(lines,numMeas{a},allindices{a},alltype{a},MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
+end
