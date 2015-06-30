@@ -28,7 +28,7 @@ function [f2, Gain2, g2, H2, h2] = myfun_Part2_overlap(buses, numbus, allbuses_a
 
 %% Slack bus zeroed out
 numbus_a = size(allbuses_a,1);
-e = x_a(1:numbus_a);
+e = x_a(1:numbus_a,1);
 f = x_a(numbus_a+1:(2*numbus_a)); % take out slack bus for Areas 2-4
 
 %% Nonlinear h's
