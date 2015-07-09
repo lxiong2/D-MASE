@@ -1,17 +1,8 @@
 %% Overwrite the graph text file
-fid = fopen('graph_partitions.txt','r');
-numParts = 2;
+numParts = 16;
+METIS_out = dlmread('graph_16parts.txt','\n');
 
+onlybuses = cell(numParts,1);
 for a = 1:numParts
-    if 
-    partitions(
+    onlybuses{a} = find(METIS_out == (a-1));
 end
-
-% for a = 1:numbus
-%     adjbuses = find(temp(a,:) ~= 0)
-%     str = repmat('%d ',[1 size(adjbuses,2)])
-%     fprintf(fid, str, adjbuses);
-%     fprintf(fid, '\n');
-% end
-
-fid = fclose(fid);

@@ -125,13 +125,15 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         end
     end
     allStates(:,2) = [newe; newf];
-      
-    x_k{1}(:,iter+1) = [allStates(areabuses{1},1); allStates(numbus+areabuses{1},1)];
-    x_k{2}(:,iter+1) = [allStates(areabuses{2},2); allStates(numbus+areabuses{2},2)];
+    
+    for a = 1:numParts
+        x_k{a}(:,iter+1) = [allStates(areabuses{a},a); allStates(numbus+areabuses{a},a)];
+    end
     
     % Look at allStates and average the buses that overlap
     % How global variables are collected and averaged
     % matches up with the global c indexing
+    numDivide = zeros(1,numbus*2);
     for a = 1:numbus*2
         numDivide(a) = sum(allStates(a,:)~=0);
         temp(a) = sum(allStates(a,:));
@@ -144,14 +146,16 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % Remap from global c_k to the indexing for each partition's state
     % vector; get rid of each area's slack bus
     % DEBUG - also need automatic function to do that
-    areac_k{1}(:,iter+1) = [c_k(areabuses{1},iter+1); c_k(numbus+areabuses{1},iter+1)];
-    areac_k{2}(:,iter+1) = [c_k(areabuses{2},iter+1); c_k(numbus+areabuses{2},iter+1)];
-        
-    areay_kl{1}(:,iter+1) = areay_kl{1}(:,iter) + rho*(x_k{1}(:,iter+1) - areac_k{1}(:,iter+1));
-    areay_kl{2}(:,iter+1) = areay_kl{2}(:,iter) + rho*(x_k{2}(:,iter+1) - areac_k{2}(:,iter+1));
+    for a = 1:numParts
+        areac_k{a}(:,iter+1) = [c_k(areabuses{a},iter+1); c_k(numbus+areabuses{a},iter+1)];
+        areay_kl{a}(:,iter+1) = areay_kl{a}(:,iter) + rho*(x_k{a}(:,iter+1) - areac_k{a}(:,iter+1));
+    end
     
-    normres_r(:,iter+1) = (norm(x_k{1}(:,iter+1) - areac_k{1}(:,iter+1)))^2 +...
-                          (norm(x_k{2}(:,iter+1) - areac_k{2}(:,iter+1)))^2;
+    normres_r(:,iter+1) = 0;
+    for a = 1:numParts
+        normres_r(:,iter+1) = normres_r(:,iter+1) + (norm(x_k{a}(:,iter+1) - areac_k{a}(:,iter+1)))^2;
+    end
+    
     normres_s(:,iter+1) = numDivide(:,1).*rho^2*(norm(c_k(:,iter+1) - c_k(:,iter)))^2;
     
     iter = iter+1;

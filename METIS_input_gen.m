@@ -23,14 +23,15 @@ numlines = size(lines,1);
 
 simauto.CloseCase();
 
-% list of adjacent buses
-% NOTE: preset the size of adjbuses to be 15, may need to change that for
-% larger cases
 temp = zeros(numbus,numbus);
+b = 1;
+c = 1;
 for a = 1:numlines
-    temp(lines(a,1),lines(a,2)) = temp(lines(a,1),lines(a,2)) + 1;
-    temp(lines(a,2),lines(a,1)) = temp(lines(a,2),lines(a,1)) + 1;
-end          
+    temp(lines(a,1),b) = lines(a,2);
+    temp(lines(a,2),c) = lines(a,1);
+    b = b + 1;
+    c = c + 1;
+end
 
 %% Overwrite the graph text file
 fid = fopen('graph.txt','w');
@@ -39,10 +40,10 @@ fid = fopen('graph.txt','w');
 fprintf(fid, '%d %d\n', [numbus numlines]);
 
 for a = 1:numbus
-    a
-    adjbuses = find(temp(a,:) ~= 0)
+    temp2 = temp(a,:);
+    adjbuses = temp2(temp2~=0)
     str = repmat('%d ',[1 size(adjbuses,2)]);
-    fprintf(fid, str, [adjbuses]);
+    fprintf(fid, str, adjbuses);
     fprintf(fid, '\n');
 end
 

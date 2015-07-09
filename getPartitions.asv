@@ -85,11 +85,11 @@ elseif option == 2
 elseif option == 3
 
     % NOTE: DELETE LAST BLANK LINE IN TEXT FILE
-    METIS_out = dlmread('graph_4parts.txt','\n').';   % CHANGE THIS DEPENDING ON THE CASE
+    METIS_out = dlmread('graph_2parts.txt','\n').';   % CHANGE THIS DEPENDING ON THE CASE
 
     onlybuses = cell(numParts,1);
     for a = 1:numParts
-        onlybuses{a} = find(METIS_out == (a-1)); % METIS output starts from 0
+        onlybuses{a} = (find(METIS_out == (a-1))); % METIS output starts from 0
     end
     
     % COPIED FROM OPTION 2
