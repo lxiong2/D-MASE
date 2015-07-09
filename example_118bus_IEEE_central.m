@@ -85,9 +85,6 @@ loadMVAR = str2double(results{2}{6})/100;
 
 simauto.CloseCase();
 
-%% Get which buses belong in which partitions
-[onlybuses, tiebuses, tielines] = getPartitions(numParts,buses,areas,numlines,lines,option,filename); % get which buses belong in each area
-
 %% Full measurement information from PowerWorld AC power flow results
 areabuses = cell(numParts,1);
 numareabus = cell(numParts,1);

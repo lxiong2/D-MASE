@@ -32,7 +32,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 50;
+maxiter = 2;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -82,10 +82,12 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
 
     % Do distributed state estimation for each partition
     for a = 1:numParts
-        [tempobjfn, tempGain, tempg] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
+        [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
         Gain{a}(:,:,iter) = tempGain;
         g{a}(:,iter) = tempg;
+        h{a}(:,iter) = temph;
+        H{a}(:,:,iter) = tempH;
         dx_k{a}(:,iter+1) = -Gain{a}(:,:,iter)\g{a}(:,iter);
         dx_k{a}(numareabus{a}+slackIndex{a},iter+1) = 0;
         x_k{a}(:,iter+1) = x_k{a}(:,iter) + dx_k{a}(:,iter+1);
@@ -119,13 +121,13 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     end
     
     % Convert the other areas to the global reference (Area 1 in this case)
-    for a = 1:numbus
-        for b = 2:numParts
+    for b = 2:numParts
+        for a = 1:numbus
             newe(a,b-1) = allStates(a,b)*cos(addSlack(b-1)) - allStates(numbus+a,b)*sin(addSlack(b-1));
             newf(a,b-1) = allStates(numbus+a,b)*cos(addSlack(b-1)) + allStates(a,b)*sin(addSlack(b-1));
         end
+        allStates(:,b) = [newe(:,b-1); newf(:,b-1)];
     end
-    allStates(:,2) = [newe; newf];
     
     for a = 1:numParts
         x_k{a}(:,iter+1) = [allStates(areabuses{a},a); allStates(numbus+areabuses{a},a)];
@@ -166,7 +168,7 @@ figure(1)
 semilogy(sqrt(normres_r))
 hold on
 semilogy(sqrt(normres_s))
-title('2-Partition, 118-Bus State Estimation Consensus Problem')
+title('N-Partition, 118-Bus State Estimation Consensus Problem')
 legend('Primal residual', 'Dual residual')
 
 % figure(2)

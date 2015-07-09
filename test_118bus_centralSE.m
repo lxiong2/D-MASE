@@ -13,6 +13,10 @@ clear all
 k = 1;
 maxiter = 20;
 
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+filename = 'graph_2parts.txt'; % only matters if option = 3
+numParts = 2; % must be at least 2
+
 example_118bus_IEEE_partitions
 
 % flat start for AC

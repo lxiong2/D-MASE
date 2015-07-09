@@ -1,4 +1,4 @@
-function [f, Gain, g] = myfun_overlap(buses, numbus, allbuses_a, adjbuses, lines, slackIndex_a, G_a, B_a, z_a, R_a, type_a, allindices_a, x_a, c_a, y_a, rho)
+function [f, Gain, g, h, H] = myfun_overlap(buses, numbus, allbuses_a, adjbuses, lines, slackIndex_a, G_a, B_a, z_a, R_a, type_a, allindices_a, x_a, c_a, y_a, rho)
 %% Inputs:
 % This function calculates rectangular state estimation
 % Uses rectangular power flow, i.e. V_i = e_i + j*f_i = |V_i| ang (theta_i)
@@ -32,7 +32,7 @@ e = x_a(1:numbus_a,1);
 f = x_a(numbus_a+1:(2*numbus_a));
 
 % Nonlinear h's
-h = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
+h = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines)
 
 H = createHmatrix_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 %Pad the slack column with zeros, so that the calculation of g isn't affected
