@@ -9,8 +9,9 @@ close all
 format long
 
 % Get system parameters and partitions
-numParts = 2;
-option = 1 %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+filename = 'graph_2parts.txt'; % only matters if option = 3
+numParts = 2; % should match filename if option = 3
 
 example_118bus_IEEE_partitions
 
@@ -74,8 +75,8 @@ n = 2*numbus;
 %eps_pri = sqrt(n)*eps_abs + eps_rel*max([norm(x1_k) norm(x2_k) norm(x3_k) norm(x4_k) norm(c_k)])
 %eps_dual = sqrt(n)*eps_abs + eps_rel*max([norm(y1_kl) norm(y2_kl) norm(y3_kl) norm(y4_kl)])
 
-eps_pri = 1e-4
-eps_dual = 1e-4
+eps_pri = 1e-5
+eps_dual = 1e-5
 
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
 

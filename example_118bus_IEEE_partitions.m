@@ -9,9 +9,6 @@
 % 7. Changed line 152 to be 89-92-2
 % 8. Changed line 154 to be 89-90-2
 
-option = 3;
-numParts = 4;
-
 simauto = actxserver('pwrworld.SimulatorAuto');
 
 % Automatically create fake measurements using PowerWorld
@@ -85,7 +82,7 @@ loadMVAR = str2double(results{2}{6})/100;
 simauto.CloseCase();
 
 %% Get which buses belong in which partitions
-[onlybuses, tiebuses, tielines, tiecompare] = getPartitions(numParts,buses,areas,numlines,lines,option); % get which buses belong in each area
+[onlybuses, tiebuses, tielines] = getPartitions(numParts,buses,areas,numlines,lines,option,filename); % get which buses belong in each area
 
 %% Full measurement information from PowerWorld AC power flow results
 areabuses = cell(numParts,1);

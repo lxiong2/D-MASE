@@ -1,4 +1,4 @@
-function [onlybuses,tiebuses,tielines,tiecompare] = getPartitions(numParts,buses,areas,numlines,lines,option)
+function [onlybuses,tiebuses,tielines] = getPartitions(numParts,buses,areas,numlines,lines,option,filename)
 % Option 1: manually enter which buses are in which area
 % Option 2: automatically pull the area numbers from PowerWorld
 % Option 3: use graph partitioner 
@@ -41,51 +41,32 @@ elseif option == 2
     % What buses outside your area are connected to the buses in your area?
     % Those are the overlapping buses
     tiebuses = cell(numParts,1);
+    tielines = cell(numParts,1);
     for a = 1:numParts
         temptie = [];
+        temptieline = [];
         for b = 1:numlines
             % one end of the line has a bus in one partition, and the other
             % end of the line has a bus in a different partition, then you
             % know it's a tie line
             if sum(lines(b,1) == cell2mat(onlybuses(a))) == 1 && sum(lines(b,2) == cell2mat(onlybuses(a))) == 0
                 temptie = [temptie; lines(b,2)];
+                temptieline = [temptieline; lines(b,:)];
             elseif sum(lines(b,2) == cell2mat(onlybuses(a))) == 1 && sum(lines(b,1) == cell2mat(onlybuses(a))) == 0
                 temptie = [temptie; lines(b,1)];
+                temptieline = [temptieline; lines(b,:)];
             end
         end
         % Remove redundant buses from multiple lines
         tiebuses{a} = unique(temptie);
+        tielines{a} = temptieline;
     end
-    
-    % Automatically figure out the tie lines
-    tiecompare = cell(numParts,1);
-    for a = 1:numParts
-        temp = [];
-        for b = 1:numParts
-            if a ~= b
-                temp = [temp; tiebuses{b}];
-            end
-        end
-    tiecompare{a} = temp;
-    end
-	
-    tielines = cell(numParts,1);
-    for a = 1:numParts
-        temptieline = [];
-        for b = 1:numlines
-            if ((sum(lines(b,1) == tiebuses{a}) > 0) && (sum(lines(b,2) == tiecompare{a}) > 0)) || ...
-               ((sum(lines(b,2) == tiebuses{a}) > 0) && (sum(lines(b,1) == tiecompare{a}) > 0))
-                temptieline = [temptieline; lines(b,:)];
-            end
-        end
-        tielines{a} = temptieline; 
-    end   
 
 % Use graph partitioner
 elseif option == 3
 
     % NOTE: DELETE LAST BLANK LINE IN TEXT FILE
-    METIS_out = dlmread('graph_4parts.txt','\n').';   % CHANGE THIS DEPENDING ON THE CASE
+    METIS_out = dlmread(filename,'\n').';   % CHANGE THIS DEPENDING ON THE CASE
 
     onlybuses = cell(numParts,1);
     for a = 1:numParts
@@ -97,44 +78,25 @@ elseif option == 3
     % What buses outside your area are connected to the buses in your area?
     % Those are the overlapping buses
     tiebuses = cell(numParts,1);
+    tielines = cell(numParts,1);
     for a = 1:numParts
         temptie = [];
+        temptieline = [];
         for b = 1:numlines
             % one end of the line has a bus in one partition, and the other
             % end of the line has a bus in a different partition, then you
             % know it's a tie line
             if sum(lines(b,1) == cell2mat(onlybuses(a))) == 1 && sum(lines(b,2) == cell2mat(onlybuses(a))) == 0
                 temptie = [temptie; lines(b,2)];
+                temptieline = [temptieline; lines(b,:)];
             elseif sum(lines(b,2) == cell2mat(onlybuses(a))) == 1 && sum(lines(b,1) == cell2mat(onlybuses(a))) == 0
                 temptie = [temptie; lines(b,1)];
+                temptieline = [temptieline; lines(b,:)];
             end
         end
         % Remove redundant buses from multiple lines
         tiebuses{a} = unique(temptie);
-    end
-
-    % Automatically figure out the tie lines
-    tiecompare = cell(numParts,1);
-    for a = 1:numParts
-        temp = [];
-        for b = 1:numParts
-            if a ~= b
-                temp = [temp; tiebuses{b}];
-            end
-        end
-    tiecompare{a} = temp;
-    end
-	
-    tielines = cell(numParts,1);
-    for a = 1:numParts
-        temptieline = [];
-        for b = 1:numlines
-            if ((sum(lines(b,1) == tiebuses{a}) > 0) && (sum(lines(b,2) == tiecompare{a}) > 0)) || ...
-               ((sum(lines(b,2) == tiebuses{a}) > 0) && (sum(lines(b,1) == tiecompare{a}) > 0))
-                temptieline = [temptieline; lines(b,:)];
-            end
-        end
-        tielines{a} = temptieline; 
+        tielines{a} = temptieline;
     end
     
 end
