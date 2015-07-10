@@ -1,4 +1,4 @@
-function [onlybuses,tiebuses,tielines] = getPartitions(numParts,buses,areas,numlines,lines,option,filename)
+function [onlybuses,tiebuses,tielines,globalSlackArea] = getPartitions(numParts,buses,areas,numlines,lines,option,filename)
 % Option 1: manually enter which buses are in which area
 % Option 2: automatically pull the area numbers from PowerWorld
 % Option 3: use graph partitioner 
@@ -26,7 +26,16 @@ if option == 1
     tielines{2} = [23 24 1 0.01350 0.04920 0.04980;
                    47 69 1 0.08440 0.27780 0.07092;
                    49 69 1 0.09850 0.32400 0.08280;
-                   65 68 1 0.00138 0.01600 0.63800]; 
+                   65 68 1 0.00138 0.01600 0.63800];
+    
+    % Automatically identify the global slack area
+    % i.e. whichever area's state vector contains bus 1
+    globalSlackArea = 0;
+    for a = 1:numParts
+        if sum(onlybuses{a} == 1)
+            globalSlackArea = a;
+        end
+    end
 
 % Automatically get area numbers straight from PowerWorld
 elseif option == 2
@@ -60,6 +69,15 @@ elseif option == 2
         % Remove redundant buses from multiple lines
         tiebuses{a} = unique(temptie);
         tielines{a} = temptieline;
+    end
+    
+    % Automatically identify the global slack area
+    % i.e. whichever area's state vector contains bus 1
+    globalSlackArea = 0;
+    for a = 1:numParts
+        if sum(onlybuses{a} == 1)
+            globalSlackArea = a;
+        end
     end
 
 % Use graph partitioner
@@ -97,6 +115,15 @@ elseif option == 3
         % Remove redundant buses from multiple lines
         tiebuses{a} = unique(temptie);
         tielines{a} = temptieline;
+    end
+    
+    % Automatically identify the global slack area
+    % i.e. whichever area's state vector contains bus 1
+    globalSlackArea = 0;
+    for a = 1:numParts
+        if sum(onlybuses{a} == 1)
+            globalSlackArea = a;
+        end
     end
     
 end

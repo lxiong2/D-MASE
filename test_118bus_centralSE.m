@@ -41,6 +41,7 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
 %     V = x(numbus:(2*numbus-1),k);
     
     % Rectangular AC version
+    tic
     e = x(1:numbus,k);
     f = [0; x(numbus+1:(2*numbus-1),k)];
 
@@ -73,7 +74,10 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     
     % update x and increase iteration count
     x(:,k+1) = x(:,k)+deltax(:,k+1);
+    
+    centralt(k) = toc;
     k = k+1;
+    
 end
 
 x

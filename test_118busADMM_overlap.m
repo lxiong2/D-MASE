@@ -75,9 +75,12 @@ n = 2*numbus;
 %eps_pri = sqrt(n)*eps_abs + eps_rel*max([norm(x1_k) norm(x2_k) norm(x3_k) norm(x4_k) norm(c_k)])
 %eps_dual = sqrt(n)*eps_abs + eps_rel*max([norm(y1_kl) norm(y2_kl) norm(y3_kl) norm(y4_kl)])
 
-eps_pri = 1e-5
-eps_dual = 1e-5
+eps_pri = 1e-5;
+eps_dual = 1e-5;
 
+%centralt = zeros(numParts,1);
+
+tic
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
 
     % Do distributed state estimation for each partition
@@ -163,6 +166,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     
     iter = iter+1;
 end
+centralt = toc;
 
 figure(1)
 semilogy(sqrt(normres_r))

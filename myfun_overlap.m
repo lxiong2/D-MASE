@@ -32,7 +32,7 @@ e = x_a(1:numbus_a,1);
 f = x_a(numbus_a+1:(2*numbus_a));
 
 % Nonlinear h's
-h = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines)
+h = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 
 H = createHmatrix_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 %Pad the slack column with zeros, so that the calculation of g isn't affected

@@ -40,7 +40,6 @@ areas = str2double(results{2}{3});
 % Get the slack bus number
 %globalSlack = buses(strcmp(results{2}{2},'YES'));
 globalSlack = 1;
-globalSlackArea = 1;
 globalSlackIndex = busIndex(buses == globalSlack);
 
 %% Line Information
@@ -86,7 +85,7 @@ loadMVAR = str2double(results{2}{6})/100;
 simauto.CloseCase();
 
 %% Get which buses belong in which partitions
-[onlybuses, tiebuses, tielines] = getPartitions(numParts,buses,areas,numlines,lines,option,filename); % get which buses belong in each area
+[onlybuses, tiebuses, tielines, globalSlackArea] = getPartitions(numParts,buses,areas,numlines,lines,option,filename); % get which buses belong in each area
 
 %% Full measurement information from PowerWorld AC power flow results
 areabuses = cell(numParts,1);
