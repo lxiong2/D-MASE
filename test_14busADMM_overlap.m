@@ -180,7 +180,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         temp = diffSlack(:,a);
         addSlack(a) = mean(temp(temp~=0));
     end
-    
+        
     % Convert the other areas to the global reference (Area 1 in this case)
     for a = 1:numbus
         for b = 2:numArea

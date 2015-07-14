@@ -11,9 +11,9 @@
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % % NOTE: Delete the blank line at the end of graph_XXX.txt
-% filename = 'graph118_4parts(3).txt'; % only matters if option = 3
+% filename = 'graph14_4parts.txt'; % only matters if option = 3
 % numParts = 4; % should match filename if option = 3
-% casename = 118;
+% casename = 14;
 
 simauto = actxserver('pwrworld.SimulatorAuto');
 
@@ -21,7 +21,7 @@ simauto = actxserver('pwrworld.SimulatorAuto');
 % Preemptively convert to per unit
 
 % NOTE: Check case file path before running
-simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 bus_2parts.pwb')
+simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb')
 
 % Automatically save Ybus
 %simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');

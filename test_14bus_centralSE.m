@@ -14,7 +14,8 @@ maxiter = 20;
 %example_14bus_IEEE_rect
 %example_14bus_IEEE_rectADMM
 %example_14bus_IEEE_partitions
-example_14bus_IEEE_partitions_test
+%example_14bus_IEEE_partitions_test
+example_14bus_IEEE_partitions_debug
 
 % flat start for AC
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];

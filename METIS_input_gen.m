@@ -5,6 +5,7 @@ simauto = actxserver('pwrworld.SimulatorAuto');
 
 % NOTE: Check case file path before running
 simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 bus_2parts.pwb')
+%simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb')
 
 simauto.RunScriptCommand('EnterMode(Run)');
 
@@ -34,7 +35,7 @@ for a = 1:numlines
 end
 
 %% Overwrite the graph text file
-fid = fopen('graph.txt','w');
+fid = fopen('graph118.txt','w');
 
 % initial line of input file with 
 fprintf(fid, '%d %d\n', [numbus numlines]);

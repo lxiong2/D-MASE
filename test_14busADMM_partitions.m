@@ -9,11 +9,12 @@ close all
 format long
 
 % Get system parameters and partitions
-option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-filename = 'graph_2parts.txt'; % only matters if option = 3
-numParts = 2; % should match filename if option = 3
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+filename = 'graph14_4parts.txt'; % only matters if option = 3
+numParts = 4; % should match filename if option = 3
+casename = 14;
 
-example_118bus_IEEE_partitions
+example_14bus_IEEE_partitions_debug
 
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
@@ -32,7 +33,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 50;
+maxiter = 20;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -75,8 +76,8 @@ n = 2*numbus;
 %eps_pri = sqrt(n)*eps_abs + eps_rel*max([norm(x1_k) norm(x2_k) norm(x3_k) norm(x4_k) norm(c_k)])
 %eps_dual = sqrt(n)*eps_abs + eps_rel*max([norm(y1_kl) norm(y2_kl) norm(y3_kl) norm(y4_kl)])
 
-eps_pri = 1e-5;
-eps_dual = 1e-5;
+eps_pri = 1e-4;
+eps_dual = 1e-4;
 
 %centralt = zeros(numParts,1);
 
@@ -106,15 +107,18 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         allStates(areabuses{a},a) = x_k{a}(1:numareabus{a},iter+1);
         allStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:2*numareabus{a},iter+1);
     end
-      
-    % Find the shared buses between Area 1 (bus 1 is the global slack) and
-    % the other areas, and calc Area 1 angles - Area X angles
+
+    % Find the shared buses between the global slack area and
+    % the other areas, and calc global slack area angles - Area X angles
     
     commonStates = cell(numParts,1);
-    diffSlack = zeros(numbus,numParts-1);
-    for a = 2:numParts
-        commonStates{a} = intersect(areabuses{1},areabuses{a});
-        diffSlack(commonStates{a},a-1) = atan(allStates(numbus+commonStates{a},1)./allStates(commonStates{a},1)) - atan(allStates(numbus+commonStates{a},a)./allStates(commonStates{a},a));
+    diffSlack = zeros(numbus,numParts);
+    for a = 1:numParts
+        commonStates{a} = intersect(areabuses{globalSlackArea},areabuses{a});
+        if a ~= globalSlackArea
+            diffSlack(commonStates{a},a) = atan(allStates(numbus+commonStates{a},globalSlackArea)./allStates(commonStates{a},globalSlackArea)) - atan(allStates(numbus+commonStates{a},a)./allStates(commonStates{a},a));
+        else diffSlack(commonStates{a},a) = 0;
+        end
     end
     
     %% Take the average of the difference in slack angles
@@ -123,15 +127,18 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     for a = 1:size(diffSlack,2)
         temp = diffSlack(:,a);
         addSlack(a) = mean(temp(temp~=0));
+        if isnan(addSlack(a))
+            addSlack(a) = 0;
+        end
     end
     
     % Convert the other areas to the global reference (Area 1 in this case)
-    for b = 2:numParts
+    for b = 1:numParts
         for a = 1:numbus
-            newe(a,b-1) = allStates(a,b)*cos(addSlack(b-1)) - allStates(numbus+a,b)*sin(addSlack(b-1));
-            newf(a,b-1) = allStates(numbus+a,b)*cos(addSlack(b-1)) + allStates(a,b)*sin(addSlack(b-1));
+            newe(a,b) = allStates(a,b)*cos(addSlack(b)) - allStates(numbus+a,b)*sin(addSlack(b));
+            newf(a,b) = allStates(numbus+a,b)*cos(addSlack(b)) + allStates(a,b)*sin(addSlack(b));
         end
-        allStates(:,b) = [newe(:,b-1); newf(:,b-1)];
+        allStates(:,b) = [newe(:,b); newf(:,b)];
     end
     
     for a = 1:numParts
@@ -174,7 +181,7 @@ figure(1)
 semilogy(sqrt(normres_r))
 hold on
 semilogy(sqrt(normres_s))
-title('N-Partition, 118-Bus State Estimation Consensus Problem')
+title('4-Partition, 14-Bus State Estimation Consensus Problem')
 legend('Primal residual', 'Dual residual')
 
 % figure(2)

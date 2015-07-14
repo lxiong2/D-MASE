@@ -12,7 +12,7 @@ simauto = actxserver('pwrworld.SimulatorAuto');
 simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb')
 
 % Automatically save Ybus
-simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');
+%simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');
 
 simauto.RunScriptCommand('EnterMode(Run)');
 
