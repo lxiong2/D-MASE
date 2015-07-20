@@ -14,10 +14,12 @@ k = 1;
 maxiter = 20;
 
 option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-filename = 'graph_2parts.txt'; % only matters if option = 3
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
+filename = 'graph118_2parts.txt'; % only matters if option = 3
+casename = 118;
 numParts = 2; % must be at least 2
 
-example_118bus_IEEE_partitions
+DMASE_Setup
 
 % flat start for AC
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];
@@ -29,7 +31,7 @@ deltax(:,1) = ones(size(x,1),1);
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-YBus
+YBus118
 %YBus_14DC
 %Ybus2 = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);

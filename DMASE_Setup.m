@@ -1,17 +1,6 @@
-% IEEE 118-bus case
-% NOTES:
-% 1. Changed line 69 to be 42-29-2 instead of both 68/69 being designated as 42-29-1
-% 2. Changed line 81 to be 49-66-2
-% 3. Changed line 83 to be 49-54-2
-% 4. Changed line 98 to be 56-58-2
-% 5. Changed line 97 to be 56-59-2
-% 6. Changed line 132 to be 77-80-2
-% 7. Changed line 152 to be 89-92-2
-% 8. Changed line 154 to be 89-90-2
-
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % % NOTE: Delete the blank line at the end of graph_XXX.txt
-% filename = 'graph118_4parts(3).txt'; % only matters if option = 3
+% filename = 'graph118_4parts.txt'; % only matters if option = 3
 % numParts = 4; % should match filename if option = 3
 % casename = 118;
 
@@ -135,42 +124,6 @@ for a = 1:numParts
         allindices{a}(2*numarealines{a}+numonlybus{a}+((2*b-1):(2*b)),1) = onlybuses{a}(b);
     end
 end
-
-% %% Partition 1
-% % Don't forget to include the overlap buses!
-% allbuses1 = sort([buses1; tiebuses1]);
-% numareabus1 = size(buses1,1); % only buses in area
-% numbus1 = size(allbuses1,1); % includes buses in area + tie buses
-% 
-% % Get AC line data for Partition 1
-% lines1 = [];
-% % If both buses are in Partition 1, include them in lines1
-% for a = 1:numlines
-%     if ismember(lines(a,1),buses1)==1 && ismember(lines(a,2),buses1)==1
-%         lines1 = [lines1; lines(a,:)]; 
-%     end
-% end
-% % Then also include the tie lines
-% lines1 = [lines1; tielines1];         
-% numlines1 = size(lines1,1);
-% 
-% alltype1(1:2*numlines1,:) = repmat({'pf'; 'qf'}, [numlines1 1]);
-% alltype1(2*numlines1+(1:numareabus1),:) = repmat({'v'}, [numareabus1 1]);
-% alltype1(2*numlines1+numareabus1+1:(2*numlines1+3*numareabus1),:)= repmat({'p'; 'q'}, [numareabus1 1]);
-% 
-% allR1 = diag(0.01^2*ones(1,size(alltype1,1)));
-% 
-% % FIX: Need to include those boundary measurements
-% allindices1 = zeros(2*numlines1+3*numareabus1,3);
-% for a = 1:numlines1
-%     allindices1((2*a-1):(2*a),:) = [lines1(a,1:3); lines1(a,1:3)]; 
-% end
-% for a = 1:numareabus1
-%     allindices1(2*numlines1+a,1) = buses1(a);
-% end
-% for a = 1:numareabus1
-%     allindices1(2*numlines1+numareabus1+((2*a-1):(2*a)),1) = buses1(a);
-% end                     
 
 % Automatically pull "measurements" from PowerWorld case
 autoMeas2

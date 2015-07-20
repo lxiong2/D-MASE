@@ -11,9 +11,9 @@
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % % NOTE: Delete the blank line at the end of graph_XXX.txt
-% filename = 'graph14_4parts.txt'; % only matters if option = 3
+% casename = 118; % only matters if option = 1
+% filename = 'graph118_4parts.txt'; % only matters if option = 3
 % numParts = 4; % should match filename if option = 3
-% casename = 14;
 
 simauto = actxserver('pwrworld.SimulatorAuto');
 
@@ -21,7 +21,7 @@ simauto = actxserver('pwrworld.SimulatorAuto');
 % Preemptively convert to per unit
 
 % NOTE: Check case file path before running
-simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb')
+simauto.OpenCase(casepath)
 
 % Automatically save Ybus
 %simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');
@@ -172,8 +172,34 @@ end
 %     allindices1(2*numlines1+numareabus1+((2*a-1):(2*a)),1) = buses1(a);
 % end                     
 
-% Automatically pull "measurements" from PowerWorld case
-autoMeas2
+% Automatically create fake measurements using PowerWorld
+% Preemptively convert to per unit
+
+% Get rid of NaN so you can calculate gen - load
+for a = 1:numbus
+    if isnan(genMW(a))
+        genMW(a) = 0;
+    end
+    if isnan(genMVAR(a))
+        genMVAR(a) = 0;
+    end
+    if isnan(loadMW(a))
+        loadMW(a) = 0;
+    end
+    if isnan(loadMVAR(a))
+        loadMVAR(a) = 0;
+    end
+end
+
+busMW = genMW - loadMW;
+busMVAR = genMVAR - loadMVAR;
+
+numMeas = cell(numParts,1);
+allz = cell(numParts,1);
+for a = 1:numParts
+    numMeas{a} = size(allindices{a},1);
+    allz{a} = getMeas(lines,numMeas{a},allindices{a},alltype{a},MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
+end
 
 %% Slack buses (one for each partition), except the global slack goes in the
 % partition with it in the state vector
