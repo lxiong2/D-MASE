@@ -20,6 +20,7 @@ casename = 118;
 numParts = 2; % must be at least 2
 
 DMASE_Setup
+%example_118bus_IEEE_partitions
 
 % flat start for AC
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];
@@ -32,7 +33,6 @@ numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
 YBus118
-%YBus_14DC
 %Ybus2 = calcYbus(buses, lines(:,1), lines(:,2), lines(:,4), lines(:,5), lines(:,6), lineStatus);
 G = real(Ybus);
 B = imag(Ybus);

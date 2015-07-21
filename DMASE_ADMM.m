@@ -10,14 +10,14 @@ format long
 option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
-% filename = 'graph14_2parts.txt'; % only matters if option = 3
-% numParts = 2; % should match filename if option = 3
+% filename = 'graph14_4parts.txt'; % only matters if option = 3
+% numParts = 4; % should match filename if option = 3
 % casename = 14;
 % YBus14
 
 casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-filename = 'graph118_2parts.txt'; % only matters if option = 3
-numParts = 2; % should match filename if option = 3
+filename = 'graph118_4parts.txt'; % only matters if option = 3
+numParts = 4; % should match filename if option = 3
 casename = 118;
 YBus118
 
@@ -40,7 +40,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 2;
+maxiter = 20;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -91,10 +91,8 @@ eps_dual = 1e-4;
 %tic
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
 
-    iter
     % Do distributed state estimation for each partition
     for a = 1:numParts
-        a
         tic
         [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
