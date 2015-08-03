@@ -6,27 +6,30 @@ clear all
 close all
 format long
 
+reps = 1;
+centralt = zeros(1,reps);
+for k = 1:reps
 % Get system parameters and partitions
-option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
-% filename = 'graph14_4parts.txt'; % only matters if option = 3
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
+filename = 'graph14_4parts.txt'; % only matters if option = 3
+numParts = 6; % should match filename if option = 3
+casename = 14;
+YBus14
+
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
+% filename = 'graph118_4parts.txt'; % only matters if option = 3
 % numParts = 4; % should match filename if option = 3
-% casename = 14;
-% YBus14
-
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-filename = 'graph118_2parts.txt'; % only matters if option = 3
-numParts = 2; % should match filename if option = 3
-casename = 118;
-YBus118
+% casename = 118;
+% YBus118
 
 DMASE_Setup
 
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-%YBus
+% YBus
 G = real(Ybus);
 B = imag(Ybus);
 
@@ -40,7 +43,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 20;
+maxiter = 10;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -87,15 +90,12 @@ eps_pri = 1e-4;
 eps_dual = 1e-4;
 
 %centralt = zeros(numParts,1);
-
-%tic
+tic
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
 
-    iter
     % Do distributed state estimation for each partition
     for a = 1:numParts
-        a
-        tic
+        %tic
         [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
         Gain{a}(:,:,iter) = tempGain;
@@ -105,7 +105,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         dx_k{a}(:,iter+1) = -Gain{a}(:,:,iter)\g{a}(:,iter);
         dx_k{a}(numareabus{a}+slackIndex{a},iter+1) = 0;
         x_k{a}(:,iter+1) = x_k{a}(:,iter) + dx_k{a}(:,iter+1);
-        partitiont(a,iter) = toc;
+        %partitiont(a,iter) = toc;
     end
        
     % Reference all the other partitions to the global index and then
@@ -140,6 +140,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
             addSlack(a) = 0;
         end
     end
+    %addSlack
     
     % Convert the other areas to the global reference (Area 1 in this case)
     for b = 1:numParts
@@ -184,7 +185,9 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     
     iter = iter+1;
 end
-%centralt = toc;
+centralt(k) = toc;
+
+end
 
 figure(1)
 semilogy(sqrt(normres_r))

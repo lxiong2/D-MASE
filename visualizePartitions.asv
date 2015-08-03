@@ -1,0 +1,43 @@
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
+filename = 'graph14_2parts.txt'; % only matters if option = 3
+numParts = 2; % should match filename if option = 3
+numbus = 14;
+
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
+% filename = 'graph118_8parts.txt'; % only matters if option = 3
+% numParts = 8; % should match filename if option = 3
+% numbus = 118;
+
+% Read METIS file
+% NOTE: DELETE LAST BLANK LINE IN TEXT FILE
+METIS_out = dlmread(filename,'\n').';   % CHANGE THIS DEPENDING ON THE CASE
+
+onlybuses = cell(numParts,1);
+for a = 1:numParts
+    onlybuses{a} = find(METIS_out == (a-1)); % METIS output starts from 0
+end
+
+for a = 1:numParts
+    if 
+        areanum(a) = [
+end
+
+simauto = actxserver('pwrworld.SimulatorAuto');
+
+% NOTE: Check case file path before running
+simauto.OpenCase(casepath)
+
+% Change the area numbers automatically in the PowerWorld case
+for a = 1:numbus
+    % I am using the line information that I gathered earlier to modify
+    % each line in the case. I also like to use the sprintf command to get
+    % numeric variables into a string format because RunScriptCommand
+    % requies a string. Note that the variable str is a powerworld script
+    % being passed through the COM object.
+    
+    str = sprintf('setdata(Bus,[AreaName]);',lines(i,1),lines(i,2),lines(i,3));
+    simauto.RunScriptCommand(str);
+end
+
+simauto.CloseCase();
+delete(simauto);

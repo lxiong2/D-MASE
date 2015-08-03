@@ -13,7 +13,7 @@ simauto = actxserver('pwrworld.SimulatorAuto');
 simauto.OpenCase(casepath)
 
 % Automatically save Ybus
-%simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');
+%simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus14.m",NO)');
 
 simauto.RunScriptCommand('EnterMode(Run)');
 
@@ -74,9 +74,11 @@ loadMW = str2double(results{2}{5})/100;
 loadMVAR = str2double(results{2}{6})/100;
 
 simauto.CloseCase();
+delete(simauto);
 
 %% Get which buses belong in which partitions
-[onlybuses, tiebuses, tielines, globalSlackArea] = getPartitions(numParts,buses,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
+[onlybuses, tiebuses, tielines, globalSlackArea] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
+%[onlybuses, tiebuses, tielines, globalSlackArea, adjacentAreas] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
 
 %% Full measurement information from PowerWorld AC power flow results
 areabuses = cell(numParts,1);
@@ -159,7 +161,7 @@ end
 slack = cell(numParts,1);
 slackIndex = cell(numParts,1);
 for a = 1:numParts
-    if intersect(globalSlack,areabuses{a}) == 1
+    if intersect(globalSlack,onlybuses{a}) == 1
         slack{a} = globalSlack;
     else
         slack{a} = onlybuses{a}(1);
