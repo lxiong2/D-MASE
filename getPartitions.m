@@ -1,4 +1,4 @@
-function [onlybuses,tiebuses,tielines,globalSlackArea] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename)
+function [onlybuses,tiebuses,tielines,globalSlackArea,areaconns] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename)
 %function [onlybuses,tiebuses,tielines,globalSlackArea,adjacentAreas] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename)
 % Option 1: manually enter which buses are in which area
 % Option 2: automatically pull the area numbers from PowerWorld
@@ -178,15 +178,17 @@ elseif option == 3
         if sum(onlybuses{a} == 1)
             globalSlackArea = a;
         end
-    end    
+    end
 end
 
-% % Construct which areas are connected to which
-% adjacentAreas = zeros(numParts,numParts);
-% for a = 1:numParts
-%     for b = 1:size(tielines{a},1)
-%         temp = 
-%    
-%     end
-% end
-
+% Create a table of area connections
+areaconns = [];
+for a = 1:numParts
+    for b = 1:numParts
+        for c = 1:numlines
+            if a~=b && sum(lines(c,1) == cell2mat(onlybuses(a))) == 1 && sum(lines(c,2) == cell2mat(onlybuses(b))) == 1
+                areaconns = [areaconns; a b lines(c,:)];
+            end
+        end
+    end
+end

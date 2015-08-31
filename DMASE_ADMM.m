@@ -8,6 +8,7 @@ format long
 
 reps = 1;
 centralt = zeros(1,reps);
+
 for k = 1:reps
 % Get system parameters and partitions
 option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
@@ -24,10 +25,21 @@ numParts = 8; % should match filename if option = 3
 casename = 118;
 YBus118
 
-DMASE_Setup
+DMASE_Setup                                                     
 
 numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
+
+% Form the neighborAreas list
+adjAreas = unique(areaconns(:,1:2),'rows'); % [from bus area, to bus area]
+neighborAreas = cell(numParts,1);
+tempIndex = (1:size(adjAreas,1)).';
+for a = 1:numParts
+    temp1 = tempIndex(adjAreas(:,1)==a);
+    temp2 = tempIndex(adjAreas(:,2)==a);
+    neighborAreas{a} = unique(sort([adjAreas(temp1,2); adjAreas(temp2,1)]));
+end
+neighborAreas
 
 % YBus
 G = real(Ybus);
@@ -92,7 +104,7 @@ eps_dual = 1e-4;
 %centralt = zeros(numParts,1);
 tic
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
-
+%while iter == 1
     % Do distributed state estimation for each partition
     for a = 1:numParts
         %tic
@@ -116,40 +128,42 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         allStates(areabuses{a},a) = x_k{a}(1:numareabus{a},iter+1);
         allStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:2*numareabus{a},iter+1);
     end
+    
+%     % Find the shared buses between the global slack area and
+%     % the other areas, and calc global slack area angles - Area X angles
+%     commonStates = cell(numParts,1);
+%     diffSlack = zeros(numbus,numParts);
+%     for a = 1:numParts
+%         commonStates{a} = intersect(areabuses{globalSlackArea},areabuses{a});
+%         if a ~= globalSlackArea
+%             diffSlack(commonStates{a},a) = atan(allStates(numbus+commonStates{a},globalSlackArea)./allStates(commonStates{a},globalSlackArea)) - atan(allStates(numbus+commonStates{a},a)./allStates(commonStates{a},a));
+%         else diffSlack(commonStates{a},a) = 0;
+%         end
+%     end
+%     
+%     %% Take the average of the difference in slack angles
+%     % Assume Vmag = 1 -> addE = 1 cos 
+%     addSlack = zeros(1,size(diffSlack,2));
+%     for a = 1:size(diffSlack,2)
+%         temp = diffSlack(:,a);
+%         addSlack(a) = mean(temp(temp~=0));
+%         if isnan(addSlack(a))
+%             addSlack(a) = 0;
+%         end
+%     end
+%     %addSlack
+%     
+%     % Convert the other areas to the global reference (Area 1 in this case)
+%     for b = 1:numParts
+%         for a = 1:numbus
+%             newe(a,b) = allStates(a,b)*cos(addSlack(b)) - allStates(numbus+a,b)*sin(addSlack(b));
+%             newf(a,b) = allStates(numbus+a,b)*cos(addSlack(b)) + allStates(a,b)*sin(addSlack(b));
+%         end
+%         allStates(:,b) = [newe(:,b); newf(:,b)];
+%     end
 
-    % Find the shared buses between the global slack area and
-    % the other areas, and calc global slack area angles - Area X angles
-    
-    commonStates = cell(numParts,1);
-    diffSlack = zeros(numbus,numParts);
-    for a = 1:numParts
-        commonStates{a} = intersect(areabuses{globalSlackArea},areabuses{a});
-        if a ~= globalSlackArea
-            diffSlack(commonStates{a},a) = atan(allStates(numbus+commonStates{a},globalSlackArea)./allStates(commonStates{a},globalSlackArea)) - atan(allStates(numbus+commonStates{a},a)./allStates(commonStates{a},a));
-        else diffSlack(commonStates{a},a) = 0;
-        end
-    end
-    
-    %% Take the average of the difference in slack angles
-    % Assume Vmag = 1 -> addE = 1 cos 
-    addSlack = zeros(1,size(diffSlack,2));
-    for a = 1:size(diffSlack,2)
-        temp = diffSlack(:,a);
-        addSlack(a) = mean(temp(temp~=0));
-        if isnan(addSlack(a))
-            addSlack(a) = 0;
-        end
-    end
-    %addSlack
-    
-    % Convert the other areas to the global reference (Area 1 in this case)
-    for b = 1:numParts
-        for a = 1:numbus
-            newe(a,b) = allStates(a,b)*cos(addSlack(b)) - allStates(numbus+a,b)*sin(addSlack(b));
-            newf(a,b) = allStates(numbus+a,b)*cos(addSlack(b)) + allStates(a,b)*sin(addSlack(b));
-        end
-        allStates(:,b) = [newe(:,b); newf(:,b)];
-    end
+    [newStates,polarStates] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas);
+    allStates = newStates;
     
     for a = 1:numParts
         x_k{a}(:,iter+1) = [allStates(areabuses{a},a); allStates(numbus+areabuses{a},a)];
@@ -188,6 +202,22 @@ end
 centralt(k) = toc;
 
 end
+
+% For error checking purposes, calculate th1 from x_k and subtract it from
+% all bus angles (in rectangular form)
+% i.e. e = V*cos(th - th_ref2GlobalAng), f = V*sin(th - th_ref2GlobalAng)
+globalStates = zeros(numbus*2,numParts);
+for a = 1:numParts
+    globalStates(areabuses{a},a) = x_k{a}(1:numareabus{a},iter);
+    globalStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:numareabus{a}*2,iter);
+    if sum(areabuses{a}==globalSlack)==1
+        ref2GlobalAng = atan(globalStates(numbus+globalSlack,a)/globalStates(globalSlack,a)); % calculate from th1 from final state iteration
+    end
+end
+ref2GlobalAng
+finalStates(1:numbus,:) = globalStates(1:numbus,:)*cos(ref2GlobalAng)+globalStates(numbus+1:2*numbus,:)*sin(ref2GlobalAng);
+finalStates(numbus+1:2*numbus,:) = globalStates(numbus+1:2*numbus,:)*cos(ref2GlobalAng)-globalStates(1:numbus,:)*sin(ref2GlobalAng);
+finalStates
 
 figure(1)
 semilogy(sqrt(normres_r))

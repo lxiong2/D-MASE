@@ -77,7 +77,7 @@ simauto.CloseCase();
 delete(simauto);
 
 %% Get which buses belong in which partitions
-[onlybuses, tiebuses, tielines, globalSlackArea] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
+[onlybuses, tiebuses, tielines, globalSlackArea, areaconns] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
 %[onlybuses, tiebuses, tielines, globalSlackArea, adjacentAreas] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
 
 %% Full measurement information from PowerWorld AC power flow results
