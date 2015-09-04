@@ -1,0 +1,25 @@
+numbus = 8;
+G = neighborAreas;
+v = 1;
+
+for n = 1:numbus
+    distance(n) = inf;
+    parent(n) = [];
+end
+
+newQ = CQueue();
+
+distance(v) = 0;
+newQ.push(v);
+
+while q.isempty() == 0
+    u = newQ.pop();
+    for a = 1:size(neighborAreas{u},1)
+        if distance(neighborAreas{u}(a)) == 0
+            distance(neighborAreas{u}(a)) = distance(neighborAreas{v}(a))+1;
+            parent(a) = u;
+            
+        end
+    end
+end
+

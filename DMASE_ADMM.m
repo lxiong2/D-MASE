@@ -6,11 +6,12 @@ clear all
 close all
 format long
 
-reps = 1;
+reps = 10;
 centralt = zeros(1,reps);
 
 for k = 1:reps
 % Get system parameters and partitions
+
 option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
@@ -20,8 +21,8 @@ option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % YBus14
 
 casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-filename = 'graph118_8parts.txt'; % only matters if option = 3
-numParts = 8; % should match filename if option = 3
+filename = 'graph118_32parts.txt'; % only matters if option = 3
+numParts = 32; % should match filename if option = 3
 casename = 118;
 YBus118
 
@@ -39,7 +40,6 @@ for a = 1:numParts
     temp2 = tempIndex(adjAreas(:,2)==a);
     neighborAreas{a} = unique(sort([adjAreas(temp1,2); adjAreas(temp2,1)]));
 end
-neighborAreas
 
 % YBus
 G = real(Ybus);
@@ -103,11 +103,12 @@ eps_dual = 1e-4;
 
 %centralt = zeros(numParts,1);
 tic
+%tstart(k) = cputime;
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
 %while iter == 1
     % Do distributed state estimation for each partition
     for a = 1:numParts
-        %tic
+%         tic
         [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
         Gain{a}(:,:,iter) = tempGain;
@@ -117,7 +118,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         dx_k{a}(:,iter+1) = -Gain{a}(:,:,iter)\g{a}(:,iter);
         dx_k{a}(numareabus{a}+slackIndex{a},iter+1) = 0;
         x_k{a}(:,iter+1) = x_k{a}(:,iter) + dx_k{a}(:,iter+1);
-        %partitiont(a,iter) = toc;
+%         partitiont(a,iter) = toc;
     end
        
     % Reference all the other partitions to the global index and then
@@ -162,7 +163,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
 %         allStates(:,b) = [newe(:,b); newf(:,b)];
 %     end
 
-    [newStates,polarStates] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas);
+    [newStates,polarStates,distance,parent] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas,globalSlackArea);
     allStates = newStates;
     
     for a = 1:numParts
@@ -173,11 +174,12 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % How global variables are collected and averaged
     % matches up with the global c indexing
     numDivide = zeros(1,numbus*2);
+    tempSum = zeros(1,numbus*2);
     for a = 1:numbus*2
         numDivide(a) = sum(allStates(a,:)~=0);
-        temp(a) = sum(allStates(a,:));
+        tempSum(a) = sum(allStates(a,:));
         if numDivide(a) > 0
-            c_k(a,iter+1) = temp(a)/numDivide(a);
+            c_k(a,iter+1) = tempSum(a)/numDivide(a);
         end
     end
     c_k;
@@ -200,24 +202,25 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     iter = iter+1;
 end
 centralt(k) = toc;
+%tend(k) = cputime;
 
 end
 
-% For error checking purposes, calculate th1 from x_k and subtract it from
-% all bus angles (in rectangular form)
-% i.e. e = V*cos(th - th_ref2GlobalAng), f = V*sin(th - th_ref2GlobalAng)
-globalStates = zeros(numbus*2,numParts);
-for a = 1:numParts
-    globalStates(areabuses{a},a) = x_k{a}(1:numareabus{a},iter);
-    globalStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:numareabus{a}*2,iter);
-    if sum(areabuses{a}==globalSlack)==1
-        ref2GlobalAng = atan(globalStates(numbus+globalSlack,a)/globalStates(globalSlack,a)); % calculate from th1 from final state iteration
-    end
-end
-ref2GlobalAng
-finalStates(1:numbus,:) = globalStates(1:numbus,:)*cos(ref2GlobalAng)+globalStates(numbus+1:2*numbus,:)*sin(ref2GlobalAng);
-finalStates(numbus+1:2*numbus,:) = globalStates(numbus+1:2*numbus,:)*cos(ref2GlobalAng)-globalStates(1:numbus,:)*sin(ref2GlobalAng);
-finalStates
+% % For error checking purposes, calculate th1 from x_k and subtract it from
+% % all bus angles (in rectangular form)
+% % i.e. e = V*cos(th - th_ref2GlobalAng), f = V*sin(th - th_ref2GlobalAng)
+% globalStates = zeros(numbus*2,numParts);
+% for a = 1:numParts
+%     globalStates(areabuses{a},a) = x_k{a}(1:numareabus{a},iter);
+%     globalStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:numareabus{a}*2,iter);
+%     if sum(areabuses{a}==globalSlack)==1
+%         ref2GlobalAng = atan(globalStates(numbus+globalSlack,a)/globalStates(globalSlack,a)); % calculate from th1 from final state iteration
+%     end
+% end
+% ref2GlobalAng
+% finalStates(1:numbus,:) = globalStates(1:numbus,:)*cos(ref2GlobalAng)+globalStates(numbus+1:2*numbus,:)*sin(ref2GlobalAng);
+% finalStates(numbus+1:2*numbus,:) = globalStates(numbus+1:2*numbus,:)*cos(ref2GlobalAng)-globalStates(1:numbus,:)*sin(ref2GlobalAng);
+% finalStates
 
 figure(1)
 semilogy(sqrt(normres_r))
