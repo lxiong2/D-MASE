@@ -91,13 +91,16 @@ if option == 1
         end
     end
 
-% Automatically get area numbers straight from PowerWorld
+% Automatically get area numbers straight from entered PowerWorld area
+% field
 elseif option == 2
-
+    
+    arealist = unique(areas);
+    
     % Get the actual area buses from PowerWorld
     onlybuses = cell(numParts,1);
     for a = 1:numParts
-        [m,~] = find(areas == a);
+        [m,~] = find(areas == arealist(a));
         onlybuses{a} = buses(m);
     end
     % Look at each partition

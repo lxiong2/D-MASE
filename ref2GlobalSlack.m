@@ -21,6 +21,9 @@ newQ.push(v);
 newStates(areabuses{v},v) = allStates(areabuses{v},v);
 newStates(numbus+areabuses{v},v) = allStates(numbus+areabuses{v},v);
 
+% breadth first search of each state's neighbors, using a queue
+% implementation; uses CQueue, a C-like queue class that I got from
+% Mathworks
 while newQ.isempty() == 0
     u = newQ.pop();
     for b = 1:size(neighborAreas{u},1)

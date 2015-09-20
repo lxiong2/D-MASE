@@ -4,7 +4,9 @@ clear
 simauto = actxserver('pwrworld.SimulatorAuto');
 
 % NOTE: Check case file path before running
-simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 bus_2parts.pwb')
+simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 24 bus.pwb')
+%simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_onlylines_Consolidated.pwb')
+%simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 bus_2parts.pwb')
 %simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb')
 
 simauto.RunScriptCommand('EnterMode(Run)');
@@ -23,26 +25,31 @@ lines = [str2double(results{2}{1}) str2double(results{2}{2}) str2double(results{
 numlines = size(lines,1);     
 
 simauto.CloseCase();
+delete(simauto);
+
+busIndex = (1:numbus).';
 
 temp = zeros(numbus,numbus);
 b = 1;
 c = 1;
 for a = 1:numlines
-    temp(lines(a,1),b) = lines(a,2);
-    temp(lines(a,2),c) = lines(a,1);
+    m = busIndex(lines(a,2)==buses);
+    n = busIndex(lines(a,1)==buses);
+    temp(n,b) = m;
+    temp(m,c) = n;
     b = b + 1;
     c = c + 1;
 end
 
 %% Overwrite the graph text file
-fid = fopen('graph118.txt','w');
+fid = fopen('graph24.txt','w');
 
 % initial line of input file with 
 fprintf(fid, '%d %d\n', [numbus numlines]);
 
 for a = 1:numbus
     temp2 = temp(a,:);
-    adjbuses = temp2(temp2~=0)
+    adjbuses = temp2(temp2~=0);
     str = repmat('%d ',[1 size(adjbuses,2)]);
     fprintf(fid, str, adjbuses);
     fprintf(fid, '\n');

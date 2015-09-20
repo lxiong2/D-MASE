@@ -6,25 +6,39 @@ clear all
 close all
 format long
 
-reps = 10;
+reps = 1;
 centralt = zeros(1,reps);
 
 for k = 1:reps
 % Get system parameters and partitions
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
 % filename = 'graph14_6parts.txt'; % only matters if option = 3
 % numParts = 6; % should match filename if option = 3
 % casename = 14;
 % YBus14
 
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-filename = 'graph118_32parts.txt'; % only matters if option = 3
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
+% filename = 'graph118_32parts.txt'; % only matters if option = 3
+% numParts = 32; % should match filename if option = 3
+% casename = 118;
+% YBus118
+
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 24 bus.pwb';
+% filename = 'graph24_3parts.txt'; % only matters if option = 3
+% numParts = 3; % should match filename if option = 3
+% casename = 24;
+% YBus24
+
+option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_onlylines.pwb';
+filename = ''; % only matters if option = 3
 numParts = 32; % should match filename if option = 3
-casename = 118;
-YBus118
+casename = 'TVA';
+YBusTVA
 
 DMASE_Setup                                                     
 

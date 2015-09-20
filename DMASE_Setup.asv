@@ -57,7 +57,7 @@ for a = 1:numlines
         lineCheck = [lineCheck; lines(a,1:2)];
     % isnan(lines(a,3)) == 1 && sum(ismember(lineCheck,lines(a,1:3)))==0
     elseif (isnan(lines(a,3)) == 1) && (inLineCheck > 0)
-        lines(a,3) = 100 + inLineCheck;
+        lines(a,3) = 100 + inLineCheck
         lineCheck = [lineCheck; lines(a,1:2)];
     end
 end
