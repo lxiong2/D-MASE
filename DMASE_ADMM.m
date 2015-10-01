@@ -12,12 +12,14 @@ centralt = zeros(1,reps);
 for k = 1:reps
 % Get system parameters and partitions
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
-% filename = 'graph14_6parts.txt'; % only matters if option = 3
-% numParts = 6; % should match filename if option = 3
-% casename = 14;
-% YBus14
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
+filename = 'graph14_2parts.txt'; % only matters if option = 3
+numParts = 2; % should match filename if option = 3
+casename = 14;
+%YBus14
+YBus14_quadlines
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
@@ -33,12 +35,12 @@ for k = 1:reps
 % casename = 24;
 % YBus24
 
-option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_onlylines.pwb';
-filename = ''; % only matters if option = 3
-numParts = 32; % should match filename if option = 3
-casename = 'TVA';
-YBusTVA
+% option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered_nomultilines.pwb';
+% filename = ''; % only matters if option = 3
+% numParts = 32; % should match filename if option = 3
+% casename = 'TVA';
+% YBusTVA
 
 DMASE_Setup                                                     
 
@@ -69,7 +71,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 10;
+maxiter = 5;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -119,10 +121,10 @@ eps_dual = 1e-4;
 tic
 %tstart(k) = cputime;
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
-%while iter == 1
     % Do distributed state estimation for each partition
     for a = 1:numParts
 %         tic
+        a
         [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
         Gain{a}(:,:,iter) = tempGain;
@@ -218,6 +220,18 @@ end
 centralt(k) = toc;
 %tend(k) = cputime;
 
+end
+
+% Convert final rectangular x_k to polar form for error checking
+polarStates = cell(size(x_k,1),size(x_k,2));
+for b = 1:numParts
+    for a = 1:size(areabuses{b},1)
+        polarStates{b}(a,1) = atan(x_k{b}(size(areabuses{b},1)+a,iter-1)/x_k{b}(a,iter-1));
+        if isnan(polarStates{b}(a,1)) == 1
+            polarStates{b}(a,1) = 0;
+        end
+        polarStates{b}(size(areabuses{b},1)+a,1) = sqrt(x_k{b}(a,iter-1)^2+x_k{b}(size(areabuses{b},1)+a,iter-1)^2);
+    end
 end
 
 % % For error checking purposes, calculate th1 from x_k and subtract it from

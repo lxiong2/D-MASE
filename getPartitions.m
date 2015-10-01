@@ -108,8 +108,10 @@ elseif option == 2
     % Those are the overlapping buses
     tiebuses = cell(numParts,1);
     tielines = cell(numParts,1);
+
     for a = 1:numParts
         temptie = [];
+        temptieIndex = [];
         temptieline = [];
         for b = 1:numlines
             % one end of the line has a bus in one partition, and the other

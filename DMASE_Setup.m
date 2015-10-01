@@ -25,7 +25,6 @@ fieldarray = {'BusNum','BusSlack','AreaNum'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
 buses = str2double(results{2}{1});
 numbus = size(buses,1);
-busIndex = (1:numbus).';
 areas = str2double(results{2}{3});
 if option == 2
     numParts = size(unique(areas),1);
@@ -34,7 +33,7 @@ end
 % Get the slack bus number
 %globalSlack = buses(strcmp(results{2}{2},'YES'));
 globalSlack = 1;
-globalSlackIndex = busIndex(buses == globalSlack);
+globalSlackIndex = globalSlack;
 
 %% Line Information
 % Get line parameters for full AC system
@@ -67,8 +66,8 @@ end
 % larger cases
 temp = zeros(numbus,numbus);
 for a = 1:numlines
-    temp(busIndex(buses==lines(a,1)),busIndex(buses==lines(a,2))) = temp(busIndex(buses==lines(a,1)),busIndex(buses==lines(a,2)))+1;
-    temp(busIndex(buses==lines(a,2)),busIndex(buses==lines(a,1))) = temp(busIndex(buses==lines(a,2)),busIndex(buses==lines(a,1)))+1;
+    temp(lines(a,1),lines(a,2)) = temp(lines(a,1),lines(a,2))+1;
+    temp(lines(a,2),lines(a,1)) = temp(lines(a,2),lines(a,1))+1;
 end
 
 adjbuses = zeros(numbus,numbus);
@@ -173,7 +172,6 @@ busMVAR = genMVAR - loadMVAR;
 numMeas = cell(numParts,1);
 allz = cell(numParts,1);
 for a = 1:numParts
-    a
     numMeas{a} = size(allindices{a},1);
     allz{a} = getMeas(buses,lines,numMeas{a},allindices{a},alltype{a},MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
 end
