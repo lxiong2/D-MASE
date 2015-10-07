@@ -21,7 +21,7 @@ simauto.RunScriptCommand('EnterMode(Run)');
 simauto.RunScriptCommand('SolvePowerFlow(RECTNEWT,,,,)');
 
 % Get the list of buses in the system
-fieldarray = {'BusNum','BusSlack','AreaNum'}; %at from bus, at to bus
+fieldarray = {'BusNum','BusSlack','AreaNum','BusRad','BusPUVolt'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
 buses = str2double(results{2}{1});
 numbus = size(buses,1);
@@ -29,6 +29,7 @@ areas = str2double(results{2}{3});
 if option == 2
     numParts = size(unique(areas),1);
 end
+centralPWStates = [str2double(results{2}{4}); str2double(results{2}{5})];
 
 % Get the slack bus number
 %globalSlack = buses(strcmp(results{2}{2},'YES'));

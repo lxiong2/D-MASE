@@ -12,14 +12,14 @@ centralt = zeros(1,reps);
 for k = 1:reps
 % Get system parameters and partitions
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
-filename = 'graph14_2parts.txt'; % only matters if option = 3
-numParts = 2; % should match filename if option = 3
-casename = 14;
-%YBus14
-YBus14_quadlines
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
+% filename = 'graph14_2parts.txt'; % only matters if option = 3
+% numParts = 2; % should match filename if option = 3
+% casename = 14;
+% %YBus14
+% YBus14_quadlines
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
@@ -35,12 +35,12 @@ YBus14_quadlines
 % casename = 24;
 % YBus24
 
-% option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered_nomultilines.pwb';
-% filename = ''; % only matters if option = 3
-% numParts = 32; % should match filename if option = 3
-% casename = 'TVA';
-% YBusTVA
+option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered_nomultilines.pwb';
+filename = ''; % only matters if option = 3
+numParts = 32; % should match filename if option = 3
+casename = 'TVA';
+YBusTVA
 
 DMASE_Setup                                                     
 
@@ -71,7 +71,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 5;
+maxiter = 2;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -145,39 +145,6 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         allStates(areabuses{a},a) = x_k{a}(1:numareabus{a},iter+1);
         allStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:2*numareabus{a},iter+1);
     end
-    
-%     % Find the shared buses between the global slack area and
-%     % the other areas, and calc global slack area angles - Area X angles
-%     commonStates = cell(numParts,1);
-%     diffSlack = zeros(numbus,numParts);
-%     for a = 1:numParts
-%         commonStates{a} = intersect(areabuses{globalSlackArea},areabuses{a});
-%         if a ~= globalSlackArea
-%             diffSlack(commonStates{a},a) = atan(allStates(numbus+commonStates{a},globalSlackArea)./allStates(commonStates{a},globalSlackArea)) - atan(allStates(numbus+commonStates{a},a)./allStates(commonStates{a},a));
-%         else diffSlack(commonStates{a},a) = 0;
-%         end
-%     end
-%     
-%     %% Take the average of the difference in slack angles
-%     % Assume Vmag = 1 -> addE = 1 cos 
-%     addSlack = zeros(1,size(diffSlack,2));
-%     for a = 1:size(diffSlack,2)
-%         temp = diffSlack(:,a);
-%         addSlack(a) = mean(temp(temp~=0));
-%         if isnan(addSlack(a))
-%             addSlack(a) = 0;
-%         end
-%     end
-%     %addSlack
-%     
-%     % Convert the other areas to the global reference (Area 1 in this case)
-%     for b = 1:numParts
-%         for a = 1:numbus
-%             newe(a,b) = allStates(a,b)*cos(addSlack(b)) - allStates(numbus+a,b)*sin(addSlack(b));
-%             newf(a,b) = allStates(numbus+a,b)*cos(addSlack(b)) + allStates(a,b)*sin(addSlack(b));
-%         end
-%         allStates(:,b) = [newe(:,b); newf(:,b)];
-%     end
 
     [newStates,polarStates,distance,parent] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas,globalSlackArea);
     allStates = newStates;
@@ -222,33 +189,45 @@ centralt(k) = toc;
 
 end
 
-% Convert final rectangular x_k to polar form for error checking
-polarStates = cell(size(x_k,1),size(x_k,2));
-for b = 1:numParts
-    for a = 1:size(areabuses{b},1)
-        polarStates{b}(a,1) = atan(x_k{b}(size(areabuses{b},1)+a,iter-1)/x_k{b}(a,iter-1));
-        if isnan(polarStates{b}(a,1)) == 1
-            polarStates{b}(a,1) = 0;
-        end
-        polarStates{b}(size(areabuses{b},1)+a,1) = sqrt(x_k{b}(a,iter-1)^2+x_k{b}(size(areabuses{b},1)+a,iter-1)^2);
-    end
+% Compacted polar states
+% Convert to polar coordinates for debug purposes
+compactPolarStates = cell(numParts,1);
+for a = 1:numParts
+    compactPolarStates{a} = [polarStates(areabuses{a},a); polarStates(numbus+areabuses{a},a)];
 end
 
-% % For error checking purposes, calculate th1 from x_k and subtract it from
-% % all bus angles (in rectangular form)
-% % i.e. e = V*cos(th - th_ref2GlobalAng), f = V*sin(th - th_ref2GlobalAng)
-% globalStates = zeros(numbus*2,numParts);
-% for a = 1:numParts
-%     globalStates(areabuses{a},a) = x_k{a}(1:numareabus{a},iter);
-%     globalStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:numareabus{a}*2,iter);
-%     if sum(areabuses{a}==globalSlack)==1
-%         ref2GlobalAng = atan(globalStates(numbus+globalSlack,a)/globalStates(globalSlack,a)); % calculate from th1 from final state iteration
-%     end
-% end
-% ref2GlobalAng
-% finalStates(1:numbus,:) = globalStates(1:numbus,:)*cos(ref2GlobalAng)+globalStates(numbus+1:2*numbus,:)*sin(ref2GlobalAng);
-% finalStates(numbus+1:2*numbus,:) = globalStates(numbus+1:2*numbus,:)*cos(ref2GlobalAng)-globalStates(1:numbus,:)*sin(ref2GlobalAng);
-% finalStates
+% Compare polarStates against PW's centralized power flow solution
+errReport = [];
+diffReport = [];
+errThreshold = 0.5; %1e-5;
+diffTrueSoln = zeros(numbus*2,numParts);
+compactDiffTrueSoln = cell(numParts,1);
+diffIndex = [buses; buses];
+areaList = unique(areas);
+for a = 1:numParts
+    tempCentral = zeros(numbus*2,1);
+    tempCentral(areabuses{a}) = centralPWStates(areabuses{a});
+    tempCentral(numbus+areabuses{a}) = centralPWStates(numbus+areabuses{a});
+    diffTrueSoln(:,a) = tempCentral - polarStates(:,a);
+    compactDiffTrueSoln{a} = [centralPWStates(areabuses{a}) - polarStates(areabuses{a},a); centralPWStates(numbus+areabuses{a}) - polarStates(numbus+areabuses{a},a)];
+    for b = 1:numbus*2
+        % Flag bus numbers of problem buses, i.e. if diffTrueSoln is higher than a specified error threshold
+        if diffTrueSoln(b,a) > errThreshold
+            errReport = [errReport; a diffIndex(b) diffTrueSoln(b,a)];
+        end
+    end
+    for b = 1:size(areabuses{a},1)
+        miniDiffIndex = [areabuses{a}; areabuses{a}];
+        if abs(compactPolarStates{a}(b)) > 0.5
+            diffReport = [diffReport; a areaList(a) miniDiffIndex(b) 1 compactPolarStates{a}(b)];
+        end
+        if (abs(compactPolarStates{a}(size(areabuses{a},1)+b)) > 1.5) || (abs(compactPolarStates{a}(size(areabuses{a},1)+b)) < 0.7)
+            diffReport = [diffReport; a areaList(a) miniDiffIndex(b) 2 compactPolarStates{a}(b)];
+        end
+    end
+end
+errReport;
+diffReport
 
 figure(1)
 semilogy(sqrt(normres_r))
