@@ -37,14 +37,13 @@ YBus118
 G = real(Ybus);
 B = imag(Ybus);
 
-tic
 while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     % Polar AC version
 %     theta = [0; x(1:numbus-1,k)]; % assumes slack bus is bus 1
 %     V = x(numbus:(2*numbus-1),k);
     
     % Rectangular AC version
-    %tic
+    tic
     e = x(1:numbus,k);
     f = [0; x(numbus+1:(2*numbus-1),k)];
 
@@ -78,11 +77,10 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     % update x and increase iteration count
     x(:,k+1) = x(:,k)+deltax(:,k+1);
     
-    %centralt(k) = toc;
+    centralt(k) = toc;
     k = k+1;
     
 end
-centralt = toc
 
 x
 k

@@ -11,15 +11,16 @@ centralt = zeros(1,reps);
 
 for k = 1:reps
 % Get system parameters and partitions
-
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
-% filename = 'graph14_2parts.txt'; % only matters if option = 3
-% numParts = 2; % should match filename if option = 3
-% casename = 14;
-% %YBus14
-% YBus14_quadlines
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_xfmrs.pwb';
+%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
+%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
+filename = 'graph14_2parts.txt'; % only matters if option = 3
+numParts = 2; % should match filename if option = 3
+casename = 14;
+YBus14
+%YBus14_quadlines
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
@@ -35,12 +36,24 @@ for k = 1:reps
 % casename = 24;
 % YBus24
 
-option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered_nomultilines.pwb';
-filename = ''; % only matters if option = 3
-numParts = 32; % should match filename if option = 3
-casename = 'TVA';
-YBusTVA
+% option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered_nomultilines.pwb';
+% filename = ''; % only matters if option = 3
+% numParts = 32; % should match filename if option = 3
+% casename = 'TVA';
+% YBusTVA
+
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
+% filename = 'graph14_6parts.txt'; % only matters if option = 3
+% numParts = 6; % should match filename if option = 3
+% casename = 14;
+% YBus14
+
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
+% filename = 'graph118_8parts.txt'; % only matters if option = 3
+% numParts = 8; % should match filename if option = 3
+% casename = 118;
+% YBus118
 
 DMASE_Setup                                                     
 
@@ -71,7 +84,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 2;
+maxiter = 5;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -118,13 +131,11 @@ eps_pri = 1e-4;
 eps_dual = 1e-4;
 
 %centralt = zeros(numParts,1);
-tic
-%tstart(k) = cputime;
+tic %tic toc PAIR 3/3
 while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
     % Do distributed state estimation for each partition
+    tic % tic toc PAIR 1/3
     for a = 1:numParts
-%         tic
-        a
         [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
         Gain{a}(:,:,iter) = tempGain;
@@ -134,9 +145,11 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         dx_k{a}(:,iter+1) = -Gain{a}(:,:,iter)\g{a}(:,iter);
         dx_k{a}(numareabus{a}+slackIndex{a},iter+1) = 0;
         x_k{a}(:,iter+1) = x_k{a}(:,iter) + dx_k{a}(:,iter+1);
-%         partitiont(a,iter) = toc;
     end
-       
+    partitiont(iter) = toc; % tic toc PAIR 1/3
+    
+    tic % tic toc PAIR 2/3
+    
     % Reference all the other partitions to the global index and then
     % take the global slack area - the area you want to reference to the
     % global slack bus
@@ -146,7 +159,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         allStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:2*numareabus{a},iter+1);
     end
 
-    [newStates,polarStates,distance,parent] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas,globalSlackArea);
+    [newStates,polarStates] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas,globalSlackArea);
     allStates = newStates;
     
     for a = 1:numParts
@@ -157,12 +170,11 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % How global variables are collected and averaged
     % matches up with the global c indexing
     numDivide = zeros(1,numbus*2);
-    tempSum = zeros(1,numbus*2);
     for a = 1:numbus*2
         numDivide(a) = sum(allStates(a,:)~=0);
-        tempSum(a) = sum(allStates(a,:));
+        temp(a) = sum(allStates(a,:));
         if numDivide(a) > 0
-            c_k(a,iter+1) = tempSum(a)/numDivide(a);
+            c_k(a,iter+1) = temp(a)/numDivide(a);
         end
     end
     c_k;
@@ -181,11 +193,11 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     end
     
     normres_s(:,iter+1) = numDivide(:,1).*rho^2*(norm(c_k(:,iter+1) - c_k(:,iter)))^2;
+    ADMMt(iter) = toc; % tic toc PAIR 2/3 
     
     iter = iter+1;
 end
-centralt(k) = toc;
-%tend(k) = cputime;
+centralt(k) = toc; %tic toc PAIR 3/3
 
 end
 
@@ -198,10 +210,12 @@ end
 
 % Compare polarStates against PW's centralized power flow solution
 errReport = [];
-errThreshold = 1; %1e-5;
+diffReport = [];
+errThreshold = 1e-4;
 diffTrueSoln = zeros(numbus*2,numParts);
 compactDiffTrueSoln = cell(numParts,1);
 diffIndex = [buses; buses];
+areaList = unique(areas);
 for a = 1:numParts
     tempCentral = zeros(numbus*2,1);
     tempCentral(areabuses{a}) = centralPWStates(areabuses{a});
@@ -214,21 +228,22 @@ for a = 1:numParts
             errReport = [errReport; a diffIndex(b) diffTrueSoln(b,a)];
         end
     end
-    for b = 1:numbus
-        if abs(compactPolarStates(b,a)) > 0.5
-            errReport = [errReport; a diffIndex(b) diffTrueSoln(b,a)];
+    for b = 1:size(areabuses{a},1)
+        miniDiffIndex = [areabuses{a}; areabuses{a}];
+        if abs(compactPolarStates{a}(b)) > 0.5
+            diffReport = [diffReport; a areaList(a) miniDiffIndex(b) 1 compactPolarStates{a}(b)];
         end
-                if abs(compactPolarStates(b,a)) > 0.5
-            errReport = [errReport; a diffIndex(b) diffTrueSoln(b,a)];
+        if (abs(compactPolarStates{a}(size(areabuses{a},1)+b)) > 1.5) || (abs(compactPolarStates{a}(size(areabuses{a},1)+b)) < 0.7)
+            diffReport = [diffReport; a areaList(a) miniDiffIndex(b) 2 compactPolarStates{a}(b)];
         end
     end
 end
-errReport
+% errReport
+% diffReport
 
-
-figure(1)
-semilogy(sqrt(normres_r))
-hold on
-semilogy(sqrt(normres_s))
-title('N-Partition Distributed Multi-Area State Estimation Consensus Problem')
-legend('Primal residual', 'Dual residual')
+% figure(1)
+% semilogy(sqrt(normres_r))
+% hold on
+% semilogy(sqrt(normres_s))
+% title('N-Partition Distributed Multi-Area State Estimation Consensus Problem')
+% legend('Primal residual', 'Dual residual')

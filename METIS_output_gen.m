@@ -1,6 +1,6 @@
 %% Overwrite the graph text file
-numParts = 16;
-METIS_out = dlmread('graph14_4parts.txt','\n');
+numParts = 2;
+METIS_out = dlmread('graph14_2parts.txt','\n');
 
 onlybuses = cell(numParts,1);
 for a = 1:numParts

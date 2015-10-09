@@ -1,8 +1,24 @@
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% % NOTE: Delete the blank line at the end of graph_XXX.txt
-% filename = 'graph118_4parts.txt'; % only matters if option = 3
-% numParts = 4; % should match filename if option = 3
-% casename = 118;
+clc
+clear all
+close all
+format long
+
+reps = 1;
+centralt = zeros(1,reps);
+
+for k = 1:reps
+% Get system parameters and partitions
+
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_xfmrs.pwb';
+%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
+%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
+filename = 'graph14_2parts.txt'; % only matters if option = 3
+numParts = 2; % should match filename if option = 3
+casename = 14;
+YBus14
+%YBus14_quadlines
 
 simauto = actxserver('pwrworld.SimulatorAuto');
 
@@ -10,10 +26,10 @@ simauto = actxserver('pwrworld.SimulatorAuto');
 % Preemptively convert to per unit
 
 % NOTE: Check case file path before running
-simauto.OpenCase(casepath)
+simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 bus_2parts.pwb')
 
 % Automatically save Ybus
-%simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus14.m",NO)');
+%simauto.RunScriptCommand('SaveYbusInMatlabFormat("C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\YBus.m",NO)');
 
 simauto.RunScriptCommand('EnterMode(Run)');
 
@@ -21,20 +37,18 @@ simauto.RunScriptCommand('EnterMode(Run)');
 simauto.RunScriptCommand('SolvePowerFlow(RECTNEWT,,,,)');
 
 % Get the list of buses in the system
-fieldarray = {'BusNum','BusSlack','AreaNum','BusRad','BusPUVolt'}; %at from bus, at to bus
+fieldarray = {'BusNum','BusSlack','AreaNum'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
 buses = str2double(results{2}{1});
 numbus = size(buses,1);
+busIndex = (1:numbus).';
 areas = str2double(results{2}{3});
-if option == 2
-    numParts = size(unique(areas),1);
-end
-centralPWStates = [str2double(results{2}{4}); str2double(results{2}{5})];
 
 % Get the slack bus number
 %globalSlack = buses(strcmp(results{2}{2},'YES'));
 globalSlack = 1;
-globalSlackIndex = globalSlack;
+globalSlackArea = 1;
+globalSlackIndex = busIndex(buses == globalSlack);
 
 %% Line Information
 % Get line parameters for full AC system
@@ -42,43 +56,18 @@ fieldarray = {'BusNum','BusNum:1','LineCircuit','LineR','LineX','LineC'}; %at fr
 results = simauto.GetParametersMultipleElement('branch',fieldarray,'');
 lines = [str2double(results{2}{1}) str2double(results{2}{2}) str2double(results{2}{3})...
          str2double(results{2}{4}) str2double(results{2}{5}) str2double(results{2}{6})];
-numlines = size(lines,1);
-
-% If circuit number is EQ or E2, then convert them to 100, 101, etc.
-% respectively
-lineCheck = [0 0];
-for a = 1:numlines
-    % if it's the first time that a line has NaN in the circuit number field,
-    % then just assign 100, and put it into this checklist
-    %(isnan(lines(a,3)) == 1)
-    inLineCheck = sum(ismember(lineCheck,lines(a,1:2),'rows'));
-    if (isnan(lines(a,3)) == 1) && (inLineCheck == 0)
-        lines(a,3) = 100;
-        lineCheck = [lineCheck; lines(a,1:2)];
-    % isnan(lines(a,3)) == 1 && sum(ismember(lineCheck,lines(a,1:3)))==0
-    elseif (isnan(lines(a,3)) == 1) && (inLineCheck > 0)
-        lines(a,3) = 100 + inLineCheck;
-        lineCheck = [lineCheck; lines(a,1:2)];
-    end
-end
-
-% % Get the list of transformers in the system
-% fieldarray = {'BusNum','BusNum:1','LineCircuit','LineTap','LinePhase'}; %at from bus, at to bus
-% results = simauto.GetParametersMultipleElement('transformer',fieldarray,'');
-% xfmrs = [str2double(results{2}{1}) str2double(results{2}{2}) str2double(results{2}{3})...
-%          str2double(results{2}{4}) str2double(results{2}{5})];
-% numxfmrs = size(lines,1);
+numlines = size(lines,1);     
 
 % list of adjacent buses
 % NOTE: preset the size of adjbuses to be 15, may need to change that for
 % larger cases
 temp = zeros(numbus,numbus);
 for a = 1:numlines
-    temp(lines(a,1),lines(a,2)) = temp(lines(a,1),lines(a,2))+1;
-    temp(lines(a,2),lines(a,1)) = temp(lines(a,2),lines(a,1))+1;
+    temp(lines(a,1),lines(a,2)) = temp(lines(a,1),lines(a,2)) + 1;
+    temp(lines(a,2),lines(a,1)) = temp(lines(a,2),lines(a,1)) + 1;
 end
 
-adjbuses = zeros(numbus,numbus);
+adjbuses = zeros(numbus,15);
 for a = 1:numbus
     temp2 = find(temp(a,:) ~= 0);
     adjbuses(a,1:size(temp2,2)) = temp2;
@@ -102,11 +91,6 @@ loadMW = str2double(results{2}{5})/100;
 loadMVAR = str2double(results{2}{6})/100;
 
 simauto.CloseCase();
-delete(simauto);
-
-%% Get which buses belong in which partitions
-[onlybuses, tiebuses, tielines, globalSlackArea, areaconns] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
-%[onlybuses, tiebuses, tielines, globalSlackArea, adjacentAreas] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
 
 %% Full measurement information from PowerWorld AC power flow results
 areabuses = cell(numParts,1);
@@ -155,6 +139,42 @@ for a = 1:numParts
     end
 end
 
+% %% Partition 1
+% % Don't forget to include the overlap buses!
+% allbuses1 = sort([buses1; tiebuses1]);
+% numareabus1 = size(buses1,1); % only buses in area
+% numbus1 = size(allbuses1,1); % includes buses in area + tie buses
+% 
+% % Get AC line data for Partition 1
+% lines1 = [];
+% % If both buses are in Partition 1, include them in lines1
+% for a = 1:numlines
+%     if ismember(lines(a,1),buses1)==1 && ismember(lines(a,2),buses1)==1
+%         lines1 = [lines1; lines(a,:)]; 
+%     end
+% end
+% % Then also include the tie lines
+% lines1 = [lines1; tielines1];         
+% numlines1 = size(lines1,1);
+% 
+% alltype1(1:2*numlines1,:) = repmat({'pf'; 'qf'}, [numlines1 1]);
+% alltype1(2*numlines1+(1:numareabus1),:) = repmat({'v'}, [numareabus1 1]);
+% alltype1(2*numlines1+numareabus1+1:(2*numlines1+3*numareabus1),:)= repmat({'p'; 'q'}, [numareabus1 1]);
+% 
+% allR1 = diag(0.01^2*ones(1,size(alltype1,1)));
+% 
+% % FIX: Need to include those boundary measurements
+% allindices1 = zeros(2*numlines1+3*numareabus1,3);
+% for a = 1:numlines1
+%     allindices1((2*a-1):(2*a),:) = [lines1(a,1:3); lines1(a,1:3)]; 
+% end
+% for a = 1:numareabus1
+%     allindices1(2*numlines1+a,1) = buses1(a);
+% end
+% for a = 1:numareabus1
+%     allindices1(2*numlines1+numareabus1+((2*a-1):(2*a)),1) = buses1(a);
+% end                     
+
 % Automatically create fake measurements using PowerWorld
 % Preemptively convert to per unit
 
@@ -181,7 +201,7 @@ numMeas = cell(numParts,1);
 allz = cell(numParts,1);
 for a = 1:numParts
     numMeas{a} = size(allindices{a},1);
-    allz{a} = getMeas(buses,lines,numMeas{a},allindices{a},alltype{a},MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
+    allz{a} = getMeas(lines,numMeas{a},allindices{a},alltype{a},MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
 end
 
 %% Slack buses (one for each partition), except the global slack goes in the
@@ -189,7 +209,7 @@ end
 slack = cell(numParts,1);
 slackIndex = cell(numParts,1);
 for a = 1:numParts
-    if intersect(globalSlack,onlybuses{a}) == 1
+    if intersect(globalSlack,areabuses{a}) == 1
         slack{a} = globalSlack;
     else
         slack{a} = onlybuses{a}(1);
