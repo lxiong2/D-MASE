@@ -20,6 +20,11 @@ simauto.RunScriptCommand('EnterMode(Run)');
 % Run rectangular Newton-Raphson power flow
 simauto.RunScriptCommand('SolvePowerFlow(RECTNEWT,,,,)');
 
+% Get the slack bus number
+%globalSlack = buses(strcmp(results{2}{2},'YES'));
+globalSlack = 1;
+globalSlackIndex = globalSlack;
+
 % Get the list of buses in the system
 fieldarray = {'BusNum','BusSlack','AreaNum','BusRad','BusPUVolt'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
@@ -29,12 +34,9 @@ areas = str2double(results{2}{3});
 if option == 2
     numParts = size(unique(areas),1);
 end
-centralPWStates = [str2double(results{2}{4}); str2double(results{2}{5})];
-
-% Get the slack bus number
-%globalSlack = buses(strcmp(results{2}{2},'YES'));
-globalSlack = 1;
-globalSlackIndex = globalSlack;
+centralPWStates_th = str2double(results{2}{4});
+centralPWStates_V = str2double(results{2}{5});
+centralPWStates = [centralPWStates_th - centralPWStates_th(globalSlackIndex); centralPWStates_V];
 
 %% Line Information
 % Get line parameters for full AC system
@@ -104,55 +106,27 @@ loadMVAR = str2double(results{2}{6})/100;
 simauto.CloseCase();
 delete(simauto);
 
-%% Get which buses belong in which partitions
-[onlybuses, tiebuses, tielines, globalSlackArea, areaconns] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
-%[onlybuses, tiebuses, tielines, globalSlackArea, adjacentAreas] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
-
 %% Full measurement information from PowerWorld AC power flow results
-areabuses = cell(numParts,1);
-numareabus = cell(numParts,1);
-numonlybus = cell(numParts,1);
 
-arealines = cell(numParts,1);
-numarealines = cell(numParts,1);
-
-alltype = cell(numParts,1);
-allR = cell(numParts,1);
-allindices = cell(numParts,1);
-
-% Go through each partition and autogenerate the type, indices, and R
+% Autogenerate the type, indices, and R
 % matrices
-for a = 1:numParts
-    areabuses{a} = sort([onlybuses{a}; tiebuses{a}]); %all buses in area including tie buses
-    numareabus{a} = size(areabuses{a},1); %includes buses in area + tie buses
-    numonlybus{a} = size(onlybuses{a},1); %only the buses in area
-    
-    temp = [];    
-    for b = 1:numlines
-        if ismember(lines(b,1),onlybuses{a})==1 && ismember(lines(b,2),onlybuses{a})==1
-            temp = [temp; lines(b,:)]; 
-        end
-    end
-    arealines{a} = [temp; tielines{a}];
-    numarealines{a} = size(arealines{a},1);
-    
-    alltype{a} = [repmat({'pf'; 'qf'}, [numarealines{a} 1]);
-                  repmat({'v'}, [numonlybus{a} 1]);
-                  repmat({'p'; 'q'}, [numonlybus{a} 1])];
+  
+type = [repmat({'pf'; 'qf'}, [numlines 1]);
+          repmat({'v'}, [numbus 1]);
+          repmat({'p'; 'q'}, [numbus 1])];
 
-    allR{a} = diag(0.01^2*ones(1,size(alltype{a},1)));
+R = diag(0.01^2*ones(1,size(type,1)));
 
-    % FIX: Need to include those boundary measurements
-    allindices{a} = zeros(2*numarealines{a}+3*numonlybus{a},3);
-    for b = 1:numarealines{a}
-        allindices{a}((2*b-1):(2*b),:) = [arealines{a}(b,1:3); arealines{a}(b,1:3)]; 
-    end
-    for b = 1:numonlybus{a}
-        allindices{a}(2*numarealines{a}+b,1) = onlybuses{a}(b);
-    end
-    for b = 1:numonlybus{a}
-        allindices{a}(2*numarealines{a}+numonlybus{a}+((2*b-1):(2*b)),1) = onlybuses{a}(b);
-    end
+% FIX: Need to include those boundary measurements
+indices = zeros(2*numlines+3*numbus,3);
+for b = 1:numlines
+    indices((2*b-1):(2*b),:) = [lines(b,1:3); lines(b,1:3)];
+end
+for b = 1:numbus
+    indices(2*numlines+b,1) = buses(b);
+end
+for b = 1:numbus
+    indices(2*numlines+numbus+((2*b-1):(2*b)),1) = buses(b);
 end
 
 % Automatically create fake measurements using PowerWorld
@@ -177,34 +151,5 @@ end
 busMW = genMW - loadMW;
 busMVAR = genMVAR - loadMVAR;
 
-numMeas = cell(numParts,1);
-allz = cell(numParts,1);
-for a = 1:numParts
-    numMeas{a} = size(allindices{a},1);
-    allz{a} = getMeas(buses,lines,numMeas{a},allindices{a},alltype{a},MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
-end
-
-%% Slack buses (one for each partition), except the global slack goes in the
-% partition with it in the state vector
-slack = cell(numParts,1);
-slackIndex = cell(numParts,1);
-for a = 1:numParts
-    if intersect(globalSlack,onlybuses{a}) == 1
-        slack{a} = globalSlack;
-    else
-        slack{a} = onlybuses{a}(1);
-    end
-    busIndex = (1:numareabus{a}).';
-    slackIndex{a} = busIndex(areabuses{a}==slack{a});
-end
-           
-%% Aggregated measurements
-z = [];
-type = [];
-indices = [];
-for a = 1:numParts
-    z = [z; allz{a}];
-    type = [type; alltype{a}];
-    indices = [indices; allindices{a}];
-end
-R = diag(0.01^2*ones(1,size(z,1)));
+% Get measurements
+z = getMeas(buses,lines,size(indices,1),indices,type,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);

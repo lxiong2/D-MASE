@@ -10,24 +10,27 @@ centralt = 0;
 k = 1;
 maxiter = 20;
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-% YBus14
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+numParts = 1;
+YBus14
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
+% filename = 'graph57_2parts.txt'; % only matters if option = 3
+% casename = 57;
+% numParts = 2;
 % YBus57
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
+% filename = 'graph118_2parts.txt'; % only matters if option = 3
+% casename = 118;
+% numParts = 2;
 % YBus118
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
-YBus300
-
-%DMASE_Setup
-centralSE_setup
+DMASE_Setup
+%centralSE_setup
 
 % flat start for AC
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];
@@ -86,7 +89,7 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     k = k+1;
     
 end
-totalt = sum(centralt);
+totalt = sum(centralt)
 %toc
 
 % Convert rectangular state variables to polar form

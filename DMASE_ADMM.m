@@ -17,18 +17,25 @@ centralt = 0;
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_xfmrs.pwb';
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
-% filename = 'graph14_6parts.txt'; % only matters if option = 3
-% numParts = 6; % should match filename if option = 3
+% filename = 'graph14_2parts.txt'; % only matters if option = 3
+% numParts = 2; % should match filename if option = 3
 % casename = 14;
 % YBus14
 % %YBus14_quadlines
 
 option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-filename = 'graph118_8parts.txt'; % only matters if option = 3
-numParts = 8; % should match filename if option = 3
-casename = 118;
-YBus118
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
+filename = 'graph57_2parts.txt'; % only matters if option = 3
+casename = 57;
+numParts = 2;
+YBus57
+
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
+% filename = 'graph118_8parts.txt'; % only matters if option = 3
+% numParts = 8; % should match filename if option = 3
+% casename = 118;
+% YBus118
 
 % option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered_nomultilines.pwb';
@@ -49,9 +56,15 @@ YBus118
 % casename = 118;
 % YBus118
 
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
+filename = 'graph300_2parts.txt'; % only matters if option = 3
+numParts = 2;
+casename = 300;
+YBus300
+
 DMASE_Setup                                                     
 
-numlines = size(lines,1);
 lineStatus = repmat({'Closed'},[numlines 1]);
 
 % Form the neighborAreas list
@@ -78,7 +91,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 5;
+maxiter = 20;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -194,8 +207,10 @@ end
 
 %end
 
-partitiont
-ADMMt
+totalt = sum(partitiont)+sum(ADMMt);
+perPartition = sum(partitiont)/totalt;
+perADMM = sum(ADMMt)/totalt;
+
 %centralt
 
 % Compacted polar states

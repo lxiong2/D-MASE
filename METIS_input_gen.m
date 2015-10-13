@@ -4,7 +4,9 @@ clear
 simauto = actxserver('pwrworld.SimulatorAuto');
 
 % NOTE: Check case file path before running
-simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb')
+%simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb')
+%simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb')
+simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb')
 %simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_onlylines_Consolidated.pwb')
 %simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 bus_2parts.pwb')
 %simauto.OpenCase('C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb')
@@ -42,7 +44,7 @@ for a = 1:numlines
 end
 
 %% Overwrite the graph text file
-fid = fopen('graph14.txt','w');
+fid = fopen('graph300.txt','w');
 
 % initial line of input file with 
 fprintf(fid, '%d %d\n', [numbus numlines]);

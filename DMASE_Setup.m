@@ -20,6 +20,11 @@ simauto.RunScriptCommand('EnterMode(Run)');
 % Run rectangular Newton-Raphson power flow
 simauto.RunScriptCommand('SolvePowerFlow(RECTNEWT,,,,)');
 
+% Get the slack bus number
+%globalSlack = buses(strcmp(results{2}{2},'YES'));
+globalSlack = 1;
+globalSlackIndex = globalSlack;
+
 % Get the list of buses in the system
 fieldarray = {'BusNum','BusSlack','AreaNum','BusRad','BusPUVolt'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
@@ -29,12 +34,9 @@ areas = str2double(results{2}{3});
 if option == 2
     numParts = size(unique(areas),1);
 end
-centralPWStates = [str2double(results{2}{4}); str2double(results{2}{5})];
-
-% Get the slack bus number
-%globalSlack = buses(strcmp(results{2}{2},'YES'));
-globalSlack = 1;
-globalSlackIndex = globalSlack;
+centralPWStates_th = str2double(results{2}{4});
+centralPWStates_V = str2double(results{2}{5});
+centralPWStates = [centralPWStates_th - centralPWStates_th(globalSlackIndex); centralPWStates_V];
 
 %% Line Information
 % Get line parameters for full AC system
