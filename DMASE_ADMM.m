@@ -17,17 +17,17 @@ centralt = 0;
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_xfmrs.pwb';
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
-% filename = 'graph14_2parts.txt'; % only matters if option = 3
-% numParts = 2; % should match filename if option = 3
+% filename = 'graph14_14parts.txt'; % only matters if option = 3
+% numParts = 14; % should match filename if option = 3
 % casename = 14;
 % YBus14
-% %YBus14_quadlines
+% % %YBus14_quadlines
 
 option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
-filename = 'graph57_2parts.txt'; % only matters if option = 3
+filename = 'graph57_8parts.txt'; % only matters if option = 3
+numParts = 8;
 casename = 57;
-numParts = 2;
 YBus57
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
@@ -56,12 +56,12 @@ YBus57
 % casename = 118;
 % YBus118
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
-filename = 'graph300_2parts.txt'; % only matters if option = 3
-numParts = 2;
-casename = 300;
-YBus300
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
+% filename = 'graph300_2parts.txt'; % only matters if option = 3
+% numParts = 2;
+% casename = 300;
+% YBus300
 
 DMASE_Setup                                                     
 
@@ -91,7 +91,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 20;
+maxiter = 5;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -143,6 +143,7 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % Do distributed state estimation for each partition
     tic % tic toc PAIR 1/3
     for a = 1:numParts
+        a
         [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
         Gain{a}(:,:,iter) = tempGain;
@@ -227,7 +228,12 @@ errThreshold = 1e-4;
 diffTrueSoln = zeros(numbus*2,numParts);
 compactDiffTrueSoln = cell(numParts,1);
 diffIndex = [buses; buses];
-areaList = unique(areas);
+if option == 2
+    areaList = unique(areas);
+elseif option == 3
+    areaList = (1:numParts).';
+end
+    
 for a = 1:numParts
     tempCentral = zeros(numbus*2,1);
     tempCentral(areabuses{a}) = centralPWStates(areabuses{a});

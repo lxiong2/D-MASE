@@ -12,23 +12,23 @@ centralt = 0;
 
 %for k = 1:reps
 % Get system parameters and partitions
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_xfmrs.pwb';
-%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
-%casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
-filename = 'graph14_2parts.txt'; % only matters if option = 3
-numParts = 2; % should match filename if option = 3
-casename = 14;
-YBus14
-%YBus14_quadlines
-
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
-% filename = 'graph57_2parts.txt'; % only matters if option = 3
-% casename = 57;
-% numParts = 2;
-% YBus57
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+% %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_xfmrs.pwb';
+% %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
+% %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
+% filename = 'graph14_14parts.txt'; % only matters if option = 3
+% numParts = 14; % should match filename if option = 3
+% casename = 14;
+% YBus14
+% % %YBus14_quadlines
+
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
+filename = 'graph57_8parts.txt'; % only matters if option = 3
+numParts = 8;
+casename = 57;
+YBus57
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
@@ -55,6 +55,13 @@ YBus14
 % numParts = 8; % should match filename if option = 3
 % casename = 118;
 % YBus118
+
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
+% filename = 'graph300_2parts.txt'; % only matters if option = 3
+% numParts = 2;
+% casename = 300;
+% YBus300
 
 DMASE_Setup                                                     
 
@@ -84,7 +91,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 20;
+maxiter = 10;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -136,8 +143,10 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % Do distributed state estimation for each partition
     tic % tic toc PAIR 1/3
     for a = 1:numParts
+        a
         [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
+        disp('here is the problem')
         Gain{a}(:,:,iter) = tempGain;
         g{a}(:,iter) = tempg;
         h{a}(:,iter) = temph;
@@ -201,7 +210,9 @@ end
 %end
 
 totalt = sum(partitiont)+sum(ADMMt);
-perPartition = 
+perPartition = sum(partitiont)/totalt;
+perADMM = sum(ADMMt)/totalt;
+
 %centralt
 
 % Compacted polar states
@@ -218,7 +229,12 @@ errThreshold = 1e-4;
 diffTrueSoln = zeros(numbus*2,numParts);
 compactDiffTrueSoln = cell(numParts,1);
 diffIndex = [buses; buses];
-areaList = unique(areas);
+if option == 2
+    areaList = unique(areas);
+elseif option == 3
+    areaList = (1:numParts).';
+end
+    
 for a = 1:numParts
     tempCentral = zeros(numbus*2,1);
     tempCentral(areabuses{a}) = centralPWStates(areabuses{a});
@@ -244,9 +260,9 @@ end
 % errReport
 % diffReport
 
-% figure(1)
-% semilogy(sqrt(normres_r))
-% hold on
-% semilogy(sqrt(normres_s))
-% title('N-Partition Distributed Multi-Area State Estimation Consensus Problem')
-% legend('Primal residual', 'Dual residual')
+figure(1)
+semilogy(sqrt(normres_r))
+hold on
+semilogy(sqrt(normres_s))
+title('N-Partition Distributed Multi-Area State Estimation Consensus Problem')
+legend('Primal residual', 'Dual residual')
