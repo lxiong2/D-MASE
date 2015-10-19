@@ -37,6 +37,11 @@ end
 centralPWStates_th = str2double(results{2}{4});
 centralPWStates_V = str2double(results{2}{5});
 centralPWStates = [centralPWStates_th - centralPWStates_th(globalSlackIndex); centralPWStates_V];
+centralPWStates_rect = zeros(numbus*2,1);
+for a = 1:numbus
+    centralPWStates_rect(a) = centralPWStates_V(a)*cos(centralPWStates_th(a));
+    centralPWStates_rect(numbus+a) = centralPWStates_V(a)*sin(centralPWStates_th(a));
+end
 
 %% Line Information
 % Get line parameters for full AC system

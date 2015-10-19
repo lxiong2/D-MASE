@@ -3,10 +3,15 @@
 % numParts = 4; % should match filename if option = 3
 % numbus = 14;
 
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-filename = 'graph118_4parts.txt'; % only matters if option = 3
-numParts = 4; % should match filename if option = 3
-numbus = 118;
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
+filename = 'graph57_8parts.txt'; % only matters if option = 3
+numParts = 8;
+numbus = 57;
+
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
+% filename = 'graph118_4parts.txt'; % only matters if option = 3
+% numParts = 4; % should match filename if option = 3
+% numbus = 118;
 
 % Read METIS file
 % NOTE: DELETE LAST BLANK LINE IN TEXT FILE

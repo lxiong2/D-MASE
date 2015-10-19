@@ -23,12 +23,12 @@ centralt = 0;
 % YBus14
 % % %YBus14_quadlines
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
-filename = 'graph57_8parts.txt'; % only matters if option = 3
-numParts = 8;
-casename = 57;
-YBus57
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
+% filename = 'graph57_8parts.txt'; % only matters if option = 3
+% numParts = 8;
+% casename = 57;
+% YBus57
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
@@ -143,16 +143,16 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
     % Do distributed state estimation for each partition
     tic % tic toc PAIR 1/3
     for a = 1:numParts
-        a
         [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
-        disp('here is the problem')
         Gain{a}(:,:,iter) = tempGain;
         g{a}(:,iter) = tempg;
         h{a}(:,iter) = temph;
         H{a}(:,:,iter) = tempH;
-        dx_k{a}(:,iter+1) = -Gain{a}(:,:,iter)\g{a}(:,iter);
-        dx_k{a}(numareabus{a}+slackIndex{a},iter+1) = 0;
+%         dx_k{a}(:,iter+1) = -Gain{a}(:,:,iter)\g{a}(:,iter);
+%         dx_k{a}(numareabus{a}+slackIndex{a},iter+1) = 0;
+        tempdx_k{a} = -Gain{a}(:,:,iter)\g{a}(:,iter);
+        dx_k{a}(:,iter+1) = [tempdx_k{a}(1:numareabus{a}+slackIndex{a}-1); 0; tempdx_k{a}(numareabus{a}+slackIndex{a}:numareabus{a}*2-1)];
         x_k{a}(:,iter+1) = x_k{a}(:,iter) + dx_k{a}(:,iter+1);
     end
     partitiont(iter) = toc; % tic toc PAIR 1/3
@@ -167,7 +167,10 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         allStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:2*numareabus{a},iter+1);
     end
 
-    [newStates,polarStates] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas,globalSlackArea);
+    temp101(:,:,iter) = allStates
+    temp101_polar(:,:,iter) = convertRect2Polar(temp101, numParts, numbus)
+    [newStates,polarStates,distance,parent] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas,globalSlackArea);
+    
     allStates = newStates;
     
     for a = 1:numParts

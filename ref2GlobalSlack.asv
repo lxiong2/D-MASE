@@ -46,9 +46,10 @@ while newQ.isempty() == 0
 end
 
 for a = 1:numParts
-    newStates(areabuses{a},a) = allStates(areabuses{a},a)*cos(distance(a))-...
-        allStates(numbus+areabuses{a},a)*sin(distance(a)); %e_new = e_old*cos(dth)-f_old*sin(dth)
-    newStates(numbus+areabuses{a},a) = allStates(numbus+areabuses{a},a)*cos(distance(a))+...
-        allStates(areabuses{a},a)*sin(distance(a)); %f_new = f_old*cos(dth)+e_old*sin(dth)
+    newStates(areabuses{a},a) = allStates(areabuses{neighborAreas{u}(b)},neighborAreas{u}(b))*cos(distance(neighborAreas{u}(b)))-...
+        allStates(numbus+areabuses{neighborAreas{u}(b)},neighborAreas{u}(b))*sin(distance(neighborAreas{u}(b)));
+    newStates(numbus+areabuses{a},a) = allStates(numbus+areabuses{neighborAreas{u}(b)},neighborAreas{u}(b))*cos(distance(neighborAreas{u}(b)))+...
+        allStates(areabuses{neighborAreas{u}(b)},neighborAreas{u}(b))*sin(distance(neighborAreas{u}(b)));
 end
+
 polarStates = convertRect2Polar(newStates, numParts, numbus);

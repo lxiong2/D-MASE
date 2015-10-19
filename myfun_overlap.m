@@ -36,9 +36,21 @@ h = createhvector_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses
 
 H = createHmatrix_rectADMM(e,f,G_a,B_a,type_a,allindices_a,numbus,buses,allbuses_a,adjbuses,lines);
 %Pad the slack column with zeros, so that the calculation of g isn't affected
-H = [H(:,1:numbus_a) H(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) zeros(size(z_a,1),1) H(:,(numbus_a+slackIndex_a+1):2*numbus_a)]; 
+% H = [H(:,1:numbus_a) H(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) zeros(size(z_a,1),1) H(:,(numbus_a+slackIndex_a+1):2*numbus_a)]; 
+% 
+% f = (z_a-h).'*(R_a\(z_a-h));
+% Gain = 2*H.'*(R_a\H)+rho;
+% 
+% g = -2*H.'*(R_a\(z_a-h)) + y_a + rho*(x_a-c_a); %DEBUG: is y a row or column vector? What about c?
+
+% %Pad the slack column with zeros, so that the calculation of g isn't affected
+H = [H(:,1:numbus_a) H(:,(numbus_a+1):(numbus_a+slackIndex_a-1)) zeros(size(z_a,1),1) H(:,(numbus_a+slackIndex_a+1):2*numbus_a)];
 
 f = (z_a-h).'*(R_a\(z_a-h));
 Gain = 2*H.'*(R_a\H)+rho;
+% Remove f slack row/column
+Gain = [Gain(1:numbus_a+slackIndex_a-1,1:1:numbus_a+slackIndex_a-1) Gain(1:numbus_a+slackIndex_a-1,numbus_a+slackIndex_a+1:numbus_a*2);
+        Gain(numbus_a+slackIndex_a+1:numbus_a*2,1:numbus_a+slackIndex_a-1) Gain(numbus_a+slackIndex_a+1:numbus_a*2,numbus_a+slackIndex_a+1:1:numbus_a*2)];
 
 g = -2*H.'*(R_a\(z_a-h)) + y_a + rho*(x_a-c_a); %DEBUG: is y a row or column vector? What about c?
+g = [g(1:numbus_a+slackIndex_a-1); g(numbus_a+slackIndex_a+1:numbus_a*2)];
