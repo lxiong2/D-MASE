@@ -1,4 +1,4 @@
-function [onlybuses,tiebuses,tielines,innerlines,globalSlackArea,areaconns,isContig] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename)
+function [onlybuses,tiebuses,tielines,globalSlackArea,areaconns] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename)
 %function [onlybuses,tiebuses,tielines,globalSlackArea,adjacentAreas] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename)
 % Option 1: manually enter which buses are in which area
 % Option 2: automatically pull the area numbers from PowerWorld
@@ -149,18 +149,25 @@ elseif option == 3
     for a = 1:numParts
         onlybuses{a} = find(METIS_out == (a-1)); % METIS output starts from 0
     end
-  
+    
+    % check contiguity of buses in each partition
+    notContig = 
+    for a = 1:numParts
+        for b = 1:size(onlybuses{a},1)
+            
+        end
+    end
+    
+    
     % COPIED FROM OPTION 2
     % Look at each partition
     % What buses outside your area are connected to the buses in your area?
     % Those are the overlapping buses
     tiebuses = cell(numParts,1);
     tielines = cell(numParts,1);
-    innerlines = cell(numParts,1);
     for a = 1:numParts
         temptie = [];
         temptieline = [];
-        tempinnerline = [];
         for b = 1:numlines
             % one end of the line has a bus in one partition, and the other
             % end of the line has a bus in a different partition, then you
@@ -171,14 +178,11 @@ elseif option == 3
             elseif sum(lines(b,2) == cell2mat(onlybuses(a))) == 1 && sum(lines(b,1) == cell2mat(onlybuses(a))) == 0
                 temptie = [temptie; lines(b,1)];
                 temptieline = [temptieline; lines(b,:)];
-            elseif sum(lines(b,1) == cell2mat(onlybuses(a))) == 1 && sum(lines(b,2) == cell2mat(onlybuses(a))) == 1
-                tempinnerline = [tempinnerline; lines(b,:)];
             end
         end
         % Remove redundant buses from multiple lines
         tiebuses{a} = unique(temptie);
         tielines{a} = temptieline;
-        innerlines{a} = tempinnerline;
     end
     
     % Automatically identify the global slack area

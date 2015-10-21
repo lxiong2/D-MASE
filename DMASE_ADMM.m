@@ -17,18 +17,18 @@ centralt = 0;
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_xfmrs.pwb';
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
-% filename = 'graph14_14parts.txt'; % only matters if option = 3
-% numParts = 14; % should match filename if option = 3
+% filename = 'graph14_4parts.txt'; % only matters if option = 3
+% numParts = 4; % should match filename if option = 3
 % casename = 14;
 % YBus14
 % % %YBus14_quadlines
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
-filename = 'graph57_8parts (2).txt'; % only matters if option = 3; none=rb; (2)=k-way contig
-numParts = 8;
-casename = 57;
-YBus57
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
+% filename = 'graph57_57parts.txt'; % only matters if option = 3; none=rb; (2)=k-way contig
+% numParts = 57;
+% casename = 57;
+% YBus57
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
@@ -44,24 +44,19 @@ YBus57
 % casename = 'TVA';
 % YBusTVA
 
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
-% filename = 'graph14_6parts.txt'; % only matters if option = 3
-% numParts = 6; % should match filename if option = 3
-% casename = 14;
-% YBus14
-
+% option = 3;
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-% filename = 'graph118_8parts.txt'; % only matters if option = 3
-% numParts = 8; % should match filename if option = 3
+% filename = 'graph118_118parts.txt'; % only matters if option = 3
+% numParts = 118; % should match filename if option = 3
 % casename = 118;
 % YBus118
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
-% filename = 'graph300_2parts.txt'; % only matters if option = 3
-% numParts = 2;
-% casename = 300;
-% YBus300
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
+filename = 'graph300_2parts.txt'; % only matters if option = 3
+numParts = 2;
+casename = 300;
+YBus300
 
 DMASE_Setup                                                     
 
@@ -167,8 +162,6 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         allStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:2*numareabus{a},iter+1);
     end
 
-    temp101(:,:,iter) = allStates
-    temp101_polar(:,:,iter) = convertRect2Polar(temp101, numParts, numbus)
     [newStates,polarStates,distance,parent] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas,globalSlackArea);
     
     allStates = newStates;

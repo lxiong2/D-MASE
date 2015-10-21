@@ -23,17 +23,17 @@ centralt = 0;
 % YBus14
 % % %YBus14_quadlines
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
-% filename = 'graph57_8parts.txt'; % only matters if option = 3
-% numParts = 8;
-% casename = 57;
-% YBus57
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
+filename = 'graph57_8parts.txt'; % only matters if option = 3; none=rb; (2)=k-way contig
+numParts = 16;
+casename = 57;
+YBus57
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-% filename = 'graph118_8parts.txt'; % only matters if option = 3
-% numParts = 8; % should match filename if option = 3
+% filename = 'graph118_32parts.txt'; % only matters if option = 3
+% numParts = 32; % should match filename if option = 3
 % casename = 118;
 % YBus118
 
@@ -167,8 +167,6 @@ while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dua
         allStates(numbus+areabuses{a},a) = x_k{a}(numareabus{a}+1:2*numareabus{a},iter+1);
     end
 
-    temp101(:,:,iter) = allStates
-    temp101_polar(:,:,iter) = convertRect2Polar(temp101, numParts, numbus)
     [newStates,polarStates,distance,parent] = ref2GlobalSlack(allStates,numbus,numParts,areabuses,neighborAreas,globalSlackArea);
     
     allStates = newStates;

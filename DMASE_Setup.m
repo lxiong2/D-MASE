@@ -112,8 +112,21 @@ simauto.CloseCase();
 delete(simauto);
 
 %% Get which buses belong in which partitions
-[onlybuses, tiebuses, tielines, globalSlackArea, areaconns] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
+[onlybuses, tiebuses, tielines, innerlines, globalSlackArea, areaconns] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
 %[onlybuses, tiebuses, tielines, globalSlackArea, adjacentAreas] = getPartitions(numParts,buses,globalSlack,areas,numlines,lines,option,casename,filename); % get which buses belong in each area
+
+% % check contiguity of buses in each partition
+% for a = 1:numParts
+%     [tempnotContig,tempcontigDistance,tempparent] = checkContig(a,onlybuses{a},innerlines{a});
+%     overallContig{a} = tempnotContig;
+%     overallDistance{a} = tempcontigDistance;
+%     overallParent{a} = tempparent;
+%     if isempty(overallContig{a}) == 0
+%         display('Warning: partition is not contiguous')
+%         display(a)
+%         display(overallContig{a})
+%     end
+% end
 
 %% Full measurement information from PowerWorld AC power flow results
 areabuses = cell(numParts,1);
