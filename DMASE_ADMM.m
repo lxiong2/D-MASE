@@ -14,50 +14,65 @@ centralt = 0;
 % Get system parameters and partitions
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-% %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_xfmrs.pwb';
-% %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_doublelines.pwb';
-% %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus_quadruplelines.pwb';
 % filename = 'graph14_4parts.txt'; % only matters if option = 3
+% newfilename = 'graph14_4parts (2).txt';
 % numParts = 4; % should match filename if option = 3
 % casename = 14;
 % YBus14
-% % %YBus14_quadlines
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
-% filename = 'graph57_57parts.txt'; % only matters if option = 3; none=rb; (2)=k-way contig
-% numParts = 57;
+% filename = 'graph57_6parts.txt'; % only matters if option = 3; none=rb; (2)=k-way contig
+% newfilename = 'graph57_6parts (2).txt';
+% numParts = 6;
 % casename = 57;
 % YBus57
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-% filename = 'graph118_32parts.txt'; % only matters if option = 3
-% numParts = 32; % should match filename if option = 3
-% casename = 118;
-% YBus118
-
-% option = 2; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered_nomultilines.pwb';
-% filename = ''; % only matters if option = 3
-% numParts = 32; % should match filename if option = 3
-% casename = 'TVA';
-% YBusTVA
-
-% option = 3;
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-% filename = 'graph118_118parts.txt'; % only matters if option = 3
-% numParts = 118; % should match filename if option = 3
+% filename = 'graph118_50parts.txt'; % only matters if option = 3
+% newfilename = 'graph118_50parts (2).txt';
+% numParts = 50; % should match filename if option = 3
 % casename = 118;
 % YBus118
 
 option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
-filename = 'graph300_2parts.txt'; % only matters if option = 3
-numParts = 2;
+filename = 'graph300_250parts.txt'; % only matters if option = 3
+newfilename = 'graph300_250parts (2).txt';
+numParts = 250;
 casename = 300;
 YBus300
 
+% Read METIS output file and see how many actual partitions there are, then
+% overwrite numParts
+METIS_out = dlmread(filename,'\n').';
+listParts = unique(METIS_out);
+allParts = (0:numParts-1).';
+emptyParts = setdiff(allParts,listParts); % numbering starts from 0 (part 0,1,...,N-1)
+numParts = numParts-size(emptyParts,1)
+
+% Overwrite METIS file with new partition numbering if there are empty
+% partitions
+if size(emptyParts,1) ~= 0
+    fid = fopen(newfilename,'w');
+    for a = 1:casename
+        temp = METIS_out(a);
+        for b = 1:size(emptyParts,1)
+            if METIS_out(a) > emptyParts(b)
+                temp = temp-1;
+            end
+        end
+        fprintf(fid, '%d', temp);
+        if a ~= casename
+            fprintf(fid, '\n');
+        end
+    end
+    fid = fclose(fid);
+    filename = newfilename;
+end
+
+% Get partitions and set up measurement information from PowerWorld
 DMASE_Setup                                                     
 
 lineStatus = repmat({'Closed'},[numlines 1]);

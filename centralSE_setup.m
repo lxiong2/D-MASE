@@ -23,10 +23,10 @@ simauto.RunScriptCommand('SolvePowerFlow(RECTNEWT,,,,)');
 % Get the slack bus number
 %globalSlack = buses(strcmp(results{2}{2},'YES'));
 globalSlack = 1;
-globalSlackIndex = globalSlack;
+globalSlackIndex = 1;
 
 % Get the list of buses in the system
-fieldarray = {'BusNum','BusSlack','AreaNum','BusRad','BusPUVolt'}; %at from bus, at to bus
+fieldarray = {'BusNum','BusSlack','AreaNum','BusRad','BusPUVolt','BusSlack'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
 buses = str2double(results{2}{1});
 numbus = size(buses,1);

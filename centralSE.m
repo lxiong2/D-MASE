@@ -26,7 +26,6 @@ YBus14
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
 % YBus300
 
-%DMASE_Setup
 centralSE_setup
 
 % flat start for AC
@@ -103,7 +102,7 @@ errReport = [];
 errThreshold = 1e-4;
 diffTrueSoln = zeros(numbus*2,1);
 diffTrueSoln = centralPWStates - polarStates;
-for a = 1:numbus
+for a = 1:numbus*2
     if diffTrueSoln(a) > errThreshold
         errReport = [errReport; a centralPWStates(a) polarStates(a)];
     end
