@@ -28,7 +28,15 @@ YBus14
 
 centralSE_setup
 
-% flat start for AC
+% Add Gaussian noise to measurements
+load noise.mat
+for a = 1:size(z,1)
+    if (indices(a,1) ~= globalSlack) && (indices(a,2) ~= globalSlack)
+        z(a) = z(a)*(1+noise(a,4));
+    end
+end
+
+%% flat start for AC
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];
 
 % flat start for DC

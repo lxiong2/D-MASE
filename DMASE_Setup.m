@@ -204,6 +204,16 @@ for a = 1:numParts
     allz{a} = getMeas(buses,lines,numMeas{a},allindices{a},alltype{a},MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
 end
 
+% Add random Gaussian noise to allz
+% load tNoise.mat
+% for a = 1:numParts
+%     for b = 1:numMeas{a}
+%         if (allindices{a}(b,1) ~= globalSlack) && (allindices{a}(b,2) ~= globalSlack)
+%             allz{a} = allz{a}*(1+noise{a}(b));
+%         end
+%     end
+% end
+
 %% Slack buses (one for each partition), except the global slack goes in the
 % partition with it in the state vector
 slack = cell(numParts,1);
@@ -218,13 +228,13 @@ for a = 1:numParts
     slackIndex{a} = busIndex(areabuses{a}==slack{a});
 end
            
-%% Aggregated measurements
-z = [];
-type = [];
-indices = [];
-for a = 1:numParts
-    z = [z; allz{a}];
-    type = [type; alltype{a}];
-    indices = [indices; allindices{a}];
-end
-R = diag(0.01^2*ones(1,size(z,1)));
+% %% Aggregated measurements
+% z = [];
+% type = [];
+% indices = [];
+% for a = 1:numParts
+%     z = [z; allz{a}];
+%     type = [type; alltype{a}];
+%     indices = [indices; allindices{a}];
+% end
+% R = diag(0.01^2*ones(1,size(z,1)));

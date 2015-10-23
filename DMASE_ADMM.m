@@ -10,15 +10,14 @@ format long
 %centralt = zeros(1,reps);
 centralt = 0;
 
-%for k = 1:reps
 % Get system parameters and partitions
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-% filename = 'graph14_4parts.txt'; % only matters if option = 3
-% newfilename = 'graph14_4parts (2).txt';
-% numParts = 4; % should match filename if option = 3
-% casename = 14;
-% YBus14
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+filename = 'graph14_2parts.txt'; % only matters if option = 3
+newfilename = 'graph14_2parts (2).txt';
+numParts = 2; % should match filename if option = 3
+casename = 14;
+YBus14
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
@@ -36,13 +35,13 @@ centralt = 0;
 % casename = 118;
 % YBus118
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
-filename = 'graph300_250parts.txt'; % only matters if option = 3
-newfilename = 'graph300_250parts (2).txt';
-numParts = 250;
-casename = 300;
-YBus300
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
+% filename = 'graph300_250parts.txt'; % only matters if option = 3
+% newfilename = 'graph300_250parts (2).txt';
+% numParts = 250;
+% casename = 300;
+% YBus300
 
 % Read METIS output file and see how many actual partitions there are, then
 % overwrite numParts
