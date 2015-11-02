@@ -204,15 +204,18 @@ for a = 1:numParts
     allz{a} = getMeas(buses,lines,numMeas{a},allindices{a},alltype{a},MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
 end
 
-% Add random Gaussian noise to allz
-% load tNoise.mat
-% for a = 1:numParts
-%     for b = 1:numMeas{a}
-%         if (allindices{a}(b,1) ~= globalSlack) && (allindices{a}(b,2) ~= globalSlack)
-%             allz{a} = allz{a}*(1+noise{a}(b));
-%         end
-%     end
-% end
+%% Add random Gaussian noise to allz
+for a = 1:numParts
+    for b = 1:numMeas{a}
+        % find how each centralized measurement's indices and type
+        % map to allindices
+        for d = 1:size(noise,1)
+            if sum(allindices{a}(b,:)==noise(d,1:3))==3 && strcmp(alltype{a}(b),type(d))==1
+                allz{a}(b) = allz{a}(b)*(1+noise(d,4));
+            end
+        end
+    end
+end
 
 %% Slack buses (one for each partition), except the global slack goes in the
 % partition with it in the state vector

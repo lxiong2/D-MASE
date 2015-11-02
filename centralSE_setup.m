@@ -152,4 +152,4 @@ busMW = genMW - loadMW;
 busMVAR = genMVAR - loadMVAR;
 
 % Get measurements
-z = getMeas(buses,lines,size(indices,1),indices,type,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR)
+z = getMeas(buses,lines,size(indices,1),indices,type,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);

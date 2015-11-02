@@ -10,26 +10,29 @@ centralt = 0;
 k = 1;
 maxiter = 20;
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-YBus14
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+% YBus14
+% load noise14.mat
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
 % YBus57
+% load noise57.mat
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
 % YBus118
+% load noise118.mat
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
-% YBus300
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
+YBus300
+load noise300.mat
 
 centralSE_setup
 
-% Add Gaussian noise to measurements
-load noise.mat
+%% Add Gaussian noise to measurements
 for a = 1:size(z,1)
     if (indices(a,1) ~= globalSlack) && (indices(a,2) ~= globalSlack)
         z(a) = z(a)*(1+noise(a,4));
@@ -93,7 +96,7 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     k = k+1;
     
 end
-totalt = sum(centralt);
+totalt = sum(centralt)
 %toc
 
 % Convert rectangular state variables to polar form
@@ -106,13 +109,13 @@ for a = 1:numbus
 end
 
 % Compare polarStates against PW's centralized power flow solution
-errReport = [];
-errThreshold = 1e-4;
-diffTrueSoln = zeros(numbus*2,1);
-diffTrueSoln = centralPWStates - polarStates;
-for a = 1:numbus*2
-    if diffTrueSoln(a) > errThreshold
-        errReport = [errReport; a centralPWStates(a) polarStates(a)];
-    end
-end
-errReport
+% errReport = [];
+% errThreshold = 1e-4;
+% diffTrueSoln = zeros(numbus*2,1);
+% diffTrueSoln = centralPWStates - polarStates;
+% for a = 1:numbus*2
+%     if diffTrueSoln(a) > errThreshold
+%         errReport = [errReport; a centralPWStates(a) polarStates(a)];
+%     end
+% end
+% errReport

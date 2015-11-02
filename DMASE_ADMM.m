@@ -11,37 +11,46 @@ format long
 centralt = 0;
 
 % Get system parameters and partitions
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-filename = 'graph14_2parts.txt'; % only matters if option = 3
-newfilename = 'graph14_2parts (2).txt';
-numParts = 2; % should match filename if option = 3
-casename = 14;
-YBus14
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+% filename = 'graph14_14parts.txt'; % only matters if option = 3
+% newfilename = 'graph14_14parts (2).txt';
+% numParts = 14; % should match filename if option = 3
+% casename = 14;
+% YBus14
+% load noise14.mat
+% load noisetype14.mat
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
-% filename = 'graph57_6parts.txt'; % only matters if option = 3; none=rb; (2)=k-way contig
-% newfilename = 'graph57_6parts (2).txt';
-% numParts = 6;
+% filename = 'graph57_57parts.txt'; % only matters if option = 3; none=rb; (2)=k-way contig
+% newfilename = 'graph57_57parts (2).txt';
+% numParts = 57;
 % casename = 57;
 % YBus57
+% load noise57.mat
+% load noisetype57.mat
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-% filename = 'graph118_50parts.txt'; % only matters if option = 3
-% newfilename = 'graph118_50parts (2).txt';
-% numParts = 50; % should match filename if option = 3
+% filename = 'graph118_118parts.txt'; % only matters if option = 3
+% newfilename = 'graph118_118parts (2).txt';
+% numParts = 118; % should match filename if option = 3
 % casename = 118;
 % YBus118
+% load noise118.mat
+% load noisetype118.mat
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
-% filename = 'graph300_250parts.txt'; % only matters if option = 3
-% newfilename = 'graph300_250parts (2).txt';
-% numParts = 250;
-% casename = 300;
-% YBus300
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
+filename = 'graph300_128parts.txt'; % only matters if option = 3
+newfilename = 'graph300_128parts (2).txt';
+numParts = 128;
+casename = 300;
+YBus300
+load noise300.mat
+load noisetype300.mat
+
 
 % Read METIS output file and see how many actual partitions there are, then
 % overwrite numParts
@@ -100,7 +109,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 10;
+maxiter = 5;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -143,8 +152,8 @@ n = 2*numbus;
 %eps_pri = sqrt(n)*eps_abs + eps_rel*max([norm(x1_k) norm(x2_k) norm(x3_k) norm(x4_k) norm(c_k)])
 %eps_dual = sqrt(n)*eps_abs + eps_rel*max([norm(y1_kl) norm(y2_kl) norm(y3_kl) norm(y4_kl)])
 
-eps_pri = 1e-4;
-eps_dual = 1e-4;
+eps_pri = 1e-2;
+eps_dual = 1e-2;
 
 %centralt = zeros(numParts,1);
 %tic %tic toc PAIR 3/3
@@ -219,11 +228,22 @@ end
 
 %end
 
-totalt = sum(partitiont)+sum(ADMMt);
+totalt = sum(partitiont)+sum(ADMMt)
 perPartition = sum(partitiont)/totalt;
 perADMM = sum(ADMMt)/totalt;
 
 %centralt
+
+% Global Polar States
+globalPolarSoln = zeros(2*numbus,1);
+for a = 1:numbus
+    globalPolarSoln(a,1) = atan(c_k(numbus+a,iter)/c_k(a,iter));
+    if isnan(globalPolarSoln(a,1)) == 1
+        globalPolarSoln(a,1) = 0;
+    end
+	globalPolarSoln(numbus+a,1) = sqrt(c_k(a,iter)^2+c_k(numbus+a,iter)^2);
+end
+globalPolarSoln = globalPolarSoln - globalPolarSoln(1,:);
 
 % Compacted polar states
 % Convert to polar coordinates for debug purposes
@@ -269,7 +289,7 @@ for a = 1:numParts
 end
 % errReport
 % diffReport
-
+% 
 figure(1)
 semilogy(sqrt(normres_r))
 hold on
