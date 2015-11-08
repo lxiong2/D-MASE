@@ -21,8 +21,11 @@ maxiter = 20;
 % load noise57.mat
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
-% YBus118
+% %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_test (2).pwb';
+% %YBus118
+% YBus118_test
+% load noise118_test.mat
 % load noise118.mat
 
 option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
@@ -85,7 +88,7 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
    
     % Compute right-hand side
     rhs(:,k) = H(:,:,k).'*(R\(z-h(:,k)));
-    
+   
     % Solve for dx
     deltax(:,k+1) = Gain(:,:,k)\rhs(:,k);
     
