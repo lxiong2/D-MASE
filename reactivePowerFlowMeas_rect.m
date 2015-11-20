@@ -4,11 +4,10 @@ function [dQijde, dQijdf] = reactivePowerFlowMeas_rect(e,f,G,B,buses,lines,indQF
 
 dQijde = zeros(1,size(buses,1));
 dQijdf = zeros(1,size(buses,1));
-busIndex = (1:size(buses,1)).';
 bsi = 0;
 
-m = busIndex(buses==indQFmeas(1,1));
-n = busIndex(buses==indQFmeas(1,2));
+m = find(buses==indQFmeas(1,1));
+n = find(buses==indQFmeas(1,2));
 ckt = indQFmeas(1,3);
 
 paraLines1 = intersect(find(lines(:,1)==indQFmeas(1,1)),find(lines(:,2)==indQFmeas(1,2)));

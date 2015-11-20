@@ -80,12 +80,12 @@ for a = 1:numlines
     temp(lines(a,2),lines(a,1)) = temp(lines(a,2),lines(a,1))+1;
 end
 
-adjbuses = zeros(numbus,numbus);
+adjbuses = cell(numbus,1);
 for a = 1:numbus
     temp2 = find(temp(a,:) ~= 0);
-    adjbuses(a,1:size(temp2,2)) = temp2;
+    adjbuses{a} = [a temp2];
 end
-adjbuses = [(1:numbus).' adjbuses];
+%adjbuses = [(1:numbus).' adjbuses];
             
 % Get power flow line results
 fieldarray = {'BusNum','BusNum:1','LineCircuit','LineMW','LineMVR','LineMW:1','LineMVR:1'}; %at from bus, at to bus
@@ -111,23 +111,21 @@ delete(simauto);
 % Autogenerate the type, indices, and R
 % matrices
   
-type = [repmat({'pf'; 'qf'}, [numlines 1]);
-          repmat({'v'}, [numbus 1]);
-          repmat({'p'; 'q'}, [numbus 1])];
+type = [repmat({'pf'}, [numlines 1]);
+        repmat({'qf'}, [numlines 1]);
+        repmat({'p'}, [numbus 1]);
+        repmat({'q'}, [numbus 1]);
+        repmat({'v'}, [numbus 1])];
 
 R = diag(0.01^2*ones(1,size(type,1)));
 
 % FIX: Need to include those boundary measurements
 indices = zeros(2*numlines+3*numbus,3);
-for b = 1:numlines
-    indices((2*b-1):(2*b),:) = [lines(b,1:3); lines(b,1:3)];
-end
-for b = 1:numbus
-    indices(2*numlines+b,1) = buses(b);
-end
-for b = 1:numbus
-    indices(2*numlines+numbus+((2*b-1):(2*b)),1) = buses(b);
-end
+indices(1:numlines,:) = lines(:,1:3);
+indices(numlines+1:2*numlines,:) = lines(:,1:3);
+indices((2*numlines+1):(2*numlines+numbus),1) = buses(:,1);
+indices((2*numlines+numbus+1):(2*numlines+2*numbus),1) = buses(:,1);
+indices((2*numlines+2*numbus+1):(2*numlines+3*numbus),1) = buses(:,1);
 
 % Automatically create fake measurements using PowerWorld
 % Preemptively convert to per unit
@@ -152,4 +150,9 @@ busMW = genMW - loadMW;
 busMVAR = genMVAR - loadMVAR;
 
 % Get measurements
-z = getMeas(buses,lines,size(indices,1),indices,type,MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
+z = zeros(2*numlines+3*numbus,1);
+z(1:numlines,1) = getMeas(lines,indices,'pf',MWflows,MVARflows,revMWflows,revMVARflows);
+z(numlines+1:2*numlines,1) = getMeas(lines,indices,'qf',MWflows,MVARflows,revMWflows,revMVARflows);
+z((2*numlines+1):(2*numlines+numbus),1) = busMW;
+z((2*numlines+numbus+1):(2*numlines+2*numbus),1) = busMVAR;
+z((2*numlines+2*numbus+1):(2*numlines+3*numbus),1) = busV;

@@ -1,43 +1,27 @@
-function h = createhvector_rect(e,f,G,B,type,indices,numbus,buses,lines)
+function h = createhvector_rect(e,f,G,B,type,indices,buses,lines,adjbuses)
 % Rectangular power flow
 % V_i = e_i + j*f_i = |V_i| ang (theta_i)
 % Includes what to do for parallel lines
 
 h = zeros(size(type,1),1);
-busIndex = (1:numbus).';
 % Assume gsi = 0
+
+temptime = 0;
 
 %% Determine type of measurement
 for a = 1:size(type,1)
-    % Real power injection measurements
-    if strcmp(type(a),'p') == 1
-        m = busIndex(buses==indices(a,1)); % m = bus at which P is injected
-        temp = 0;
-        temp2 = 0;
-        for n = 1:numbus
-            temp = temp+(G(m,n)*e(n)-B(m,n)*f(n));
-            temp2 = temp2+(G(m,n)*f(n)+B(m,n)*e(n));
-        end
-        h(a) = e(m)*temp+f(m)*temp2;
-    % Reactive power injection measurements  
-    elseif strcmp(type(a),'q') == 1
-        m = busIndex(buses==indices(a,1)); % m = bus at which P is injected
-        temp = 0;
-        temp2 = 0;
-        for n = 1:numbus
-            temp = temp+(-G(m,n)*f(n)-B(m,n)*e(n));
-            temp2 = temp2+(G(m,n)*e(n)-B(m,n)*f(n));
-        end
-        h(a) = e(m)*temp + f(m)*temp2;
     % Real power flow measurements
-    elseif strcmp(type(a),'pf') == 1
-        m = busIndex(buses==indices(a,1));
-        n = busIndex(buses==indices(a,2));
+    if strcmp(type(a),'pf') == 1
+        m = find(buses==indices(a,1));
+        n = find(buses==indices(a,2));
         ckt = indices(a,3);
         % Find the indices of the lines that have the same to and from
         % buses or vice versa
+        %tic
         paraLines1 = intersect(find(lines(:,1)==indices(a,1)),find(lines(:,2)==indices(a,2)));
         paraLines2 = intersect(find(lines(:,2)==indices(a,1)),find(lines(:,1)==indices(a,2)));
+%         tempt = toc;
+%         temptime = temptime+tempt;
         paraLines = [paraLines1; paraLines2];
         if size(paraLines,1) == 1 %no multiple lines (or if the matrix is empty)     
             h(a) = -G(m,n)*(e(m)^2+f(m)^2)+G(m,n)*(e(m)*e(n)+f(m)*f(n))+B(m,n)*(f(m)*e(n)-e(m)*f(n));
@@ -56,8 +40,8 @@ for a = 1:size(type,1)
         end
     % Reactive power flow measurements 
     elseif strcmp(type(a),'qf') == 1
-        m = busIndex(buses==indices(a,1));
-        n = busIndex(buses==indices(a,2));
+        m = find(buses==indices(a,1));
+        n = find(buses==indices(a,2));
         ckt = indices(a,3);
         % Find the indices of the lines that have the same to and from
         % buses or vice versa
@@ -80,10 +64,35 @@ for a = 1:size(type,1)
             bmm = b+bsi;
             h(a) = -bmm*(e(m)^2+f(m)^2)-bmn*(e(m)*e(n)+f(m)*f(n))-gmn*(e(m)*f(n)-f(m)*e(n));
         end
+    % Real power injection measurements
+    elseif strcmp(type(a),'p') == 1
+        m = find(buses==indices(a,1)); % m = bus at which P is injected
+        temp = 0;
+        temp2 = 0;
+        for b = 1:size(adjbuses{m},2)
+            n = adjbuses{m}(b);
+            temp = temp+(G(m,n)*e(n)-B(m,n)*f(n));
+            temp2 = temp2+(G(m,n)*f(n)+B(m,n)*e(n));
+        end
+        h(a) = e(m)*temp+f(m)*temp2;
+    % Reactive power injection measurements  
+    elseif strcmp(type(a),'q') == 1
+%         tic
+        m = find(buses==indices(a,1)); % m = bus at which P is injected
+        temp = 0;
+        temp2 = 0;
+        for b = 1:size(adjbuses{m},2)
+            n = adjbuses{m}(b);
+            temp = temp+(-G(m,n)*f(n)-B(m,n)*e(n));
+            temp2 = temp2+(G(m,n)*e(n)-B(m,n)*f(n));
+        end
+        h(a) = e(m)*temp + f(m)*temp2;
+%         tempt = toc;
+%         temptime = temptime+tempt;
     % Voltage magnitude measurements SQUARED (NOTE: SQUARED, so to get the
     % actual V magnitude, take the sqrt)
     elseif strcmp(type(a),'v') == 1
-        m = busIndex(buses==indices(a,1));
+        m = find(buses==indices(a,1));
         h(a) = e(m)^2+f(m)^2;
     % Current magnitude measurements
 %     elseif strcmp(type(a),'i') == 1
@@ -107,3 +116,5 @@ for a = 1:size(type,1)
 %         h(a) = theta(m);
     end
 end
+
+temptime

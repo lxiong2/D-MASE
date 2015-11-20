@@ -4,10 +4,9 @@ function [dPijde, dPijdf] = realPowerFlowMeas_rect(e,f,G,B,buses,lines,indPFmeas
 
 dPijde = zeros(1,size(buses,1));
 dPijdf = zeros(1,size(buses,1));
-busIndex = (1:size(buses,1)).';
 
-m = busIndex(buses==indPFmeas(1,1));
-n = busIndex(buses==indPFmeas(1,2));
+m = find(buses==indPFmeas(1,1));
+n = find(buses==indPFmeas(1,2));
 ckt = indPFmeas(1,3);
 
 paraLines1 = intersect(find(lines(:,1)==indPFmeas(1,1)),find(lines(:,2)==indPFmeas(1,2)));

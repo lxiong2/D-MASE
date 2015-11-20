@@ -11,21 +11,21 @@ format long
 centralt = 0;
 
 %Get system parameters and partitions
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-filename = 'graph14_2parts.txt'; % only matters if option = 3
-newfilename = 'graph14_2parts (2).txt';
-numParts = 2; % should match filename if option = 3
-casename = 14;
-YBus14
-load noise14.mat
-load noisetype14.mat
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+% filename = 'graph14_2parts.txt'; % only matters if option = 3
+% newfilename = 'graph14_2parts (2).txt';
+% numParts = 2; % should match filename if option = 3
+% casename = 14;
+% YBus14
+% load noise14.mat
+% load noisetype14.mat
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
-% filename = 'graph57_16parts.txt'; % only matters if option = 3; none=rb; (2)=k-way contig
-% newfilename = 'graph57_16parts (2).txt';
-% numParts = 16;
+% filename = 'graph57_57parts.txt'; % only matters if option = 3; none=rb; (2)=k-way contig
+% newfilename = 'graph57_57parts (2).txt';
+% numParts = 57;
 % casename = 57;
 % YBus57
 % load noise57.mat
@@ -41,15 +41,15 @@ load noisetype14.mat
 % load noise118.mat
 % load noisetype118.mat
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
-% filename = 'graph300_8parts.txt'; % only matters if option = 3
-% newfilename = 'graph300_8parts (2).txt';
-% numParts = 8;
-% casename = 300;
-% YBus300
-% load noise300.mat
-% load noisetype300.mat
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
+filename = 'graph300_128parts.txt'; % only matters if option = 3
+newfilename = 'graph300_128parts (2).txt';
+numParts = 128;
+casename = 300;
+YBus300
+load noise300.mat
+load noisetype300.mat
 
 % Read METIS output file and see how many actual partitions there are, then
 % overwrite numParts

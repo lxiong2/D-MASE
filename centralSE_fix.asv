@@ -18,7 +18,7 @@ maxiter = 20;
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
 % YBus57
-% load noise57.mat
+% %load noise57.mat
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
@@ -31,11 +31,11 @@ maxiter = 20;
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
 % YBus300
-% load noise300.mat
+% %load noise300.mat
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered.pwb';
-YBusTVA
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered.pwb';
+% YBusTVA
 % load noise300.mat
 
 tic
@@ -67,8 +67,8 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
 %     theta = [0; x(1:numbus-1,k)]; % assumes slack bus is bus 1
 %     V = x(numbus:(2*numbus-1),k);
     
-    % Rectangular AC version
     tic
+    % Rectangular AC version
     e = x(1:numbus,k);
     f = [0; x(numbus+1:(2*numbus-1),k)];
 
@@ -78,7 +78,7 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     h(:,k) = createhvector_rect(e,f,G,B,type,indices,numbus,buses,lines); % rectangular
     r(:,k) = z-h(:,k);
     J(k) = (z-h(:,k)).'*(R\(z-h(:,k)));
-   
+    
     % Form measurement Jacobian H
     % FIX: Test and debug iMeas.m
     % WARNING: Assumed gsi = 0 in realPowerFlowMeas.m
@@ -89,7 +89,7 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     % we're looking only at DC
     %H(:,:,k) = [temp(:,1:slackIndex-1) temp(:,slackIndex+1:numbus)];
     H(:,:,k) = [temp(:,1:numbus) temp(:,numbus+2:2*numbus)];
-
+    
     % Calculate gain matrix G(x^k) = H.'*R^(-1)*H
     Gain(:,:,k) = H(:,:,k).'*(R\H(:,:,k));
     

@@ -1,4 +1,4 @@
-function H = createHmatrix_rect(e,f,G,B,type,indices,numbus,buses,lines)
+function H = createHmatrix_rect(e,f,G,B,type,indices,numbus,buses,lines,adjbuses)
 
 %% Initialize
 % Real power injection
@@ -20,20 +20,8 @@ H = zeros(size(type,1),size(buses,1)*2);
 
 %% Determine type of measurement
 for a = 1:size(type,1)
-    % Real power injection measurements [dPdth dPdV]
-    if strcmp(type(a),'p') == 1
-        numPmeas = numPmeas + 1;
-        indPmeas = indices(a,:);
-        [dPde, dPdf] = realPowerInjMeas_rect(e,f,G,B,numbus,buses,indPmeas);
-        H(a,:) = [dPde dPdf];
-    % Reactive power injection measurements [dQdth dQdV]   
-    elseif strcmp(type(a),'q') == 1
-        numQmeas = numQmeas + 1;
-        indQmeas = indices(a,:);
-        [dQde, dQdf] = reactivePowerInjMeas_rect(e,f,G,B,numbus,buses,indQmeas);
-        H(a,:) = [dQde dQdf];
     % Real power flow measurements [dPijdth dPijdV]
-    elseif strcmp(type(a),'pf') == 1
+    if strcmp(type(a),'pf') == 1
         numPFmeas = numPFmeas + 1;
         indPFmeas = indices(a,:);
         [dPijde, dPijdf] = realPowerFlowMeas_rect(e,f,G,B,buses,lines,indPFmeas);
@@ -44,6 +32,18 @@ for a = 1:size(type,1)
         indQFmeas = indices(a,:);
         [dQijde, dQijdf] = reactivePowerFlowMeas_rect(e,f,G,B,buses,lines,indQFmeas);
         H(a,:) = [dQijde dQijdf];
+    % Real power injection measurements [dPdth dPdV]
+    elseif strcmp(type(a),'p') == 1
+        numPmeas = numPmeas + 1;
+        indPmeas = indices(a,:);
+        [dPde, dPdf] = realPowerInjMeas_rect(e,f,G,B,numbus,buses,adjbuses,indPmeas);
+        H(a,:) = [dPde dPdf];
+    % Reactive power injection measurements [dQdth dQdV]   
+    elseif strcmp(type(a),'q') == 1
+        numQmeas = numQmeas + 1;
+        indQmeas = indices(a,:);
+        [dQde, dQdf] = reactivePowerInjMeas_rect(e,f,G,B,numbus,buses,adjbuses,indQmeas);
+        H(a,:) = [dQde dQdf];
     % Voltage magnitude measurements    
     elseif strcmp(type(a),'v') == 1
         numVmeas = numVmeas + 1;
