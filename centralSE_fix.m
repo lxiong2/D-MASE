@@ -61,18 +61,13 @@ B = imag(Ybus);
 
 %tic
 while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
-    % Polar AC version
-%     theta = [0; x(1:numbus-1,k)]; % assumes slack bus is bus 1
-%     V = x(numbus:(2*numbus-1),k);
     
     %tic
     % Rectangular AC version
     e = x(1:numbus,k);
     f = [0; x(numbus+1:(2*numbus-1),k)];
 
-    %h(:,k) = zeros(size(z,1),1);
     % Form the measurement function h(x^k)
-    %h(:,k) = createhvector_DC2(theta,V,G,B,type,indices,numbus,buses,lines);
     h(:,k) = createhvector_rect(e,f,G,B,type,indices,buses,lines,adjbuses); % rectangular
     
     r(:,k) = z-h(:,k);
@@ -81,13 +76,8 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     % Form measurement Jacobian H
     % FIX: Test and debug iMeas.m
     % WARNING: Assumed gsi = 0 in realPowerFlowMeas.m
-    %temp = createHmatrix_DC2(theta,V,G,B,type,indices,numbus,buses,lines);
     tic
     temp = createHmatrix_rect(e,f,G,B,type,indices,numbus,buses,lines,adjbuses);
-    
-    % only slackIndex+1:(numbus) instead of slackIndex+1:(2*numbus) when
-    % we're looking only at DC
-    %H(:,:,k) = [temp(:,1:slackIndex-1) temp(:,slackIndex+1:numbus)];
     H(:,:,k) = [temp(:,1:numbus) temp(:,numbus+2:2*numbus)];
     tempt(k) = toc;
     

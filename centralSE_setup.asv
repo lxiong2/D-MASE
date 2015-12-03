@@ -165,9 +165,8 @@ for a = 1:numlines
     if lines(a,3) > 1
         paraLines(a) = 1;
         temp = intersect(find(lines(:,1)==indices(a,1)),find(lines(:,2)==indices(a,2)));
-        temp2 = intersect(find(lines(:,2)==indices(a,1)),find(lines(:,1)==indices(a,2)));
-        paraLines(temp) = 1;
-        paraLines(temp2) = 1;
+        paraLines(temp
+
+        paraLines = [paraLines1; paraLines2];
     end
 end
-paraLineIndex = find(paraLines~=0); % find the line indices of parallel branches

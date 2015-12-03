@@ -31,8 +31,3 @@ else
     dPijdf(1,m) = 2*gmm*f(m)+gmn*f(n)+bmn*e(n);
     dPijdf(1,n) = gmn*f(m)-bmn*e(m);
 end
-
-% dPijde(1,m) = 2*G(m,m)*e(m)+(G(m,n)*e(n)-B(m,n)*f(n));
-% dPijde(1,n) = G(m,n)*e(m)+B(m,n)*f(m);
-% dPijdf(1,m) = 2*G(m,m)*f(m)+(G(m,n)*f(n)+B(m,n)*e(n));
-% dPijdf(1,n) = -B(m,n)*e(m)+G(m,n)*f(m);

@@ -34,9 +34,9 @@ maxiter = 20;
 % load noise300.mat
 
 option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered.pwb';
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered+Basic_SG.pwb';
 YBusTVA
-% load noise300.mat
+% load noiseTVA.mat
 
 tic
 centralSE_setup
@@ -58,24 +58,18 @@ deltax(:,1) = ones(size(x,1),1);
 
 lineStatus = repmat({'Closed'},[numlines 1]);
 
-G = real(Ybus);
-B = imag(Ybus);
+G = full(real(Ybus));
+B = full(imag(Ybus));
 
 %tic
-while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
-    % Polar AC version
-%     theta = [0; x(1:numbus-1,k)]; % assumes slack bus is bus 1
-%     V = x(numbus:(2*numbus-1),k);
-    
+while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)   
     % Rectangular AC version
-    tic
+    %tic
     e = x(1:numbus,k);
     f = [0; x(numbus+1:(2*numbus-1),k)];
 
-    %h(:,k) = zeros(size(z,1),1);
     % Form the measurement function h(x^k)
-    %h(:,k) = createhvector_DC2(theta,V,G,B,type,indices,numbus,buses,lines);
-    h(:,k) = createhvector_rect(e,f,G,B,type,indices,numbus,buses,lines); % rectangular
+    h(:,k) = createhvector_rect(e,f,G,B,numtype,indices,lines,paraLineIndex); % rectangular
     r(:,k) = z-h(:,k);
     J(k) = (z-h(:,k)).'*(R\(z-h(:,k)));
    
@@ -83,13 +77,11 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     % FIX: Test and debug iMeas.m
     % WARNING: Assumed gsi = 0 in realPowerFlowMeas.m
     %temp = createHmatrix_DC2(theta,V,G,B,type,indices,numbus,buses,lines);
-    temp = createHmatrix_rect(e,f,G,B,type,indices,numbus,buses,lines);
-    
-    % only slackIndex+1:(numbus) instead of slackIndex+1:(2*numbus) when
-    % we're looking only at DC
-    %H(:,:,k) = [temp(:,1:slackIndex-1) temp(:,slackIndex+1:numbus)];
+    tic
+    temp = createHmatrix_rect(e,f,G,B,numtype,indices,numbus,buses,lines,adjbuses);
     H(:,:,k) = [temp(:,1:numbus) temp(:,numbus+2:2*numbus)];
-
+    eacht(k)=toc
+   
     % Calculate gain matrix G(x^k) = H.'*R^(-1)*H
     Gain(:,:,k) = H(:,:,k).'*(R\H(:,:,k));
     
@@ -102,11 +94,11 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     % update x and increase iteration count
     x(:,k+1) = x(:,k)+deltax(:,k+1);
     
-    centralt(k) = toc;
+    %centralt(k) = toc;
     k = k+1;
     
 end
-totalt = sum(centralt)
+%totalt = sum(centralt)
 %toc
 
 % Convert rectangular state variables to polar form

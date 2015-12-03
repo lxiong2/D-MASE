@@ -41,17 +41,15 @@ for a = 1:numtype(4)
     Hq(a,:) = [dQde dQdf];
 end
 % Voltage magnitude measurements
-for a = 1:numtype(5)
-    indVmeas = vindices(a,:);
-    [dVde, dVdf] = vMeas_rect(e,f,buses,indVmeas);
-    Hv(a,:) = [dVde dVdf];
-end
-
-% indVmeas = vindices(:,1);
-% vIndex = zeros(numtype(5),1);
-% vIndex = 
-% [vm,vn]=ind2sub([numtype(5) numbus*2], ); 
-% Hv(:,indVmeas)=2*e(indVmeas)
+% for a = 1:numtype(5)
+%     indVmeas = vindices(a,:);
+%     [dVde, dVdf] = vMeas_rect(e,f,buses,indVmeas);
+%     Hv(a,:) = [dVde dVdf];
+% end
+% 
+indVmeas = vindices(:,1);
+[vm,vn]=ind2sub([numtype(5), 
+Hv(:,indVmeas)=2*e(indVmeas)
 % vMatrix = zeros(numtype(5),numtype(5));
 % Hv2 = vMatrix*f(indVmeas);
 % Hv = [Hv1 Hv2]
