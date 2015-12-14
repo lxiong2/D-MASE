@@ -1,4 +1,4 @@
-function h = createhvector_rect(e,f,G,B,numtype,indices,lines,paraLineIndex)
+function h = createhvector_rect(e,f,G,B,numtype,indices,numbus,lines,paraLineIndex)
 % Rectangular power flow
 % V_i = e_i + j*f_i = |V_i| ang (theta_i)
 % Includes what to do for parallel lines
@@ -49,7 +49,7 @@ vindices = indices(numtype(1)+numtype(2)+numtype(3)+numtype(4)+(1:numtype(5)),:)
 pfm = pfindices(:,1);
 pfn = pfindices(:,2);
 % for single branches
-pftempVec = sub2ind([size(G,1) size(G,2)],pfm,pfn); % get G(m,n) in a vectorized way
+pftempVec = sub2ind([numbus numbus],pfm,pfn); % get G(m,n) in a vectorized way
 pfG = G(pftempVec);
 pfB = B(pftempVec);
 hpf = -pfG.*(e(pfm).^2+f(pfm).^2)+pfG.*(e(pfm).*e(pfn)+f(pfm).*f(pfn))+pfB.*(f(pfm).*e(pfn)-e(pfm).*f(pfn));
@@ -95,7 +95,7 @@ hpf(paraLineIndex) = lilg.*(e(pfm2).^2+f(pfm2).^2)+-lilg.*(e(pfm2).*e(pfn2)+f(pf
 qfm = qfindices(:,1);
 qfn = qfindices(:,2);
 % for single branches
-qftempVec = sub2ind([size(G,1) size(G,2)],qfm,qfn); % get G(m,n) in a vectorized way
+qftempVec = sub2ind([numbus numbus],qfm,qfn); % get G(m,n) in a vectorized way
 qfG = G(qftempVec);
 qfB = B(qftempVec);
 bsi = lines(:,6)/2; % DEBUG: not generalized

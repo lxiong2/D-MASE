@@ -10,15 +10,15 @@ centralt = 0;
 k = 1;
 maxiter = 20;
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-% YBus14
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+YBus14
 % load noise14.mat
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
 % YBus57
-% load noise57.mat
+%load noise57.mat
 
 % option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
@@ -33,14 +33,12 @@ maxiter = 20;
 % YBus300
 % load noise300.mat
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered+Basic_SG.pwb';
-YBusTVA
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered+Basic_SG.pwb';
+% YBusTVA
 % load noiseTVA.mat
 
-tic
 centralSE_setup
-toc
 
 %% Add Gaussian noise to measurements
 % for a = 1:size(z,1)
@@ -62,14 +60,14 @@ G = full(real(Ybus));
 B = full(imag(Ybus));
 
 %tic
-while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)   
+while (max(abs(deltax(:,k))) > 1e-4) && (k < maxiter)   
     % Rectangular AC version
     %tic
     e = x(1:numbus,k);
     f = [0; x(numbus+1:(2*numbus-1),k)];
 
     % Form the measurement function h(x^k)
-    h(:,k) = createhvector_rect(e,f,G,B,numtype,indices,lines,paraLineIndex); % rectangular
+    h(:,k) = createhvector_rect(e,f,G,B,numtype,indices,numbus,lines,paraLineIndex); % rectangular
     r(:,k) = z-h(:,k);
     J(k) = (z-h(:,k)).'*(R\(z-h(:,k)));
    
@@ -78,7 +76,7 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     % WARNING: Assumed gsi = 0 in realPowerFlowMeas.m
     %temp = createHmatrix_DC2(theta,V,G,B,type,indices,numbus,buses,lines);
     tic
-    temp = createHmatrix_rect(e,f,G,B,numtype,indices,numbus,buses,lines,adjbuses);
+    temp = createHmatrix_rect(e,f,G,B,numtype,indices,numbus,buses,lines,paraLineIndex,adjbuses);
     H(:,:,k) = [temp(:,1:numbus) temp(:,numbus+2:2*numbus)];
     eacht(k)=toc
    
@@ -96,7 +94,6 @@ while (norm(deltax(:,k)) > 1e-4) && (k < maxiter)
     
     %centralt(k) = toc;
     k = k+1;
-    
 end
 %totalt = sum(centralt)
 %toc
