@@ -88,15 +88,22 @@ Hqf = [Hqf1 Hqf2];
 Hp1 = zeros(numtype(3),numbus); % dPi/de
 Hp2 = zeros(numtype(3),numbus); % dPi/df
 pm = pindices(:,1);
-ptempVec = sub2ind([numbus numbus],pm,pm); % get G(m,n) in a vectorized way
+ptempVec = sub2ind([numbus numbus],pm,pm); % get G(m,m) in a vectorized way
 pG = G(ptempVec);
 pB = B(ptempVec);
 
-Hp1(1,m) = dPde(1,m)+(G(m,b)*e(b)-B(m,b)*f(b));
-Hp2(1,m) = dPdf(1,m)+(G(m,b)*f(b)+B(m,b)*e(b));
-Hp1(1,a) = G(m,a)*e(m)+B(m,a)*f(m);
-Hp2(1,a) = -B(m,a)*e(m)+G(m,a)*f(m);
+eMat = zeros(numbus,numbus);
+fMat = zeros(numbus,numbus);
+eMat(ptempVec) = e(pm);
+fMat(ptempVec) = f(pm);
 
+Hp1 = G(pm,:)*eMat+B(pm,:)*fMat;
+Hp1(ptempVec) = G(pm,:)*e(pm)-B(pm,:)*f(pm)+pG.*e(pm)+pB.*f(pm);
+Hp2 = 
+Hp2(ptempVec) = dPdf(1,m)+(G(m,b)*f(b)+B(m,b)*e(b));
+% Hp2(1,m) = 
+% Hp2(1,a) = -B(m,a)*e(m)+G(m,a)*f(m);
+% 
 Hp = [Hp1 Hp2];
 
 %% Reactive power injection measurements [dQdth dQdV] 

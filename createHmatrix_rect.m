@@ -79,33 +79,49 @@ Hqf2(indqfn2) = lilb.*f(qfm2)+lilg.*e(qfm2);
 Hqf = [Hqf1 Hqf2];
 
 %% Real power injection measurements [dPdth dPdV]
-Hp = zeros(numtype(3),numbus*2);
-for a = 1:numtype(3)
-    indPmeas = pindices(a,:);
-    [dPde, dPdf] = realPowerInjMeas_rect(e,f,G,B,numbus,buses,adjbuses,indPmeas);
-    Hp(a,:) = [dPde dPdf];
-end
-% Hp1 = zeros(numtype(3),numbus); % dPi/de
-% Hp2 = zeros(numtype(3),numbus); % dPi/df
-% pm = pindices(:,1);
-% ptempVec = sub2ind([numbus numbus],pm,pm); % get G(m,n) in a vectorized way
-% pG = G(ptempVec);
-% pB = B(ptempVec);
-% 
-% Hp1(1,m) = dPde(1,m)+(G(m,b)*e(b)-B(m,b)*f(b));
-% Hp2(1,m) = dPdf(1,m)+(G(m,b)*f(b)+B(m,b)*e(b));
-% Hp1(1,a) = G(m,a)*e(m)+B(m,a)*f(m);
-% Hp2(1,a) = -B(m,a)*e(m)+G(m,a)*f(m);
-% 
-% Hp = [Hp1 Hp2];
+% Hp = zeros(numtype(3),numbus*2);
+% for a = 1:numtype(3)
+%     indPmeas = pindices(a,:);
+%     [dPde, dPdf] = realPowerInjMeas_rect(e,f,G,B,numbus,buses,adjbuses,indPmeas);
+%     Hp(a,:) = [dPde dPdf];
+% end
+pm = pindices(:,1);
+ptempVec = sub2ind([numbus numbus],pm,pm); % get G(m,m) in a vectorized way
+pG = G(ptempVec);
+pB = B(ptempVec);
+peMat = zeros(numbus,numbus);
+pfMat = zeros(numbus,numbus);
+peMat(ptempVec) = e(pm);
+pfMat(ptempVec) = f(pm);
+
+Hp1 = peMat*G(pm,:)+pfMat*B(pm,:); % the order of multiplication matters; overwise you get transverse
+Hp1(ptempVec) = G(pm,:)*e(pm)-B(pm,:)*f(pm)+pG.*e(pm)+pB.*f(pm);
+Hp2 = peMat*-B(pm,:)+pfMat*G(pm,:);
+Hp2(ptempVec) = G(pm,:)*f(pm)+B(pm,:)*e(pm)+pG.*f(pm)-pB.*e(pm);
+Hp = [Hp1 Hp2];
 
 %% Reactive power injection measurements [dQdth dQdV] 
-Hq = zeros(numtype(4),numbus*2);
-for a = 1:numtype(4)
-    indQmeas = qindices(a,:);
-    [dQde, dQdf] = reactivePowerInjMeas_rect(e,f,G,B,numbus,buses,adjbuses,indQmeas);
-    Hq(a,:) = [dQde dQdf];
-end
+% Hq = zeros(numtype(4),numbus*2);
+% for a = 1:numtype(4)
+%     indQmeas = qindices(a,:);
+%     [dQde, dQdf] = reactivePowerInjMeas_rect(e,f,G,B,numbus,buses,adjbuses,indQmeas);
+%     Hq(a,:) = [dQde dQdf];
+% end
+qm = qindices(:,1);
+qtempVec = sub2ind([numbus numbus],qm,qm); % get G(m,m) in a vectorized way
+qG = G(qtempVec);
+qB = B(qtempVec);
+qeMat = zeros(numbus,numbus);
+qfMat = zeros(numbus,numbus);
+qeMat(qtempVec) = e(qm);
+qfMat(qtempVec) = f(qm);
+
+Hq1 = qeMat*-B(qm,:)+qfMat*G(qm,:); % the order of multiplication matters; overwise you get transverse
+Hq1(qtempVec) = -G(qm,:)*f(qm)-B(qm,:)*e(qm)+qG.*f(qm)-qB.*e(qm);
+Hq2 = qeMat*-G(qm,:)-qfMat*B(qm,:);
+Hq2(qtempVec) = G(qm,:)*e(qm)-B(qm,:)*f(qm)-qG.*e(qm)-qB.*f(qm);
+Hq = [Hq1 Hq2];
+
 %% Voltage magnitude measurements
 % Hv = zeros(numtype(5),numbus*2);
 % for a = 1:numtype(5)
