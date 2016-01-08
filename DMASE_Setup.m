@@ -156,23 +156,33 @@ for a = 1:numParts
     arealines{a} = [temp; tielines{a}];
     numarealines{a} = size(arealines{a},1);
     
-    alltype{a} = [repmat({'pf'; 'qf'}, [numarealines{a} 1]);
-                  repmat({'v'}, [numonlybus{a} 1]);
-                  repmat({'p'; 'q'}, [numonlybus{a} 1])];
+    alltype{a} = [repmat({'pf'}, [numarealines{a} 1]);
+                  repmat({'qf'}, [numarealines{a} 1]);
+                  repmat({'p'}, [numonlybus{a} 1]);
+                  repmat({'q'}, [numonlybus{a} 1]);
+                  repmat({'v'}, [numonlybus{a} 1])];
 
+    numtype{a} = [numarealines{a}; numarealines{a}; numonlybus{a}; numonlybus{a}; numonlybus{a}];
+    numMeas{a} = 2*numarealines{a}+3*numonlybus{a};
+        
     allR{a} = diag(0.01^2*ones(1,size(alltype{a},1)));
 
     % FIX: Need to include those boundary measurements
     allindices{a} = zeros(2*numarealines{a}+3*numonlybus{a},3);
-    for b = 1:numarealines{a}
-        allindices{a}((2*b-1):(2*b),:) = [arealines{a}(b,1:3); arealines{a}(b,1:3)]; 
-    end
-    for b = 1:numonlybus{a}
-        allindices{a}(2*numarealines{a}+b,1) = onlybuses{a}(b);
-    end
-    for b = 1:numonlybus{a}
-        allindices{a}(2*numarealines{a}+numonlybus{a}+((2*b-1):(2*b)),1) = onlybuses{a}(b);
-    end
+    allindices{a}(1:numarealines{a},:) = arealines{a}(:,1:3);
+    allindices{a}(numarealines{a}+1:2*numarealines{a},:) = arealines{a}(:,1:3);
+    allindices{a}((2*numarealines{a}+1):(2*numarealines{a}+numonlybus{a}),1) = onlybuses{a}(:,1);
+    allindices{a}((2*numarealines{a}+numonlybus{a}+1):(2*numarealines{a}+2*numonlybus{a}),1) = onlybuses{a}(:,1);
+    allindices{a}((2*numarealines{a}+2*numonlybus{a}+1):(2*numarealines{a}+3*numonlybus{a}),1) = onlybuses{a}(:,1);
+%     for b = 1:numarealines{a}
+%         allindices{a}((2*b-1):(2*b),:) = [arealines{a}(b,1:3); arealines{a}(b,1:3)]; 
+%     end
+%     for b = 1:numonlybus{a}
+%         allindices{a}(2*numarealines{a}+b,1) = onlybuses{a}(b);
+%     end
+%     for b = 1:numonlybus{a}
+%         allindices{a}(2*numarealines{a}+numonlybus{a}+((2*b-1):(2*b)),1) = onlybuses{a}(b);
+%     end
 end
 
 % Automatically create fake measurements using PowerWorld
@@ -197,25 +207,27 @@ end
 busMW = genMW - loadMW;
 busMVAR = genMVAR - loadMVAR;
 
-numMeas = cell(numParts,1);
 allz = cell(numParts,1);
 for a = 1:numParts
-    numMeas{a} = size(allindices{a},1);
-    allz{a} = getMeas(buses,lines,numMeas{a},allindices{a},alltype{a},MWflows,MVARflows,revMWflows,revMVARflows,busV,busMW,busMVAR);
+    allz{a}(1:numarealines{a},1) = getMeas(arealines{a},allindices{a},'pf',MWflows,MVARflows,revMWflows,revMVARflows);
+    allz{a}(numarealines{a}+1:2*numarealines{a},:) = getMeas(arealines{a},allindices{a},'qf',MWflows,MVARflows,revMWflows,revMVARflows);
+    allz{a}((2*numarealines{a}+1):(2*numarealines{a}+numonlybus{a}),1) = busMW(onlybuses{a});
+    allz{a}((2*numarealines{a}+numonlybus{a}+1):(2*numarealines{a}+2*numonlybus{a}),1) = busMVAR(onlybuses{a});
+    allz{a}((2*numarealines{a}+2*numonlybus{a}+1):(2*numarealines{a}+3*numonlybus{a}),1) = busV(onlybuses{a});
 end
 
 %% Add random Gaussian noise to allz
-for a = 1:numParts
-    for b = 1:numMeas{a}
-        % find how each centralized measurement's indices and type
-        % map to allindices
-        for d = 1:size(noise,1)
-            if sum(allindices{a}(b,:)==noise(d,1:3))==3 && strcmp(alltype{a}(b),type(d))==1
-                allz{a}(b) = allz{a}(b)*(1+noise(d,4));
-            end
-        end
-    end
-end
+% for a = 1:numParts
+%     for b = 1:numMeas{a}
+%         % find how each centralized measurement's indices and type
+%         % map to allindices
+%         for d = 1:size(noise,1)
+%             if sum(allindices{a}(b,:)==noise(d,1:3))==3 && strcmp(alltype{a}(b),type(d))==1
+%                 allz{a}(b) = allz{a}(b)*(1+noise(d,4));
+%             end
+%         end
+%     end
+% end
 
 %% Slack buses (one for each partition), except the global slack goes in the
 % partition with it in the state vector

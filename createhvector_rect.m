@@ -117,8 +117,8 @@ qtemp = -G(qm,:)*f-B(qm,:)*e;
 qtemp2 = G(qm,:)*e-B(qm,:)*f;
 hq = e(qm).*qtemp + f(qm).*qtemp2;
 
-%% Voltage magnitude measurements SQUARED (NOTE: SQUARED, so to get the
-% actual V magnitude, take the sqrt)
+%% Voltage magnitude measurements SQUARED 
+% (NOTE: SQUARED, so to get the actual V magnitude, take the sqrt)
 vm = vindices(:,1);
 hv = e(vm).^2+f(vm).^2;
 

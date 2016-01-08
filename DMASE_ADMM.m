@@ -11,13 +11,13 @@ format long
 centralt = 0;
 
 %Get system parameters and partitions
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-% filename = 'graph14_2parts.txt'; % only matters if option = 3
-% newfilename = 'graph14_2parts (2).txt';
-% numParts = 2; % should match filename if option = 3
-% casename = 14;
-% YBus14
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+filename = 'graph14_2parts.txt'; % only matters if option = 3
+newfilename = 'graph14_2parts (2).txt';
+numParts = 2; % should match filename if option = 3
+casename = 14;
+YBus14
 % load noise14.mat
 % load noisetype14.mat
 
@@ -41,15 +41,15 @@ centralt = 0;
 % load noise118.mat
 % load noisetype118.mat
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
-filename = 'graph300_128parts.txt'; % only matters if option = 3
-newfilename = 'graph300_128parts (2).txt';
-numParts = 128;
-casename = 300;
-YBus300
-load noise300.mat
-load noisetype300.mat
+% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
+% filename = 'graph300_128parts.txt'; % only matters if option = 3
+% newfilename = 'graph300_128parts (2).txt';
+% numParts = 128;
+% casename = 300;
+% YBus300
+% load noise300.mat
+% load noisetype300.mat
 
 % Read METIS output file and see how many actual partitions there are, then
 % overwrite numParts
@@ -108,7 +108,7 @@ end
 
 %% Run distributed multi-area state estimation
 iter = 1;
-maxiter = 10;
+maxiter = 2;
 rho = 1; % step size
 
 % Initialize each partition's state vectors
@@ -164,9 +164,9 @@ while (maxnormdx_k > 1e-4) && (iter < maxiter)
 %while (sumnormdx_k/numParts > 1e-4) && (iter < maxiter)
 %while ((sqrt(normres_r(:,iter)) > eps_pri) || (sqrt(normres_s(:,iter)) > eps_dual)) && (iter < maxiter)
     % Do distributed state estimation for each partition
-    tic % tic toc PAIR 1/3
+    %tic % tic toc PAIR 1/3
     for a = 1:numParts
-        [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
+        [tempobjfn, tempGain, tempg, temph, tempH] = myfun_overlap(buses, numbus, areabuses{a}, adjbuses, arealines{a}, slackIndex{a}, areaG{a}, areaB{a}, allz{a}, allR{a}, alltype{a}, numtype{a}, allindices{a}, x_k{a}(:,iter), areac_k{a}(:,iter), areay_kl{a}(:,iter), rho);
         objfn{a}(:,iter) = tempobjfn;
         Gain{a}(:,:,iter) = tempGain;
         g{a}(:,iter) = tempg;
@@ -174,11 +174,15 @@ while (maxnormdx_k > 1e-4) && (iter < maxiter)
         H{a}(:,:,iter) = tempH;
 %         dx_k{a}(:,iter+1) = -Gain{a}(:,:,iter)\g{a}(:,iter);
 %         dx_k{a}(numareabus{a}+slackIndex{a},iter+1) = 0;
+        tic
         tempdx_k{a} = -Gain{a}(:,:,iter)\g{a}(:,iter);
         dx_k{a}(:,iter+1) = [tempdx_k{a}(1:numareabus{a}+slackIndex{a}-1); 0; tempdx_k{a}(numareabus{a}+slackIndex{a}:numareabus{a}*2-1)];
+        calcdxtime(a,iter+1) = toc;
+        tic
         x_k{a}(:,iter+1) = x_k{a}(:,iter) + dx_k{a}(:,iter+1);
+        updatedxtime(a,iter+1) = toc;
     end
-    partitiont(iter) = toc; % tic toc PAIR 1/3
+    %partitiont(iter) = toc; % tic toc PAIR 1/3
     
     maxnormdx_k = 0;
     for a = 1:numParts
@@ -238,9 +242,9 @@ end
 
 %end
 
-totalt = sum(partitiont)+sum(ADMMt)
-perPartition = sum(partitiont)/totalt;
-perADMM = sum(ADMMt)/totalt;
+%totalt = sum(partitiont)+sum(ADMMt);
+%perPartition = sum(partitiont)/totalt;
+%perADMM = sum(ADMMt)/totalt;
 
 %centralt
 
