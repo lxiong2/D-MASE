@@ -29,16 +29,13 @@ globalSlackIndex = 1;
 fieldarray = {'BusNum','BusSlack','AreaNum','BusRad','BusPUVolt','BusSlack'}; %at from bus, at to bus
 results = simauto.GetParametersMultipleElement('bus',fieldarray,'');
 buses = str2double(results{2}{1});
+%tempbuses = str2double(results{2}{1});
+%buses = size
 numbus = size(buses,1);
 areas = str2double(results{2}{3});
-if option == 2
-    numParts = size(unique(areas),1);
-end
 centralPWStates_th = str2double(results{2}{4});
 centralPWStates_V = str2double(results{2}{5});
 centralPWStates = [centralPWStates_th - centralPWStates_th(globalSlackIndex); centralPWStates_V];
-
-reBuses = (1:size(buses,1)).'; %reindexed buses
 
 %% Line Information
 % Get line parameters for full AC system
@@ -66,13 +63,6 @@ for a = 1:numlines
     end
 end
 
-% Reindex lines
-reLines = lines;
-for a = 1:numlines
-    reLines(a,1) = find(buses==lines(a,1));
-    reLines(a,2) = find(buses==lines(a,2));
-end
-
 % % Get the list of transformers in the system
 % fieldarray = {'BusNum','BusNum:1','LineCircuit','LineTap','LinePhase'}; %at from bus, at to bus
 % results = simauto.GetParametersMultipleElement('transformer',fieldarray,'');
@@ -84,11 +74,20 @@ end
 % NOTE: preset the size of adjbuses to be 15, may need to change that for
 % larger cases
 temp = zeros(numbus,numbus);
+linesCol1 = zeros(numbus,1);
+linesCol2 = zeros(numbus,1);
 for a = 1:numlines
-    m = find(buses==lines(a,1));
-    n = find(buses==lines(a,2));
-    temp(m,n) = temp(m,n)+1;
-    temp(n,m) = temp(n,m)+1;
+    %temp(lines(a,1),lines(a,2)) = temp(lines(a,1),lines(a,2))+1;
+    %temp(lines(a,2),lines(a,1)) = temp(lines(a,2),lines(a,1))+1;
+%   temp(find(lines(:,1)==lines(a,1)),find(lines(:,1)==lines(a,2))) = temp(find(lines(:,1)==lines(a,1)),find(lines(:,1)==lines(a,2))) + 1;
+%   temp(find(lines(:,1)==lines(a,2)),find(lines(:,1)==lines(a,1))) = temp(find(lines(:,1)==lines(a,2)),find(lines(:,1)==lines(a,1))) + 1;
+    linesCol1(a,1) = lines(a,1);
+    linesCol2(a,1) = lines(a,2);
+    temp(find(linesCol1(a,1)),find(linesCol2(a,1))) = temp(find(linesCol1(a,1)),find(linesCol2(a,1))) + 1;
+    temp(find(linesCol2(a,1)),find(linesCol1(a,1))) = temp(find(linesCol2(a,1)),find(linesCol1(a,1))) + 1;
+    linesCol1 = zeros(numbus,1);
+    linesCol2 = zeros(numbus,1);
+    
 end
 
 adjbuses = cell(numbus,1);
@@ -96,6 +95,7 @@ for a = 1:numbus
     temp2 = find(temp(a,:) ~= 0);
     adjbuses{a} = [a temp2];
 end
+%adjbuses = [(1:numbus).' adjbuses];
             
 % Get power flow line results
 fieldarray = {'BusNum','BusNum:1','LineCircuit','LineMW','LineMVR','LineMW:1','LineMVR:1'}; %at from bus, at to bus
@@ -129,15 +129,15 @@ type = [repmat({'pf'}, [numlines 1]);
 
 numtype = [numlines; numlines; numbus; numbus; numbus];
     
-%R = diag(0.01^2*ones(1,size(type,1)));
+R = diag(0.01^2*ones(1,size(type,1)));
 
 % FIX: Need to include those boundary measurements
 indices = zeros(2*numlines+3*numbus,3);
-indices(1:numlines,:) = reLines(:,1:3);
-indices(numlines+1:2*numlines,:) = reLines(:,1:3);
-indices((2*numlines+1):(2*numlines+numbus),1) = reBuses(:,1);
-indices((2*numlines+numbus+1):(2*numlines+2*numbus),1) = reBuses(:,1);
-indices((2*numlines+2*numbus+1):(2*numlines+3*numbus),1) = reBuses(:,1);
+indices(1:numlines,:) = lines(:,1:3);
+indices(numlines+1:2*numlines,:) = lines(:,1:3);
+indices((2*numlines+1):(2*numlines+numbus),1) = buses(:,1);
+indices((2*numlines+numbus+1):(2*numlines+2*numbus),1) = buses(:,1);
+indices((2*numlines+2*numbus+1):(2*numlines+3*numbus),1) = buses(:,1);
 
 % Automatically create fake measurements using PowerWorld
 % Preemptively convert to per unit
@@ -163,35 +163,21 @@ busMVAR = genMVAR - loadMVAR;
 
 % Get measurements
 z = zeros(2*numlines+3*numbus,1);
-z(1:numlines,1) = getMeas(reLines,indices,'pf',MWflows,MVARflows,revMWflows,revMVARflows);
-z(numlines+1:2*numlines,1) = getMeas(reLines,indices,'qf',MWflows,MVARflows,revMWflows,revMVARflows);
+z(1:numlines,1) = getMeas(lines,indices,'pf',MWflows,MVARflows,revMWflows,revMVARflows);
+z(numlines+1:2*numlines,1) = getMeas(lines,indices,'qf',MWflows,MVARflows,revMWflows,revMVARflows);
 z((2*numlines+1):(2*numlines+numbus),1) = busMW;
 z((2*numlines+numbus+1):(2*numlines+2*numbus),1) = busMVAR;
 z((2*numlines+2*numbus+1):(2*numlines+3*numbus),1) = busV;
 
 % Identify parallel lines
-% paraLines = zeros(numlines,1);
-% for a = 1:numlines
-%     if lines(a,3) > 1
-%         paraLines(a) = 1;
-%         temp = intersect(find(lines(:,1)==indices(a,1)),find(lines(:,2)==indices(a,2)));
-%         temp2 = intersect(find(lines(:,2)==indices(a,1)),find(lines(:,1)==indices(a,2)));
-%         paraLines(temp) = 1;
-%         paraLines(temp2) = 1;
-%     end
-% end
-% paraLineIndex = find(paraLines~=0); % find the line indices of parallel branches
-
 paraLines = zeros(numlines,1);
-Zeq = zeros(numlines,1);
-% For each line in the system, search through all the rest of the lines and
-% count up how many duplicates there are, add them all to list
 for a = 1:numlines
-    temp = intersect(find(lines(:,1)==lines(a,1)),find(lines(:,2)==lines(a,2)));
-    if size(temp,1)>1
-        paraLines(temp,1)=1;
-        Zeq(a) = 1/sum(1./lines(temp,5));
+    if lines(a,3) > 1
+        paraLines(a) = 1;
+        temp = intersect(find(lines(:,1)==indices(a,1)),find(lines(:,2)==indices(a,2)));
+        temp2 = intersect(find(lines(:,2)==indices(a,1)),find(lines(:,1)==indices(a,2)));
+        paraLines(temp) = 1;
+        paraLines(temp2) = 1;
     end
 end
-paraLineIndex = find(paraLines==1);
-paraLines = [lines(paraLineIndex,1:3) paraLineIndex lines(paraLineIndex,5) Zeq(paraLineIndex)];
+paraLineIndex = find(paraLines~=0); % find the line indices of parallel branches

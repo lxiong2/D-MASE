@@ -57,6 +57,7 @@ hpf = -pfG.*(e(pfm).^2+f(pfm).^2)+pfG.*(e(pfm).*e(pfn)+f(pfm).*f(pfn))+pfB.*(f(p
 Yeq = 1./(lines(paraLineIndex,4)+1i*lines(paraLineIndex,5));
 lilg = real(Yeq);
 lilb = imag(Yeq);
+
 pfm2 = pfindices(paraLineIndex,1);
 pfn2 = pfindices(paraLineIndex,2);
 hpf(paraLineIndex) = lilg.*(e(pfm2).^2+f(pfm2).^2)+-lilg.*(e(pfm2).*e(pfn2)+f(pfm2).*f(pfn2))+-lilb.*(f(pfm2).*e(pfn2)-e(pfm2).*f(pfn2));

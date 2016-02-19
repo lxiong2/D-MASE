@@ -91,6 +91,7 @@ pG = G(ptempVec);
 pB = B(ptempVec);
 peMat = zeros(numbus,numbus);
 pfMat = zeros(numbus,numbus);
+
 peMat(ptempVec) = e(pm);
 pfMat(ptempVec) = f(pm);
 
@@ -132,8 +133,8 @@ Hq = [Hq1 Hq2];
 Hv1 = zeros(numtype(5),numbus); %dV/de
 Hv2 = zeros(numtype(5),numbus); %dV/df
 tempindV = sub2ind([numtype(5) numbus],(1:numtype(5)).',vindices(:,1)); % not 100% sure this is right for the general case
-Hv1(tempindV) = 2*e;
-Hv2(tempindV) = 2*f;
+Hv1(tempindV) = 2*e(vindices(:,1));
+Hv2(tempindV) = 2*f(vindices(:,1));
 Hv = [Hv1 Hv2];
 
 %% Other measurements

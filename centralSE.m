@@ -6,21 +6,23 @@ close all
 format long
 
 centralt = 0;
+option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 
 k = 1;
 maxiter = 20;
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
-% YBus14
-% load noise14.mat
+casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 14 bus.pwb';
+YBus14
+load noise14.mat
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\SouthPensacola42_v01_noBusShunts.pwb';
+% YBusPensacola
+% load noisePensacola.mat
+
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 57 bus.pwb';
 % YBus57
 % load noise57.mat
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_2parts.pwb';
 % %casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE 118 Bus_test (2).pwb';
 % YBus118
@@ -28,26 +30,26 @@ maxiter = 20;
 % % load noise118_test.mat
 % load noise118.mat
 
-% option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
 % casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\IEEE300Bus.pwb';
 % YBus300
 % load noise300.mat
 
-option = 3; %how to get partitions: 1 - manual, 2 - from PW, 3 - from METIS
-casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered+Basic+noBusShunts.pwb';
-YBusTVA
-load noiseTVA.mat
+% casepath = 'C:\Users\lxiong7.AD\Documents\GitHub\D-MASE\TVASummer15Base_renumbered+Basic+noBusShunts.pwb';
+% YBusTVA
+% load noiseTVA.mat
 
 tic
 centralSE_setup
 toc
 
+R = diag(0.01^2*ones(1,size(type,1)));
+
 %% Add Gaussian noise to measurements
-for a = 1:size(z,1)
-    if (indices(a,1) ~= globalSlack) && (indices(a,2) ~= globalSlack)
-        z(a) = z(a)*(1+noise(a,4));
-    end
-end
+% for a = 1:size(z,1)
+%     if (indices(a,1) ~= globalSlack) && (indices(a,2) ~= globalSlack)
+%         z(a) = z(a)*(1+noise(a,4));
+%     end
+% end
 
 %% flat start for AC
 x(:,1) = [ones(numbus,1); zeros(numbus-1,1)];
@@ -69,6 +71,7 @@ while (max(abs(deltax(:,k))) > 1e-4) && (k < maxiter)
 
     % Form the measurement function h(x^k)
     h(:,k) = createhvector_rect(e,f,G,B,numtype,indices,numbus,lines,paraLineIndex); % rectangular
+    
     r(:,k) = z-h(:,k);
     J(k) = (z-h(:,k)).'*(R\(z-h(:,k)));   
     % Form measurement Jacobian H
@@ -76,7 +79,7 @@ while (max(abs(deltax(:,k))) > 1e-4) && (k < maxiter)
     % WARNING: Assumed gsi = 0 in realPowerFlowMeas.m
     temp = createHmatrix_rect(e,f,G,B,numtype,indices,numbus,buses,lines,paraLineIndex,adjbuses);
     H(:,:,k) = [temp(:,1:numbus) temp(:,numbus+2:2*numbus)];
-  
+    
     % Calculate gain matrix G(x^k) = H.'*R^(-1)*H
     Gain(:,:,k) = H(:,:,k).'*(R\H(:,:,k));
     
