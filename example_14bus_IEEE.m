@@ -50,29 +50,6 @@ lines = [1 2 1 0 0.05917 0;
          12	13 1 0 0.19988 0;
          13 14 1 0 0.34802 0];
 
-% Korres's paper assumed zero resistance, no shunt terms (effectively a DC
-% approximation
-% lines = [1 2 1 0 1 0;
-%          1 5 1 0 1 0;
-%          2 3 1 0 1 0;
-%          2 4 1 0 1 0;
-%          2 5 1 0 1 0;
-%          3 4 1 0 1 0;
-%          4 5 1 0 1 0;
-%          4 7 1 0 1 0;
-%          4 9 1 0 1 0;
-%          5 6 1 0 1 0;
-%          6 11 1 0 1 0;
-%          6 12 1 0 1 0;
-%          6 13 1 0 1 0;
-%          7 8 1 0 1 0;
-%          7 9 1 0 1 0;
-%          9 10 1 0 1 0;
-%          9 14 1 0 1 0;
-%          10 11 1 0 1 0;
-%          12	13 1 0 1 0;
-%          13 14 1 0 1 0];
-
 lineNum = size(lines,1);
 
 % list of adjacent buses
@@ -91,7 +68,7 @@ adjbuses = [2 5 0 0 0;
             6 12 14 0 0;
             9 13 0 0 0];
 
-% Measurement information
+%% Measurement information
 
 % Area 1
 % DEBUG: singular H1/Gain1 because columns 2 and 4 are the same
@@ -106,78 +83,78 @@ adjbuses = [2 5 0 0 0;
 %             2 5 1;
 %             1 0 0];
 
-buses1 = [1; 2; 5];
-%z1 = [0.0000; 0.0869; 0.3532; 0.0663; 0.2402]; Gross error of
-%20*0.01 at P1-5 + add P4-5 to make the system observable
-z1 = [0.0000; 0.0869; 0.3532 - 20*0.01; 0.0663; 0.2402; 0.0445];
-R1 = 0.01^2*ones(1,size(z1,1));
-type1 = {'th'; 'pf'; 'pf'; 'pf'; 'p'}; 
-indices1 = [1 0 0;
-            1 2 1;
-            1 5 1;
-            2 5 1;
-            1 0 0];
-        
-% Area 2
-buses2 = [3; 4; 7; 8];
-z2 = [0.0000; -0.0243; 0.0356; -0.0002];
-R2 = 0.01^2*ones(1,size(z2,1));
-type2 = {'th'; 'pf'; 'pf'; 'pf'};
-indices2 = [3 0 0;
-            3 4 1;
-            4 7 1;
-            7 8 1];
-        
-% Area 3
-buses3 = [6; 11; 12; 13];
-z3 = [0.0000; 0.0099; 0.0148; 0.0164; 0.0016; -0.0133];
-R3 = 0.01^2*ones(1,size(z3,1));
-type3 = {'th'; 'pf'; 'pf'; 'pf'; 'pf'; 'p'};
-indices3 = [6 0 0;
-            6 11 1;
-            6 12 1;
-            6 13 1;
-            12 13 1;
-            12 0 0];
-        
-% Area 4
-buses4 = [9; 10; 14];
-z4 = [0.0000; 0.0028; 0.0192];
-R4 = 0.01^2*ones(1,size(z4,1));
-type4 = {'th'; 'pf'; 'pf'};
-indices4 = [9 0 0;
-            9 10 1;
-            9 14 1];
-
-% Boundary measurements    
-zc1 = [-0.0801];
-Rc1 = 0.01^2*ones(1,size(zc1,1));
-typec1 = {'p'};
-indicesc1 = [5 0 0];
-
-zc2 = [-0.0445; 0.0630; 0.0274; -0.1594; 0.0000];
-Rc2 = 0.01^2*ones(1,size(zc2,1));
-typec2 = {'pf'; 'pf'; 'pf'; 'p'; 'th'};
-indicesc2 = [4 5 1;
-             4 9 1;
-             7 9 1;
-             3 0 0;
-             3 0 0];
-         
-%zc3 = [0.0154; -0.2026; 0.0000]; Gross error of -20*0.01 introduced to P13
-zc3 = [0.0154; -0.2026 + 20*0.01; 0.0000];
-Rc3 = 0.01^2*ones(1,size(zc3,1));
-typec3 = {'pf'; 'p'; 'th'};
-indicesc3 = [13 14 1;
-             13 0 0;
-             6 0 0];
-         
-zc4 = [-0.0054; -0.0346; 0.0000];
-Rc4 = 0.01^2*ones(1,size(zc4,1));
-typec4 = {'pf'; 'p'; 'th'};
-indicesc4 = [10 11 1;
-             14 0 0;
-             9 0 0];
+% buses1 = [1; 2; 5];
+% %z1 = [0.0000; 0.0869; 0.3532; 0.0663; 0.2402]; Gross error of
+% %20*0.01 at P1-5 + add P4-5 to make the system observable
+% z1 = [0.0000; 0.0869; 0.3532 - 20*0.01; 0.0663; 0.2402; 0.0445];
+% R1 = 0.01^2*ones(1,size(z1,1));
+% type1 = {'th'; 'pf'; 'pf'; 'pf'; 'p'}; 
+% indices1 = [1 0 0;
+%             1 2 1;
+%             1 5 1;
+%             2 5 1;
+%             1 0 0];
+%         
+% % Area 2
+% buses2 = [3; 4; 7; 8];
+% z2 = [0.0000; -0.0243; 0.0356; -0.0002];
+% R2 = 0.01^2*ones(1,size(z2,1));
+% type2 = {'th'; 'pf'; 'pf'; 'pf'};
+% indices2 = [3 0 0;
+%             3 4 1;
+%             4 7 1;
+%             7 8 1];
+%         
+% % Area 3
+% buses3 = [6; 11; 12; 13];
+% z3 = [0.0000; 0.0099; 0.0148; 0.0164; 0.0016; -0.0133];
+% R3 = 0.01^2*ones(1,size(z3,1));
+% type3 = {'th'; 'pf'; 'pf'; 'pf'; 'pf'; 'p'};
+% indices3 = [6 0 0;
+%             6 11 1;
+%             6 12 1;
+%             6 13 1;
+%             12 13 1;
+%             12 0 0];
+%         
+% % Area 4
+% buses4 = [9; 10; 14];
+% z4 = [0.0000; 0.0028; 0.0192];
+% R4 = 0.01^2*ones(1,size(z4,1));
+% type4 = {'th'; 'pf'; 'pf'};
+% indices4 = [9 0 0;
+%             9 10 1;
+%             9 14 1];
+% 
+% % Boundary measurements    
+% zc1 = [-0.0801];
+% Rc1 = 0.01^2*ones(1,size(zc1,1));
+% typec1 = {'p'};
+% indicesc1 = [5 0 0];
+% 
+% zc2 = [-0.0445; 0.0630; 0.0274; -0.1594; 0.0000];
+% Rc2 = 0.01^2*ones(1,size(zc2,1));
+% typec2 = {'pf'; 'pf'; 'pf'; 'p'; 'th'};
+% indicesc2 = [4 5 1;
+%              4 9 1;
+%              7 9 1;
+%              3 0 0;
+%              3 0 0];
+%          
+% %zc3 = [0.0154; -0.2026; 0.0000]; Gross error of -20*0.01 introduced to P13
+% zc3 = [0.0154; -0.2026 + 20*0.01; 0.0000];
+% Rc3 = 0.01^2*ones(1,size(zc3,1));
+% typec3 = {'pf'; 'p'; 'th'};
+% indicesc3 = [13 14 1;
+%              13 0 0;
+%              6 0 0];
+%          
+% zc4 = [-0.0054; -0.0346; 0.0000];
+% Rc4 = 0.01^2*ones(1,size(zc4,1));
+% typec4 = {'pf'; 'p'; 'th'};
+% indicesc4 = [10 11 1;
+%              14 0 0;
+%              9 0 0];
 
 %% Centralized case with all measurements aggregated         
 %z = [z1; z2; z3; z4; zc1; zc2; zc3; zc4]

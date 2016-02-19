@@ -19,45 +19,45 @@ adjbuses = [2;
 % x = [ang2; V1; V2]; %slack bus not included
 
 %% Example from ECE 6320 notes
-% z = [1.0485;
-%      0.8623;
-%      4.631;
-%      -1.05;
-%      -4.045]
+z = [1.0485^2;
+     0.8623^2;
+     4.631;
+     -1.05;
+     -4.045]
 
-% Rdiag = [0.02 0.02 0.04 0.04 0.04].^2;
-% R = diag(Rdiag);
-% 
-% % measurement types
-% type = {'v'; 'v'; 'pf'; 'qf'; 'p'};
-% indices = [1 0 0;
-%            2 0 0;
-%            1 2 1;
-%            2 1 1;
-%            2 0 0];
-% 
-%% Perfect AC measurements after running power flow
-z = [1.032605774;
-     0.143474275;
-     1.032605767;
-     0.143474281;
-     -1;
-     -0.1;
-     1;
-     0.963993186]
- 
-Rdiag = [0.04 0.04 0.04 0.04 0.04 0.04 0.02 0.02].^2;
+Rdiag = [0.02 0.02 0.04 0.04 0.04].^2;
 R = diag(Rdiag);
 
-type = {'pf'; 'qf'; 'p'; 'q'; 'p'; 'q'; 'v'; 'v'};
-indices = [1 2 1;
+% measurement types
+type = {'v'; 'v'; 'pf'; 'qf'; 'p'};
+indices = [1 0 0;
+           2 0 0;
            1 2 1;
-           1 0 0;
-           1 0 0;
-           2 0 0;
-           2 0 0;
-           1 0 0;
+           2 1 1;
            2 0 0];
+% 
+%% Perfect AC measurements after running power flow
+% z = [1.032605774;
+%      0.143474275;
+%      1.032605767;
+%      0.143474281;
+%      -1;
+%      -0.1;
+%      1;
+%      0.963993186]
+%  
+% Rdiag = [0.04 0.04 0.04 0.04 0.04 0.04 0.02 0.02].^2;
+% R = diag(Rdiag);
+% 
+% type = {'pf'; 'qf'; 'p'; 'q'; 'p'; 'q'; 'v'; 'v'};
+% indices = [1 2 1;
+%            1 2 1;
+%            1 0 0;
+%            1 0 0;
+%            2 0 0;
+%            2 0 0;
+%            1 0 0;
+%            2 0 0];
        
 %% Decentralized case
 % % allbuses1 = [1; 2]; %x = [th1; th2'; th3; V1; V2'; V3] for AC
